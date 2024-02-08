@@ -24,12 +24,64 @@ private:
     int mHeight;
 };
 
+class LTexture {
+public:
+    LTexture();
+    ~LTexture();
+
+    bool loadFromFile (std::string path);
+    void free();
+    void render (int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
+    int getWidth();
+    int getHeight();
+
+private:
+    SDL_Texture* mTexture;
+    int mWidth;
+    int mHeight;
+};
+
+class Car {
+public:
+    static const int CAR_WIDTH = 50;
+    static const int CAR_HEIGHT = 100;
+
+    Car();
+
+    void handleEvent (SDL_Event* e);
+    void moveTo (int x, int y);
+    void render();
+
+private:
+    int mPosX, mPosY;
+};
+
+class Obstacle {
+public:
+    static const int OBSTACLE_WIDTH = 50;
+    static const int OBSTACLE_HEIGHT = 100;
+
+    Obstacle();
+
+    void render();
+
+private:
+    int mPosX;
+    int mPosY;
+
+    int mVelY;
+
+};
+
 bool init();
 bool loadMedia();
 void close();
 
 LWindow gWindow;
 SDL_Renderer* gRenderer = NULL;
+LTexture yourCarTexture;
+Car yourCar;
 
 //--------------------------------------------------------------------//
 
@@ -63,6 +115,64 @@ int LWindow::getHeight() {
     return mHeight;
 }
 
+LTexture::LTexture() {
+    mTexture = NULL;
+    mWidth = 0;
+    mHeight = 0;
+}
+LTexture::~LTexture() {
+    free();
+}
+bool LTexture::loadFromFile (std::string path) {
+    return true;
+}
+void LTexture::free() {
+    SDL_DestroyTexture(mTexture);
+    mTexture = NULL;
+    mWidth = 0;
+    mHeight = 0;
+}
+void LTexture::render (int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
+    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
+    if (clip != NULL) {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(gRenderer, &renderQuad);
+//    SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
+}
+int LTexture::getWidth() {
+	return mWidth;
+}
+int LTexture::getHeight() {
+	return mHeight;
+}
+
+Car::Car() {
+    mPosX = 0;
+    mPosY = 0;
+}
+void Car::handleEvent (SDL_Event *e) {
+    if (e->type == SDL_MOUSEMOTION) {
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+        moveTo(x - CAR_WIDTH / 2, gWindow.getHeight() - 2 * CAR_HEIGHT);
+    }
+}
+void Car::moveTo (int x, int y) {
+    if (x < 0) x = 0;
+    if (x + CAR_WIDTH >= gWindow.getWidth()) x = gWindow.getWidth() - CAR_WIDTH;
+    mPosX = x;
+    mPosY = y;
+}
+void Car::render() {
+    SDL_Rect clipQuad;
+    clipQuad.w = CAR_WIDTH;
+    clipQuad.h = CAR_HEIGHT;
+    yourCarTexture.render(mPosX, mPosY, &clipQuad);
+}
+
 bool init() {
     bool success = true;
     if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -90,7 +200,6 @@ bool init() {
 
 bool loadMedia() {
     bool success = true;
-
     return success;
 }
 
@@ -109,8 +218,6 @@ int main(int agrc, char* argv[]) {
             bool quit = false;
             SDL_Event e;
 
-            SDL_Rect yourCar = {5, 5, 50, 100};
-
             // Main game loop
             while (!quit) {
                 while (SDL_PollEvent(&e)) {
@@ -118,13 +225,12 @@ int main(int agrc, char* argv[]) {
                         quit = true;
                     }
                     // Handle events here
-
+                    yourCar.handleEvent(&e);
                 }
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
-                SDL_RenderDrawRect(gRenderer, &yourCar);
+                yourCar.render();
 
 
                 SDL_RenderPresent(gRenderer);
