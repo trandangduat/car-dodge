@@ -29,7 +29,7 @@ public:
     LTexture();
     ~LTexture();
 
-    bool loadFromFile (std::string path);
+    bool loadFromFile (std::string path, int w = -1, int h = -1);
     void free();
     void render (int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
@@ -44,7 +44,7 @@ private:
 
 class Car {
 public:
-    static const int CAR_WIDTH = 50;
+    static const int CAR_WIDTH = 80;
     static const int CAR_HEIGHT = 100;
 
     Car();
@@ -81,6 +81,7 @@ void close();
 LWindow gWindow;
 SDL_Renderer* gRenderer = NULL;
 LTexture yourCarTexture;
+LTexture bgTexture;
 Car yourCar;
 
 //--------------------------------------------------------------------//
@@ -123,8 +124,27 @@ LTexture::LTexture() {
 LTexture::~LTexture() {
     free();
 }
-bool LTexture::loadFromFile (std::string path) {
-    return true;
+bool LTexture::loadFromFile (std::string path, int w, int h) {
+    free();
+
+    SDL_Texture* newTexture = NULL;
+    SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+    if (loadedSurface == NULL) {
+        std::cout << "Unable to load surface: " << IMG_GetError() << '\n';
+    }
+    else {
+        newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+        if (newTexture == NULL) {
+            std::cout << "Unable to create texture from " << path << " :" << SDL_GetError() << '\n';
+        }
+        else {
+            mWidth = (w == -1 ? loadedSurface->w : w);
+            mHeight = (h == -1 ? loadedSurface->h : h);
+        }
+        SDL_FreeSurface(loadedSurface);
+    }
+    mTexture = newTexture;
+    return mTexture != NULL;
 }
 void LTexture::free() {
     SDL_DestroyTexture(mTexture);
@@ -139,8 +159,8 @@ void LTexture::render (int x, int y, SDL_Rect* clip, double angle, SDL_Point* ce
         renderQuad.h = clip->h;
     }
     SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
-    SDL_RenderDrawRect(gRenderer, &renderQuad);
-//    SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
+//    SDL_RenderDrawRect(gRenderer, &renderQuad);
+    SDL_RenderCopyEx(gRenderer, mTexture, NULL, &renderQuad, angle, center, flip);
 }
 int LTexture::getWidth() {
 	return mWidth;
@@ -167,10 +187,7 @@ void Car::moveTo (int x, int y) {
     mPosY = y;
 }
 void Car::render() {
-    SDL_Rect clipQuad;
-    clipQuad.w = CAR_WIDTH;
-    clipQuad.h = CAR_HEIGHT;
-    yourCarTexture.render(mPosX, mPosY, &clipQuad);
+    yourCarTexture.render(mPosX, mPosY);
 }
 
 bool init() {
@@ -192,6 +209,12 @@ bool init() {
             }
             else {
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                //Initialize PNG loading
+				int imgFlags = IMG_INIT_PNG;
+				if(!( IMG_Init(imgFlags) & imgFlags )) {
+					std::cout << "IMG_Init failed: " << IMG_GetError() << '\n';
+					success = false;
+				}
             }
         }
     }
@@ -200,13 +223,25 @@ bool init() {
 
 bool loadMedia() {
     bool success = true;
+    if (!bgTexture.loadFromFile("assets/images/road.png")) {
+        std::cout << "Failed to load bg texture\n";
+        success = false;
+    }
+    if (!yourCarTexture.loadFromFile("assets/images/car.png", yourCar.CAR_WIDTH, yourCar.CAR_HEIGHT)) {
+        std::cout << "Failed to load car texture\n";
+        success = false;
+    }
     return success;
 }
 
 void close() {
+    yourCarTexture.free();
+    bgTexture.free();
+
     SDL_DestroyRenderer(gRenderer);
     gWindow.free();
 
+    IMG_Quit();
     SDL_Quit();
 }
 
@@ -217,6 +252,8 @@ int main(int agrc, char* argv[]) {
         else {
             bool quit = false;
             SDL_Event e;
+            int offsetY = 0;
+            int offsetVel = 10;
 
             // Main game loop
             while (!quit) {
@@ -230,10 +267,16 @@ int main(int agrc, char* argv[]) {
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
+                bgTexture.render(0, -bgTexture.getHeight() + offsetY);
+                bgTexture.render(0, offsetY);
                 yourCar.render();
 
 
                 SDL_RenderPresent(gRenderer);
+                offsetY += offsetVel;
+                if (offsetY > bgTexture.getHeight()) {
+                    offsetY = 0;
+                }
             }
         }
     }
