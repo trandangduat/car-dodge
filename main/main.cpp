@@ -8,7 +8,7 @@
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 600;
-const int NUMBER_OF_ROWS = 4;
+const int NUMBER_OF_COLUMNS = 4;
 
 class LWindow {
 public:
@@ -293,8 +293,8 @@ void close() {
 
 // Generate column ranges for obstacles
 void generateColumnRanges() {
-    int gap = (gWindow.getWidth() - Obstacle::OBSTACLE_WIDTH * NUMBER_OF_ROWS) / 5;
-    for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+    int gap = (gWindow.getWidth() - Obstacle::OBSTACLE_WIDTH * NUMBER_OF_COLUMNS) / 5;
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         colRanges[i].startX = (gap + Obstacle::OBSTACLE_WIDTH) * i + gap;
         colRanges[i].width = Obstacle::OBSTACLE_WIDTH;
     }
@@ -335,7 +335,7 @@ int main(int agrc, char* argv[]) {
         bgTexture.render(0, -bgTexture.getHeight() + offsetY);
         bgTexture.render(0, offsetY);
 
-        for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             if (rand() % 100) continue;
             if (obstacles[i].empty() || obstacles[i].back().getPosY() > Obstacle::OBSTACLE_HEIGHT) {
                 Obstacle newObstacle (colRanges[i].startX, 0 - Obstacle::OBSTACLE_HEIGHT, offsetVel + 3);
@@ -343,19 +343,19 @@ int main(int agrc, char* argv[]) {
                 obstacles[i].back().loadTextureImage("assets/images/obstacle.png");
             }
         }
-        for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
                 obstacles[i][j].render();
             }
         }
         // Move all obstacles down obstacle's velocity/ frame
-        for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
                 obstacles[i][j].setPos(colRanges[i].startX, obstacles[i][j].getPosY() + obstacles[i][j].getVelY());
             }
         }
         // Remove all obstacles that're out of screen
-        for (int i = 0; i < NUMBER_OF_ROWS; i++) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             if (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
                 obstacles[i].pop_front();
             }
