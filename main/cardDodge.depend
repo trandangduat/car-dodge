@@ -1,9 +1,12 @@
 # depslib dependency file v1.0
-1707415847 source:d:\cppgames\car-dodge\main\main.cpp
+1707486999 source:d:\cppgames\car-dodge\main\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
+	<deque>
+	<cstdlib>
+	<ctime>
 
 1706832967 d:\cppgames\include\sdl2\sdl.h
 	"SDL_main.h"
