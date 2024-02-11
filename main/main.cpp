@@ -269,7 +269,8 @@ void render() {
 
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            obstacles[i][j].render(obstacleTexture);
+            obstacles[i][j].render(obstacles[i][j].checkCrashed() ?
+                                   obstacleCrashedTexture : obstacleTexture);
         }
     }
 
@@ -279,13 +280,13 @@ void render() {
 }
 
 void update() {
-//    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-//        for (int j = 0; j < (int) obstacles[i].size(); j++) {
-//            if (!obstacles[i][j].checkCrashed() && checkCollision2(yourCar, obstacles[i][j])) {
-//                obstacles[i][j].crash();
-//            }
-//        }
-//    }
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (int j = 0; j < (int) obstacles[i].size(); j++) {
+            if (!obstacles[i][j].checkCrashed() && checkCollision2(yourCar, obstacles[i][j])) {
+                obstacles[i][j].crash();
+            }
+        }
+    }
     // Move all obstacles down obstacle's velocity/ frame
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
