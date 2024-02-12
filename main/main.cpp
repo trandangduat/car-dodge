@@ -3,8 +3,9 @@
 #include<SDL_ttf.h>
 #include<SDL_image.h>
 #include<deque>
-#include<cstdlib> // for rand() and srand()
-#include<ctime> // for time()
+#include<cstdlib>
+#include<ctime>
+#include<algorithm>
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 600;
@@ -82,12 +83,23 @@ void update();
 void close();
 
 SDL_Texture* loadTexture (std::string path);
+SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor);
 void blit (SDL_Texture* texture, SDL_Rect rect);
 void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
 
 void generateColumnRanges();
 bool checkCollision (SDL_Rect A, SDL_Rect B);
-bool checkCollision2 (Car A, Obstacle B);
+bool checkCollision (Car A, Obstacle B);
+std::string toString (int num) {
+    if (num == 0) return "0";
+    std::string str = "";
+    while (num) {
+        str += (char) (num % 10 + '0');
+        num /= 10;
+    }
+    std::reverse(str.begin(), str.end());
+    return str;
+}
 
 LWindow gWindow;
 SDL_Renderer* gRenderer = nullptr;
@@ -96,6 +108,12 @@ SDL_Texture* backgroundTexture = nullptr;
 SDL_Texture* carTexture = nullptr;
 SDL_Texture* obstacleTexture = nullptr;
 SDL_Texture* obstacleCrashedTexture = nullptr;
+SDL_Texture* crashesCounterTexture = nullptr;
+
+//Globally used font
+TTF_Font* gFont = nullptr;
+
+int crashesCounter = 0;
 
 Car yourCar;
 columnRange colRanges[4];
@@ -223,10 +241,16 @@ bool init() {
         return false;
     }
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    //Initialize PNG loading
-    int imgFlags = IMG_INIT_PNG;
+    //Initialize PNG & JPG loading
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     if(!( IMG_Init(imgFlags) & imgFlags )) {
         std::cout << "IMG_Init failed: " << IMG_GetError() << '\n';
+        return false;
+    }
+
+    // Initialize SDL_ttf
+    if (TTF_Init() == -1) {
+        std::cout << "TTF_Init failed: " << TTF_GetError() << '\n';
         return false;
     }
     return true;
@@ -239,22 +263,20 @@ bool loadMedia() {
     obstacleTexture         = loadTexture("assets/images/obstacle.png");
     obstacleCrashedTexture  = loadTexture("assets/images/obstacle_crashed.png");
 
-    if (backgroundTexture == nullptr) {
-        std::cout << "Failed to load bg texture\n";
-        success = false;
+    gFont = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
+    if (gFont == nullptr) {
+        std::cout << "Failed to load font: " << TTF_GetError() << '\n';
     }
-    if (carTexture == nullptr) {
-        std::cout << "Failed to load car texture\n";
-        success = false;
-    }
-    if (obstacleTexture == nullptr) {
-        std::cout << "Failed to load obstacle texture\n";
-        success = false;
-    }
-    if (obstacleCrashedTexture == nullptr) {
-        std::cout << "Failed to load crashed obstacle texture\n";
-        success = false;
-    }
+
+    crashesCounterTexture = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
+
+    success &= (backgroundTexture != nullptr);
+    success &= (carTexture != nullptr);
+    success &= (obstacleTexture != nullptr);
+    success &= (obstacleCrashedTexture != nullptr);
+    success &= (gFont != nullptr);
+    success &= (crashesCounterTexture != nullptr);
+
     return success;
 }
 
@@ -269,12 +291,12 @@ void render() {
 
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            obstacles[i][j].render(obstacles[i][j].checkCrashed() ?
-                                   obstacleCrashedTexture : obstacleTexture);
+            obstacles[i][j].render(obstacles[i][j].checkCrashed() ? obstacleCrashedTexture : obstacleTexture);
         }
     }
 
     yourCar.render(carTexture);
+    blit(crashesCounterTexture, 0, 0);
 
     SDL_RenderPresent(gRenderer);
 }
@@ -282,21 +304,26 @@ void render() {
 void update() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            if (!obstacles[i][j].checkCrashed() && checkCollision2(yourCar, obstacles[i][j])) {
+            if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
                 obstacles[i][j].crash();
+                crashesCounter++;
+//                SDL_DestroyTexture(crashesCounterTexture);
+                crashesCounterTexture = loadTexture(gFont,
+                                                    "Crashes counter: " + toString(crashesCounter),
+                                                    {255, 255, 255, 255}
+                                                    );
             }
         }
     }
-    // Move all obstacles down obstacle's velocity/ frame
+    // Move down obstacles & Remove all obstacles that're off-screen
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
             obstacles[i][j].setPos(colRanges[i].startX, obstacles[i][j].getPosY() + obstacles[i][j].getVelY());
         }
-    }
-    // Remove all obstacles that're off-screen
-    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        if (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
-            obstacles[i].pop_front();
+        for (int j = 0; j < (int) obstacles[i].size(); j++) {
+            if (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
+                obstacles[i].pop_front();
+            }
         }
     }
     // Generate new obstacles
@@ -304,7 +331,7 @@ void update() {
         if (rand() % 100) continue;
         if (obstacles[i].empty() || obstacles[i].back().getPosY() > Obstacle::OBSTACLE_HEIGHT) {
             Obstacle newObstacle (colRanges[i].startX,
-                                  0 - Obstacle::OBSTACLE_HEIGHT,
+                                  -Obstacle::OBSTACLE_HEIGHT,
                                   offsetVel - 2);
 
             obstacles[i].push_back(newObstacle);
@@ -324,8 +351,10 @@ void close() {
     SDL_DestroyTexture(obstacleCrashedTexture);
 
     SDL_DestroyRenderer(gRenderer);
+    TTF_CloseFont(gFont);
     gWindow.free();
 
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -333,6 +362,24 @@ void close() {
 SDL_Texture* loadTexture (std::string path) {
     SDL_Texture *texture;
     texture = IMG_LoadTexture(gRenderer, path.c_str());
+    if (texture == nullptr) {
+        std::cout << "Failed to load texture from " << path << ' ' << IMG_GetError() << '\n';
+    }
+    return texture;
+}
+SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor) {
+    SDL_Texture* texture = nullptr;
+    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), textColor);
+    if (surface == nullptr) {
+        std::cout << "Failed to load text surface " << SDL_GetError() << '\n';
+    }
+    else {
+        texture = SDL_CreateTextureFromSurface(gRenderer, surface);
+        if (texture == nullptr) {
+            std::cout << "Failed to convert text surface to texture " << SDL_GetError() << '\n';
+        }
+    }
+    SDL_FreeSurface(surface);
     return texture;
 }
 void blit (SDL_Texture* texture, SDL_Rect rect) {
@@ -364,7 +411,7 @@ bool checkCollision (SDL_Rect A, SDL_Rect B) {
     return (A.x + A.w >= B.x && B.x + B.w >= A.x &&
             A.y + A.h >= B.y && B.y + B.h >= A.y);
 }
-bool checkCollision2 (Car A, Obstacle B) {
+bool checkCollision (Car A, Obstacle B) {
     SDL_Rect a;
     a.x = A.getPosX();
     a.y = A.getPosY();
