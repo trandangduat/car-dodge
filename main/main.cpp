@@ -7,35 +7,33 @@
 #include<ctime>
 #include<algorithm>
 
-const int SCREEN_WIDTH = 400;
+const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 600;
+const int ROADSIDE_WIDTH = 90;
+const int CAR_WIDTH = 50;
+const int CAR_HEIGHT = 100;
+const int OBSTACLE_WIDTH = 50;
+const int OBSTACLE_HEIGHT = 100;
 const int NUMBER_OF_COLUMNS = 4;
 
 class LWindow {
 public:
     LWindow();
     bool init();
-
     SDL_Renderer* createRenderer();
     void free();
-
     int getWidth();
     int getHeight();
 
 private:
     SDL_Window* mWindow;
-
     int mWidth;
     int mHeight;
 };
 
 class Car {
 public:
-    static const int CAR_WIDTH = 50;
-    static const int CAR_HEIGHT = 100;
-
     Car();
-
     void loadTexture (std::string path);
     void handleEvent (SDL_Event* e);
     void moveTo (int x, int y);
@@ -49,18 +47,13 @@ private:
 
 class Obstacle {
 public:
-    static const int OBSTACLE_WIDTH = 50;
-    static const int OBSTACLE_HEIGHT = 100;
-
     Obstacle();
     Obstacle (int x, int y, int vel_y, bool isCrashed = false);
-
     void render (SDL_Texture* texture);
     void setPos (int x, int y);
     void setVelY (int velY);
     void crash();
     bool checkCrashed();
-
     int getVelY();
     int getPosX();
     int getPosY();
@@ -90,16 +83,7 @@ void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
 void generateColumnRanges();
 bool checkCollision (SDL_Rect A, SDL_Rect B);
 bool checkCollision (Car A, Obstacle B);
-std::string toString (int num) {
-    if (num == 0) return "0";
-    std::string str = "";
-    while (num) {
-        str += (char) (num % 10 + '0');
-        num /= 10;
-    }
-    std::reverse(str.begin(), str.end());
-    return str;
-}
+std::string toString (int num);
 
 LWindow gWindow;
 SDL_Renderer* gRenderer = nullptr;
@@ -119,7 +103,7 @@ Car yourCar;
 columnRange colRanges[4];
 std::deque<Obstacle> obstacles[4];
 int offsetY = 0;
-int offsetVel = 7;
+int offsetVel = 5;
 
 //--------------------------------------------------------------------//
 //--------------------------------------------------------------------//
@@ -158,8 +142,8 @@ int LWindow::getHeight() {
 Car::Car() {
     mRect.x = 0;
     mRect.y = 0;
-    mRect.w = Car::CAR_WIDTH;
-    mRect.h = Car::CAR_HEIGHT;
+    mRect.w = CAR_WIDTH;
+    mRect.h = CAR_HEIGHT;
 }
 void Car::handleEvent (SDL_Event *e) {
     if (e->type == SDL_MOUSEMOTION) {
@@ -169,8 +153,12 @@ void Car::handleEvent (SDL_Event *e) {
     }
 }
 void Car::moveTo (int x, int y) {
-    if (x < 0) x = 0;
-    if (x + CAR_WIDTH >= gWindow.getWidth()) x = gWindow.getWidth() - CAR_WIDTH;
+    if (x < ROADSIDE_WIDTH) {
+        x = ROADSIDE_WIDTH;
+    }
+    if (x + CAR_WIDTH > gWindow.getWidth() - ROADSIDE_WIDTH) {
+        x = gWindow.getWidth() - ROADSIDE_WIDTH - CAR_WIDTH;
+    }
     mRect.x = x;
     mRect.y = y;
 }
@@ -187,16 +175,16 @@ int Car::getPosY() {
 Obstacle::Obstacle() {
     mRect.x = 0;
     mRect.y = 0;
-    mRect.w = Obstacle::OBSTACLE_WIDTH;
-    mRect.h = Obstacle::OBSTACLE_HEIGHT;
+    mRect.w = OBSTACLE_WIDTH;
+    mRect.h = OBSTACLE_HEIGHT;
     mVelY = 0;
     mIsCrashed = false;
 }
 Obstacle::Obstacle (int x, int y, int vel_y, bool isCrashed) {
     mRect.x = x;
     mRect.y = y;
-    mRect.w = Obstacle::OBSTACLE_WIDTH;
-    mRect.h = Obstacle::OBSTACLE_HEIGHT;
+    mRect.w = OBSTACLE_WIDTH;
+    mRect.h = OBSTACLE_HEIGHT;
     mVelY = vel_y;
     mIsCrashed = isCrashed;
 }
@@ -240,15 +228,11 @@ bool init() {
         std::cout << "SDL_CreateRenderer failed: " << SDL_GetError() << '\n';
         return false;
     }
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    //Initialize PNG & JPG loading
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if(!( IMG_Init(imgFlags) & imgFlags )) {
+    if(!(IMG_Init(imgFlags) & imgFlags)) {
         std::cout << "IMG_Init failed: " << IMG_GetError() << '\n';
         return false;
     }
-
-    // Initialize SDL_ttf
     if (TTF_Init() == -1) {
         std::cout << "TTF_Init failed: " << TTF_GetError() << '\n';
         return false;
@@ -262,13 +246,11 @@ bool loadMedia() {
     carTexture              = loadTexture("assets/images/car.png");
     obstacleTexture         = loadTexture("assets/images/obstacle.png");
     obstacleCrashedTexture  = loadTexture("assets/images/obstacle_crashed.png");
+    gFont                   = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
+    crashesCounterTexture   = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
 
-    gFont = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
-    if (gFont == nullptr) {
+    if (gFont == nullptr)
         std::cout << "Failed to load font: " << TTF_GetError() << '\n';
-    }
-
-    crashesCounterTexture = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
 
     success &= (backgroundTexture != nullptr);
     success &= (carTexture != nullptr);
@@ -302,12 +284,12 @@ void render() {
 }
 
 void update() {
+    // Check collisions
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
             if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
                 obstacles[i][j].crash();
                 crashesCounter++;
-//                SDL_DestroyTexture(crashesCounterTexture);
                 crashesCounterTexture = loadTexture(gFont,
                                                     "Crashes counter: " + toString(crashesCounter),
                                                     {255, 255, 255, 255}
@@ -328,10 +310,10 @@ void update() {
     }
     // Generate new obstacles
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        if (rand() % 100) continue;
-        if (obstacles[i].empty() || obstacles[i].back().getPosY() > Obstacle::OBSTACLE_HEIGHT) {
+        if (rand() % 300) continue;
+        if (obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) {
             Obstacle newObstacle (colRanges[i].startX,
-                                  -Obstacle::OBSTACLE_HEIGHT,
+                                  -OBSTACLE_HEIGHT,
                                   offsetVel - 2);
 
             obstacles[i].push_back(newObstacle);
@@ -349,6 +331,7 @@ void close() {
     SDL_DestroyTexture(carTexture);
     SDL_DestroyTexture(obstacleTexture);
     SDL_DestroyTexture(obstacleCrashedTexture);
+    SDL_DestroyTexture(crashesCounterTexture);
 
     SDL_DestroyRenderer(gRenderer);
     TTF_CloseFont(gFont);
@@ -400,10 +383,10 @@ void blit (SDL_Texture* texture, int x, int y, int w, int h) {
 
 // Generate column ranges for obstacles
 void generateColumnRanges() {
-    int gap = (gWindow.getWidth() - Obstacle::OBSTACLE_WIDTH * NUMBER_OF_COLUMNS) / 5;
+    int gap = (gWindow.getWidth() - OBSTACLE_WIDTH * NUMBER_OF_COLUMNS - 2 * ROADSIDE_WIDTH) / 5;
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        colRanges[i].startX = (gap + Obstacle::OBSTACLE_WIDTH) * i + gap;
-        colRanges[i].width = Obstacle::OBSTACLE_WIDTH;
+        colRanges[i].startX = ROADSIDE_WIDTH + OBSTACLE_WIDTH * i + gap * (i + 1);
+        colRanges[i].width = OBSTACLE_WIDTH;
     }
 }
 
@@ -415,16 +398,27 @@ bool checkCollision (Car A, Obstacle B) {
     SDL_Rect a;
     a.x = A.getPosX();
     a.y = A.getPosY();
-    a.w = Car::CAR_WIDTH;
-    a.h = Car::CAR_HEIGHT;
+    a.w = CAR_WIDTH;
+    a.h = CAR_HEIGHT;
 
     SDL_Rect b;
     b.x = B.getPosX();
     b.y = B.getPosY();
-    b.w = Obstacle::OBSTACLE_WIDTH;
-    b.h = Obstacle::OBSTACLE_HEIGHT;
+    b.w = OBSTACLE_WIDTH;
+    b.h = OBSTACLE_HEIGHT;
 
     return checkCollision(a, b);
+}
+
+std::string toString (int num) {
+    if (num == 0) return "0";
+    std::string str = "";
+    while (num) {
+        str += (char) (num % 10 + '0');
+        num /= 10;
+    }
+    std::reverse(str.begin(), str.end());
+    return str;
 }
 
 int main(int agrc, char* argv[]) {
