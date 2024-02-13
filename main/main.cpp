@@ -41,15 +41,22 @@ private:
 class Car {
 public:
     Car();
+    Car (int x, int y, int velocity);
     void loadTexture (std::string path);
     void handleEvent (SDL_Event* e);
     void moveTo (int x, int y);
     void render (SDL_Texture* texture);
+    void setVelY (int velocity);
+    void setVisible (bool state);
     int getPosX();
     int getPosY();
+    int getVelY();
+    int getVisibleState();
 
 private:
     SDL_Rect mRect;
+    int mVelY;
+    bool mVisible;
 };
 
 class Obstacle {
@@ -82,11 +89,15 @@ public:
     int getPosY();
     int getVelY();
     int getType();
+    int getDuration();
+    bool checkClaimed();
+    void claim();
 
 private:
     int mType;
-    int mDuration; // in seconds
+    int mDuration; // in frames
     int mVelY;
+    bool mIsClaimed;
     SDL_Rect mRect;
 };
 
@@ -100,6 +111,8 @@ bool loadMedia();
 void render();
 void updateObstacles();
 void updateItems();
+void turnOffItem (int item);
+void turnOnItem (int item);
 void update();
 void close();
 
@@ -111,6 +124,7 @@ void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
 void generateColumnRanges();
 bool checkCollision (SDL_Rect A, SDL_Rect B);
 bool checkCollision (Car A, Obstacle B);
+bool checkCollision (Car A, Item B);
 std::string toString (int num);
 
 LWindow gWindow;
@@ -125,16 +139,15 @@ SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
 
 TTF_Font* gFont = nullptr;
 
-Car yourCar;
+Car yourCar(0,0, 6);
 columnRange colRanges[NUMBER_OF_COLUMNS];
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Item>      items[NUMBER_OF_COLUMNS];
 
-int itemsDuration[TOTAL_OF_ITEMS];
+int currentItemsDuration[TOTAL_OF_ITEMS];
 int crashesCounter = 0;
 int offsetY = 0;
-int offsetVel = 6;
 
 //--------------------------------------------------------------------//
 //--------------------------------------------------------------------//
@@ -172,11 +185,13 @@ int LWindow::getHeight() {
     return mHeight;
 }
 
-Car::Car() {
-    mRect.x = 0;
-    mRect.y = 0;
+Car::Car (int x, int y, int velocity) {
+    mRect.x = x;
+    mRect.y = y;
     mRect.w = CAR_WIDTH;
     mRect.h = CAR_HEIGHT;
+    mVelY = velocity;
+    mVisible = true;
 }
 void Car::handleEvent (SDL_Event *e) {
     if (e->type == SDL_MOUSEMOTION) {
@@ -198,11 +213,23 @@ void Car::moveTo (int x, int y) {
 void Car::render(SDL_Texture* texture) {
     blit(texture, mRect);
 }
+void Car::setVelY (int velocity) {
+    mVelY = velocity;
+}
+void Car::setVisible (bool state) {
+    mVisible = state;
+}
 int Car::getPosX() {
     return mRect.x;
 }
 int Car::getPosY() {
     return mRect.y;
+}
+int Car::getVelY() {
+    return mVelY;
+}
+int Car::getVisibleState() {
+    return mVisible;
 }
 
 Obstacle::Obstacle() {
@@ -277,6 +304,15 @@ int Item::getVelY() {
 }
 int Item::getType() {
     return mType;
+}
+int Item::getDuration() {
+    return mDuration;
+}
+bool Item::checkClaimed() {
+    return mIsClaimed;
+}
+void Item::claim() {
+    mIsClaimed = true;
 }
 
 bool init() {
@@ -358,15 +394,17 @@ void render() {
 
 void updateObstacles() {
     // Check collisions
-    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
-                obstacles[i][j].crash();
-                crashesCounter++;
-                crashesCounterTexture = loadTexture(gFont,
-                                                    "Crashes counter: " + toString(crashesCounter),
-                                                    {255, 255, 255, 255}
-                                                    );
+    if (yourCar.getVisibleState() == true) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+            for (int j = 0; j < (int) obstacles[i].size(); j++) {
+                if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
+                    obstacles[i][j].crash();
+                    crashesCounter++;
+                    crashesCounterTexture = loadTexture(gFont,
+                                                        "Crashes counter: " + toString(crashesCounter),
+                                                        {255, 255, 255, 255}
+                                                        );
+                }
             }
         }
     }
@@ -385,20 +423,37 @@ void updateObstacles() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         if (rand() % 300) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > OBSTACLE_HEIGHT)) {
-            Obstacle newObstacle (colRanges[i].startX, -OBSTACLE_HEIGHT, offsetVel - 2);
+            Obstacle newObstacle (colRanges[i].startX, -OBSTACLE_HEIGHT, yourCar.getVelY() - 2);
             obstacles[i].push_back(newObstacle);
         }
     }
 }
 
 void updateItems() {
-    // Move down items & Remove all items that're off-screen
+    // Decrease items' duration by 1
+    for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
+        if (currentItemsDuration[i] == 1) {
+            turnOffItem(i);
+        }
+        currentItemsDuration[i] = std::max(currentItemsDuration[i] - 1, 0);
+    }
+    // Check collisions
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (int j = 0; j < (int) items[i].size(); j++) {
+            if (!items[i][j].checkClaimed() && checkCollision(yourCar, items[i][j])) {
+                items[i][j].claim();
+                turnOnItem(items[i][j].getType());
+                currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration(); // reset duration
+            }
+        }
+    }
+    // Move down items & Remove all items that're off-screen or claimed
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) items[i].size(); j++) {
             items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY());
         }
         for (int j = 0; j < (int) items[i].size(); j++) {
-            if (!items[i].empty() && items[i].front().getPosY() >= gWindow.getHeight()) {
+            if (!items[i].empty() && (items[i].front().getPosY() >= gWindow.getHeight() || items[i].front().checkClaimed())) {
                 items[i].pop_front();
             }
         }
@@ -407,9 +462,33 @@ void updateItems() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         if (rand() % 1000) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > ITEM_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > ITEM_HEIGHT)) {
-            Item newItem (rand() % TOTAL_OF_ITEMS, 300, offsetVel - 2, colRanges[i].startX, -ITEM_HEIGHT);
+            Item newItem (rand() % TOTAL_OF_ITEMS, 360, yourCar.getVelY() - 2, colRanges[i].startX, -ITEM_HEIGHT);
             items[i].push_back(newItem);
         }
+    }
+}
+
+void turnOffItem (int item) {
+    switch (item) {
+        case SPEED_BOOST_ITEM:
+            yourCar.setVelY(yourCar.getVelY() - 4);
+            break;
+
+        case INVISIBLE_ITEM:
+            yourCar.setVisible(true);
+            break;
+    }
+}
+
+void turnOnItem (int item) {
+    switch (item) {
+        case SPEED_BOOST_ITEM:
+            yourCar.setVelY(yourCar.getVelY() + 4);
+            break;
+
+        case INVISIBLE_ITEM:
+            yourCar.setVisible(false);
+            break;
     }
 }
 
@@ -417,7 +496,7 @@ void update() {
     updateObstacles();
     updateItems();
 
-    offsetY += offsetVel;
+    offsetY += yourCar.getVelY();
     if (offsetY > gWindow.getHeight()) {
         offsetY = 0;
     }
@@ -509,6 +588,22 @@ bool checkCollision (Car A, Obstacle B) {
 
     return checkCollision(a, b);
 }
+bool checkCollision (Car A, Item B) {
+    SDL_Rect a;
+    a.x = A.getPosX();
+    a.y = A.getPosY();
+    a.w = CAR_WIDTH;
+    a.h = CAR_HEIGHT;
+
+    SDL_Rect b;
+    b.x = B.getPosX();
+    b.y = B.getPosY();
+    b.w = ITEM_WIDTH;
+    b.h = ITEM_HEIGHT;
+
+    return checkCollision(a, b);
+}
+
 
 std::string toString (int num) {
     if (num == 0) return "0";
