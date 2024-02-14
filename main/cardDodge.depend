@@ -1,10 +1,11 @@
 # depslib dependency file v1.0
-1707818494 source:d:\cppgames\car-dodge\main\main.cpp
+1707896479 source:d:\cppgames\car-dodge\main\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
 	<deque>
+	<vector>
 	<cstdlib>
 	<ctime>
 	<algorithm>

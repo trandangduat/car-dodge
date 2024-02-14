@@ -3,6 +3,7 @@
 #include<SDL_ttf.h>
 #include<SDL_image.h>
 #include<deque>
+#include<vector>
 #include<cstdlib>
 #include<ctime>
 #include<algorithm>
@@ -15,13 +16,14 @@ const int CAR_HEIGHT = 100;
 const int OBSTACLE_WIDTH = 50;
 const int OBSTACLE_HEIGHT = 100;
 const int NUMBER_OF_COLUMNS = 4;
-const int ITEM_WIDTH = 40;
+const int ITEM_WIDTH = 50;
 const int ITEM_HEIGHT = ITEM_WIDTH;
 enum item_type {
     SPEED_BOOST_ITEM,
     INVISIBLE_ITEM,
     TOTAL_OF_ITEMS
 };
+const int SPEED_BOOST_AMOUNT = 4;
 
 class LWindow {
 public:
@@ -62,7 +64,7 @@ private:
 class Obstacle {
 public:
     Obstacle();
-    Obstacle (int x, int y, int vel_y, bool isCrashed = false);
+    Obstacle (int x, int y, int vel_y, SDL_Rect clip, bool isCrashed = false);
     void render (SDL_Texture* texture);
     void setPos (int x, int y);
     void setVelY (int velY);
@@ -74,6 +76,7 @@ public:
 
 private:
     SDL_Rect mRect;
+    SDL_Rect mClip;
     int mVelY;
     bool mIsCrashed;
 };
@@ -118,6 +121,7 @@ void close();
 
 SDL_Texture* loadTexture (std::string path);
 SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor);
+void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect);
 void blit (SDL_Texture* texture, SDL_Rect rect);
 void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
 
@@ -132,10 +136,13 @@ SDL_Renderer* gRenderer = nullptr;
 
 SDL_Texture* backgroundTexture = nullptr;
 SDL_Texture* carTexture = nullptr;
-SDL_Texture* obstacleTexture = nullptr;
-SDL_Texture* obstacleCrashedTexture = nullptr;
+SDL_Texture* carInvisibleTexture = nullptr;
+SDL_Texture* obstacleSpriteTexture = nullptr;
+SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
 SDL_Texture* crashesCounterTexture = nullptr;
 SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
+
+std::vector<SDL_Rect> obstaclesClipRect;
 
 TTF_Font* gFont = nullptr;
 
@@ -232,24 +239,17 @@ int Car::getVisibleState() {
     return mVisible;
 }
 
-Obstacle::Obstacle() {
-    mRect.x = 0;
-    mRect.y = 0;
-    mRect.w = OBSTACLE_WIDTH;
-    mRect.h = OBSTACLE_HEIGHT;
-    mVelY = 0;
-    mIsCrashed = false;
-}
-Obstacle::Obstacle (int x, int y, int vel_y, bool isCrashed) {
+Obstacle::Obstacle (int x, int y, int vel_y, SDL_Rect clip, bool isCrashed) {
     mRect.x = x;
     mRect.y = y;
     mRect.w = OBSTACLE_WIDTH;
     mRect.h = OBSTACLE_HEIGHT;
+    mClip = clip;
     mVelY = vel_y;
     mIsCrashed = isCrashed;
 }
 void Obstacle::render (SDL_Texture* texture) {
-    blit(texture, mRect);
+    blit(texture, mClip, mRect);
 }
 void Obstacle::setPos (int x, int y) {
     mRect.x = x;
@@ -343,22 +343,33 @@ bool init() {
 
 bool loadMedia() {
     bool success = true;
-    backgroundTexture               = loadTexture("assets/images/road.png");
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+    backgroundTexture               = loadTexture("assets/images/road_3.png");
     carTexture                      = loadTexture("assets/images/car.png");
-    obstacleTexture                 = loadTexture("assets/images/obstacle.png");
-    obstacleCrashedTexture          = loadTexture("assets/images/obstacle_crashed.png");
+    carInvisibleTexture             = loadTexture("assets/images/car_invisible.png");
+    obstacleSpriteTexture           = loadTexture("assets/images/cars.png");
+    obstacleCrashedSpriteTexture    = loadTexture("assets/images/cars_crashed.png");
     itemTextures[SPEED_BOOST_ITEM]  = loadTexture("assets/images/items/speed_boost.png");
     itemTextures[INVISIBLE_ITEM]    = loadTexture("assets/images/items/invisible.png");
     gFont                           = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
     crashesCounterTexture           = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
+
+    obstaclesClipRect.push_back({72, 6, 46, 91});
+    obstaclesClipRect.push_back({253, 9, 49, 92});
+    obstaclesClipRect.push_back({314, 9, 49, 92});
+    obstaclesClipRect.push_back({373, 9, 49, 92});
+
+    obstaclesClipRect.push_back({14, 335, 46, 87});
+    obstaclesClipRect.push_back({69, 335, 46, 87});
+    obstaclesClipRect.push_back({127, 335, 46, 87});
 
     if (gFont == nullptr)
         std::cout << "Failed to load font: " << TTF_GetError() << '\n';
 
     success &= (backgroundTexture != nullptr);
     success &= (carTexture != nullptr);
-    success &= (obstacleTexture != nullptr);
-    success &= (obstacleCrashedTexture != nullptr);
+    success &= (obstacleSpriteTexture != nullptr);
+    success &= (obstacleCrashedSpriteTexture != nullptr);
     success &= (gFont != nullptr);
     success &= (crashesCounterTexture != nullptr);
 
@@ -376,7 +387,7 @@ void render() {
 
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            obstacles[i][j].render(obstacles[i][j].checkCrashed() ? obstacleCrashedTexture : obstacleTexture);
+            obstacles[i][j].render(obstacles[i][j].checkCrashed() ? obstacleCrashedSpriteTexture : obstacleSpriteTexture);
         }
     }
 
@@ -386,7 +397,7 @@ void render() {
         }
     }
 
-    yourCar.render(carTexture);
+    yourCar.render((yourCar.getVisibleState() == false ? carInvisibleTexture : carTexture));
     blit(crashesCounterTexture, 0, 0);
 
     SDL_RenderPresent(gRenderer);
@@ -399,6 +410,7 @@ void updateObstacles() {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
                 if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
                     obstacles[i][j].crash();
+                    obstacles[i][j].setVelY(yourCar.getVelY());
                     crashesCounter++;
                     crashesCounterTexture = loadTexture(gFont,
                                                         "Crashes counter: " + toString(crashesCounter),
@@ -423,7 +435,7 @@ void updateObstacles() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         if (rand() % 300) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > OBSTACLE_HEIGHT)) {
-            Obstacle newObstacle (colRanges[i].startX, -OBSTACLE_HEIGHT, yourCar.getVelY() - 2);
+            Obstacle newObstacle (colRanges[i].startX, -OBSTACLE_HEIGHT, 4, obstaclesClipRect[rand() % (int) obstaclesClipRect.size()]);
             obstacles[i].push_back(newObstacle);
         }
     }
@@ -432,7 +444,7 @@ void updateObstacles() {
 void updateItems() {
     // Decrease items' duration by 1
     for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
-        if (currentItemsDuration[i] == 1) {
+        if (currentItemsDuration[i] - 1 == 0) {
             turnOffItem(i);
         }
         currentItemsDuration[i] = std::max(currentItemsDuration[i] - 1, 0);
@@ -442,7 +454,9 @@ void updateItems() {
         for (int j = 0; j < (int) items[i].size(); j++) {
             if (!items[i][j].checkClaimed() && checkCollision(yourCar, items[i][j])) {
                 items[i][j].claim();
-                turnOnItem(items[i][j].getType());
+                if (!currentItemsDuration[items[i][j].getType()]) {
+                    turnOnItem(items[i][j].getType());
+                }
                 currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration(); // reset duration
             }
         }
@@ -462,7 +476,7 @@ void updateItems() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         if (rand() % 1000) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > ITEM_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > ITEM_HEIGHT)) {
-            Item newItem (rand() % TOTAL_OF_ITEMS, 360, yourCar.getVelY() - 2, colRanges[i].startX, -ITEM_HEIGHT);
+            Item newItem (rand() % TOTAL_OF_ITEMS, 360, 4, colRanges[i].startX, -ITEM_HEIGHT);
             items[i].push_back(newItem);
         }
     }
@@ -471,7 +485,7 @@ void updateItems() {
 void turnOffItem (int item) {
     switch (item) {
         case SPEED_BOOST_ITEM:
-            yourCar.setVelY(yourCar.getVelY() - 4);
+            yourCar.setVelY(yourCar.getVelY() - SPEED_BOOST_AMOUNT);
             break;
 
         case INVISIBLE_ITEM:
@@ -483,7 +497,7 @@ void turnOffItem (int item) {
 void turnOnItem (int item) {
     switch (item) {
         case SPEED_BOOST_ITEM:
-            yourCar.setVelY(yourCar.getVelY() + 4);
+            yourCar.setVelY(yourCar.getVelY() + SPEED_BOOST_AMOUNT);
             break;
 
         case INVISIBLE_ITEM:
@@ -493,8 +507,8 @@ void turnOnItem (int item) {
 }
 
 void update() {
-    updateObstacles();
     updateItems();
+    updateObstacles();
 
     offsetY += yourCar.getVelY();
     if (offsetY > gWindow.getHeight()) {
@@ -505,8 +519,9 @@ void update() {
 void close() {
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(carTexture);
-    SDL_DestroyTexture(obstacleTexture);
-    SDL_DestroyTexture(obstacleCrashedTexture);
+    SDL_DestroyTexture(carInvisibleTexture);
+    SDL_DestroyTexture(obstacleSpriteTexture);
+    SDL_DestroyTexture(obstacleCrashedSpriteTexture);
     SDL_DestroyTexture(crashesCounterTexture);
     for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
         SDL_DestroyTexture(itemTextures[i]);
@@ -544,9 +559,14 @@ SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor)
     SDL_FreeSurface(surface);
     return texture;
 }
-void blit (SDL_Texture* texture, SDL_Rect drect) {
-    SDL_Rect dest = drect;
-    SDL_RenderCopy(gRenderer, texture, nullptr, &dest);
+void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect) {
+    SDL_Rect srect = clip;
+    SDL_Rect drect = rect;
+    SDL_RenderCopy(gRenderer, texture, &srect, &drect);
+}
+void blit (SDL_Texture* texture, SDL_Rect rect) {
+    SDL_Rect drect = rect;
+    SDL_RenderCopy(gRenderer, texture, nullptr, &drect);
 }
 void blit (SDL_Texture* texture, int x, int y, int w, int h) {
     SDL_Rect dest;
