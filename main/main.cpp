@@ -283,6 +283,7 @@ Item::Item (int type, int duration, int velocity, int x, int y) {
     mRect.y = y;
     mRect.w = ITEM_WIDTH;
     mRect.h = ITEM_HEIGHT;
+    mIsClaimed = false;
 }
 void Item::render (SDL_Texture* texture) {
     blit(texture, mRect);
@@ -395,7 +396,6 @@ void render() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) items[i].size(); j++) {
             items[i][j].render(itemTextures[items[i][j].getType()]);
-            std::cout << items[i][j].getPosX() << ' ' << items[i][j].getPosY() << '\n';
         }
     }
 
@@ -406,15 +406,15 @@ void render() {
 }
 
 void updateObstacles() {
-    if (SDL_GetTicks() - startTime >= 10000) {
-        startTime = SDL_GetTicks();
-        yourCar.setVelY(std::max(10, yourCar.getVelY() + 1));
-        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-            for (int j = 0; j < (int) obstacles[i].size(); j++) {
-                obstacles[i][j].setVelY(yourCar.getVelY() + rand() % 3);
-            }
-        }
-    }
+//    if (SDL_GetTicks() - startTime >= 10000) {
+//        startTime = SDL_GetTicks();
+//        yourCar.setVelY(std::max(10, yourCar.getVelY() + 1));
+//        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+//            for (int j = 0; j < (int) obstacles[i].size(); j++) {
+//                obstacles[i][j].setVelY(yourCar.getVelY());
+//            }
+//        }
+//    }
     // Check collisions
     if (yourCar.getVisibleState() == true) {
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
