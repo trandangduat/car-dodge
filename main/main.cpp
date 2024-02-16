@@ -23,7 +23,7 @@ enum item_type {
     INVISIBLE_ITEM,
     TOTAL_OF_ITEMS
 };
-const int SPEED_BOOST_AMOUNT = 4;
+const int SPEED_BOOST_AMOUNT = 3;
 
 class LWindow {
 public:
@@ -43,54 +43,54 @@ private:
 class Car {
 public:
     Car();
-    Car (int x, int y, int velocity);
+    Car (int x, int y, float velocity);
     void loadTexture (std::string path);
     void handleEvent (SDL_Event* e);
     void moveTo (int x, int y);
     void render (SDL_Texture* texture);
-    void setVelY (int velocity);
+    void setVelY (float velocity);
     void setVisible (bool state);
     int getPosX();
     int getPosY();
-    int getVelY();
+    float getVelY();
     int getVisibleState();
 
 private:
     SDL_Rect mRect;
-    int mVelY;
+    float mVelY;
     bool mVisible;
 };
 
 class Obstacle {
 public:
     Obstacle();
-    Obstacle (int x, int y, int vel_y, SDL_Rect clip, bool isCrashed = false);
+    Obstacle (int x, int y, float velocity, SDL_Rect clip, bool isCrashed = false);
     void render (SDL_Texture* texture);
     void setPos (int x, int y);
-    void setVelY (int velY);
+    void setVelY (float velocity);
     void crash();
     bool checkCrashed();
-    int getVelY();
+    float getVelY();
     int getPosX();
     int getPosY();
 
 private:
     SDL_Rect mRect;
     SDL_Rect mClip;
-    int mVelY;
+    float mVelY;
     bool mIsCrashed;
 };
 
 class Item {
 public:
     Item();
-    Item (int type, int duration, int velocity, int x, int y);
+    Item (int type, int duration, float velocity, int x, int y);
     void render (SDL_Texture* texture);
     void setPos (int x, int y);
-    void setVelY (int velocity);
+    void setVelY (float velocity);
     int getPosX();
     int getPosY();
-    int getVelY();
+    float getVelY();
     int getType();
     int getDuration();
     bool checkClaimed();
@@ -99,7 +99,7 @@ public:
 private:
     int mType;
     int mDuration; // in frames
-    int mVelY;
+    float mVelY;
     bool mIsClaimed;
     SDL_Rect mRect;
 };
@@ -146,16 +146,49 @@ std::vector<SDL_Rect> obstaclesClipRect;
 
 TTF_Font* gFont = nullptr;
 
-Car yourCar(0,0, 6);
+Car yourCar(0,0,6);
 columnRange colRanges[NUMBER_OF_COLUMNS];
+int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Item>      items[NUMBER_OF_COLUMNS];
 
 int currentItemsDuration[TOTAL_OF_ITEMS];
-int crashesCounter = 0;
-int offsetY = 0;
-int startTime = 0;
+int crashesCounter;
+int offsetY;
+int lastUpdateTime;
+int gameLevel = 2;
+
+int main(int agrc, char* argv[]) {
+    srand(time(nullptr));
+
+    if (!init()) {
+        std::cout << "Failed to init\n";
+        return 1;
+    }
+    if (!loadMedia()) {
+        std::cout << "Failed to load media\n";
+        return 1;
+    }
+
+    bool quit = false;
+    SDL_Event e;
+    while (!quit) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                quit = true;
+            }
+            // Handle events here
+            yourCar.handleEvent(&e);
+        }
+        render();
+        update();
+    }
+
+    close();
+
+    return 0;
+}
 
 //--------------------------------------------------------------------//
 //--------------------------------------------------------------------//
@@ -193,7 +226,7 @@ int LWindow::getHeight() {
     return mHeight;
 }
 
-Car::Car (int x, int y, int velocity) {
+Car::Car (int x, int y, float velocity) {
     mRect.x = x;
     mRect.y = y;
     mRect.w = CAR_WIDTH;
@@ -221,7 +254,7 @@ void Car::moveTo (int x, int y) {
 void Car::render(SDL_Texture* texture) {
     blit(texture, mRect);
 }
-void Car::setVelY (int velocity) {
+void Car::setVelY (float velocity) {
     mVelY = velocity;
 }
 void Car::setVisible (bool state) {
@@ -233,20 +266,20 @@ int Car::getPosX() {
 int Car::getPosY() {
     return mRect.y;
 }
-int Car::getVelY() {
+float Car::getVelY() {
     return mVelY;
 }
 int Car::getVisibleState() {
     return mVisible;
 }
 
-Obstacle::Obstacle (int x, int y, int vel_y, SDL_Rect clip, bool isCrashed) {
+Obstacle::Obstacle (int x, int y, float velocity, SDL_Rect clip, bool isCrashed) {
     mRect.x = x;
     mRect.y = y;
     mRect.w = OBSTACLE_WIDTH;
     mRect.h = OBSTACLE_HEIGHT;
     mClip = clip;
-    mVelY = vel_y;
+    mVelY = velocity;
     mIsCrashed = isCrashed;
 }
 void Obstacle::render (SDL_Texture* texture) {
@@ -256,8 +289,8 @@ void Obstacle::setPos (int x, int y) {
     mRect.x = x;
     mRect.y = y;
 }
-void Obstacle::setVelY (int velY) {
-    mVelY = velY;
+void Obstacle::setVelY (float velocity) {
+    mVelY = velocity;
 }
 void Obstacle::crash() {
     mIsCrashed = true;
@@ -268,14 +301,14 @@ int Obstacle::getPosX() {
 int Obstacle::getPosY() {
     return mRect.y;
 }
-int Obstacle::getVelY() {
+float Obstacle::getVelY() {
     return mVelY;
 }
 bool Obstacle::checkCrashed() {
     return mIsCrashed;
 }
 
-Item::Item (int type, int duration, int velocity, int x, int y) {
+Item::Item (int type, int duration, float velocity, int x, int y) {
     mType = type;
     mDuration = duration;
     mVelY = velocity;
@@ -292,7 +325,7 @@ void Item::setPos (int x, int y) {
     mRect.x = x;
     mRect.y = y;
 }
-void Item::setVelY (int velocity) {
+void Item::setVelY (float velocity) {
     mVelY = velocity;
 }
 int Item::getPosX() {
@@ -301,7 +334,7 @@ int Item::getPosX() {
 int Item::getPosY() {
     return mRect.y;
 }
-int Item::getVelY() {
+float Item::getVelY() {
     return mVelY;
 }
 int Item::getType() {
@@ -346,7 +379,7 @@ bool init() {
 bool loadMedia() {
     bool success = true;
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    backgroundTexture               = loadTexture("assets/images/road_3.png");
+    backgroundTexture               = loadTexture("assets/images/road.png");
     carTexture                      = loadTexture("assets/images/car.png");
     carInvisibleTexture             = loadTexture("assets/images/car_invisible.png");
     obstacleSpriteTexture           = loadTexture("assets/images/cars.png");
@@ -356,12 +389,9 @@ bool loadMedia() {
     gFont                           = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
     crashesCounterTexture           = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
 
-    obstaclesClipRect.push_back({72, 6, 46, 91});
     obstaclesClipRect.push_back({253, 9, 49, 92});
     obstaclesClipRect.push_back({314, 9, 49, 92});
     obstaclesClipRect.push_back({373, 9, 49, 92});
-
-    obstaclesClipRect.push_back({14, 335, 46, 87});
     obstaclesClipRect.push_back({69, 335, 46, 87});
     obstaclesClipRect.push_back({127, 335, 46, 87});
 
@@ -406,15 +436,19 @@ void render() {
 }
 
 void updateObstacles() {
-//    if (SDL_GetTicks() - startTime >= 10000) {
-//        startTime = SDL_GetTicks();
-//        yourCar.setVelY(std::max(10, yourCar.getVelY() + 1));
-//        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-//            for (int j = 0; j < (int) obstacles[i].size(); j++) {
-//                obstacles[i][j].setVelY(yourCar.getVelY());
-//            }
-//        }
-//    }
+    // Update velocity +0.5f every 5 seconds
+    int currentTime = SDL_GetTicks();
+    if (currentTime - lastUpdateTime >= 5000 && yourCar.getVelY() < 13.0f) {
+        gameLevel++;
+        lastUpdateTime = currentTime;
+        yourCar.setVelY(yourCar.getVelY() + 0.5f);
+        std::cout << yourCar.getVelY() << '\n';
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+            for (int j = 0; j < (int) obstacles[i].size(); j++) {
+                items[i][j].setVelY(yourCar.getVelY());
+            }
+        }
+    }
     // Check collisions
     if (yourCar.getVisibleState() == true) {
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
@@ -444,9 +478,18 @@ void updateObstacles() {
     }
     // Generate new obstacles
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        if (rand() % 300) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > OBSTACLE_HEIGHT)) {
-            Obstacle newObstacle (colRanges[i].startX, -OBSTACLE_HEIGHT, 4, obstaclesClipRect[rand() % (int) obstaclesClipRect.size()]);
+            if (rand() % 300) continue;
+            if (obstacles[i].empty()) {
+                int randomNumber = rand() % (std::max(1, gameLevel / 3)) + 1;
+                currentColumnVelocityDif[i] = (rand() % 2 ? randomNumber : 0 - randomNumber);
+            }
+            Obstacle newObstacle (
+                                  colRanges[i].startX,
+                                  -OBSTACLE_HEIGHT,
+                                  yourCar.getVelY() + currentColumnVelocityDif[i],
+                                  obstaclesClipRect[rand() % (int) obstaclesClipRect.size()]
+                                  );
             obstacles[i].push_back(newObstacle);
         }
     }
@@ -468,7 +511,8 @@ void updateItems() {
                 if (!currentItemsDuration[items[i][j].getType()]) {
                     turnOnItem(items[i][j].getType());
                 }
-                currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration(); // reset duration
+                // reset duration
+                currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration();
             }
         }
     }
@@ -485,9 +529,15 @@ void updateItems() {
     }
     // Generate new items
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        if (rand() % 300) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > ITEM_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > ITEM_HEIGHT)) {
-            Item newItem (rand() % TOTAL_OF_ITEMS, 360, 4, colRanges[i].startX, -ITEM_HEIGHT);
+            if (rand() % 1000) continue;
+            Item newItem (
+                          rand() % TOTAL_OF_ITEMS,
+                          100,
+                          yourCar.getVelY(),
+                          colRanges[i].startX,
+                          -ITEM_HEIGHT
+                          );
             items[i].push_back(newItem);
         }
     }
@@ -646,37 +696,5 @@ std::string toString (int num) {
     std::reverse(str.begin(), str.end());
     return str;
 }
-
-int main(int agrc, char* argv[]) {
-    srand(time(nullptr));
-
-    if (!init()) {
-        std::cout << "Failed to init\n";
-        return 1;
-    }
-    if (!loadMedia()) {
-        std::cout << "Failed to load media\n";
-        return 1;
-    }
-
-    bool quit = false;
-    SDL_Event e;
-    while (!quit) {
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
-            }
-            // Handle events here
-            yourCar.handleEvent(&e);
-        }
-        render();
-        update();
-    }
-
-    close();
-
-    return 0;
-}
-
 
 // https://www.youtube.com/watch?v=xAgUYyosqVM --> this song's fire af
