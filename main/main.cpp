@@ -155,6 +155,7 @@ std::deque<Item>      items[NUMBER_OF_COLUMNS];
 int currentItemsDuration[TOTAL_OF_ITEMS];
 int crashesCounter = 0;
 int offsetY = 0;
+int startTime = 0;
 
 //--------------------------------------------------------------------//
 //--------------------------------------------------------------------//
@@ -394,6 +395,7 @@ void render() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) items[i].size(); j++) {
             items[i][j].render(itemTextures[items[i][j].getType()]);
+            std::cout << items[i][j].getPosX() << ' ' << items[i][j].getPosY() << '\n';
         }
     }
 
@@ -404,6 +406,15 @@ void render() {
 }
 
 void updateObstacles() {
+    if (SDL_GetTicks() - startTime >= 10000) {
+        startTime = SDL_GetTicks();
+        yourCar.setVelY(std::max(10, yourCar.getVelY() + 1));
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+            for (int j = 0; j < (int) obstacles[i].size(); j++) {
+                obstacles[i][j].setVelY(yourCar.getVelY() + rand() % 3);
+            }
+        }
+    }
     // Check collisions
     if (yourCar.getVisibleState() == true) {
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
@@ -474,7 +485,7 @@ void updateItems() {
     }
     // Generate new items
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        if (rand() % 1000) continue;
+        if (rand() % 300) continue;
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > ITEM_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > ITEM_HEIGHT)) {
             Item newItem (rand() % TOTAL_OF_ITEMS, 360, 4, colRanges[i].startX, -ITEM_HEIGHT);
             items[i].push_back(newItem);
@@ -641,11 +652,11 @@ int main(int agrc, char* argv[]) {
 
     if (!init()) {
         std::cout << "Failed to init\n";
-        return 0;
+        return 1;
     }
     if (!loadMedia()) {
         std::cout << "Failed to load media\n";
-        return 0;
+        return 1;
     }
 
     bool quit = false;
