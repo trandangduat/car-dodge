@@ -23,7 +23,7 @@ enum item_type {
     INVISIBLE_ITEM,
     TOTAL_OF_ITEMS
 };
-const int SPEED_BOOST_AMOUNT = 3;
+const int SPEED_BOOST_AMOUNT = 3 * 60;
 
 class LWindow {
 public:
@@ -43,15 +43,15 @@ private:
 class Car {
 public:
     Car();
-    Car (int x, int y, float velocity);
+    Car (float x, float y, float velocity);
     void loadTexture (std::string path);
     void handleEvent (SDL_Event* e);
-    void moveTo (int x, int y);
+    void moveTo (float x, float y);
     void render (SDL_Texture* texture);
     void setVelY (float velocity);
     void setVisible (bool state);
-    int getPosX();
-    int getPosY();
+    float getPosX();
+    float getPosY();
     float getVelY();
     int getVisibleState();
 
@@ -64,15 +64,15 @@ private:
 class Obstacle {
 public:
     Obstacle();
-    Obstacle (int x, int y, float velocity, SDL_Rect clip, bool isCrashed = false);
+    Obstacle (float x, float y, float velocity, SDL_Rect clip, bool isCrashed = false);
     void render (SDL_Texture* texture);
-    void setPos (int x, int y);
+    void setPos (float x, float y);
     void setVelY (float velocity);
     void crash();
     bool checkCrashed();
     float getVelY();
-    int getPosX();
-    int getPosY();
+    float getPosX();
+    float getPosY();
 
 private:
     SDL_Rect mRect;
@@ -84,12 +84,12 @@ private:
 class Item {
 public:
     Item();
-    Item (int type, int duration, float velocity, int x, int y);
+    Item (int type, int duration, float velocity, float x, float y);
     void render (SDL_Texture* texture);
-    void setPos (int x, int y);
+    void setPos (float x, float y);
     void setVelY (float velocity);
-    int getPosX();
-    int getPosY();
+    float getPosX();
+    float getPosY();
     float getVelY();
     int getType();
     int getDuration();
@@ -135,6 +135,7 @@ LWindow gWindow;
 SDL_Renderer* gRenderer = nullptr;
 
 SDL_Texture* backgroundTexture = nullptr;
+SDL_Texture* backgroundTexture2 = nullptr;
 SDL_Texture* carTexture = nullptr;
 SDL_Texture* carInvisibleTexture = nullptr;
 SDL_Texture* obstacleSpriteTexture = nullptr;
@@ -146,7 +147,7 @@ std::vector<SDL_Rect> obstaclesClipRect;
 
 TTF_Font* gFont = nullptr;
 
-Car yourCar(0,0,6);
+Car yourCar(0, 0, 6 * 60);
 columnRange colRanges[NUMBER_OF_COLUMNS];
 int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 
@@ -156,8 +157,11 @@ std::deque<Item>      items[NUMBER_OF_COLUMNS];
 int currentItemsDuration[TOTAL_OF_ITEMS];
 int crashesCounter;
 int offsetY;
-int lastUpdateTime;
-int gameLevel = 2;
+int currentTime, lastFrameTime, lastUpdateTime;
+float deltaTime;
+int gameLevel = 1;
+bool bg1 = false;
+bool bg2 = true;
 
 int main(int agrc, char* argv[]) {
     srand(time(nullptr));
@@ -181,6 +185,11 @@ int main(int agrc, char* argv[]) {
             // Handle events here
             yourCar.handleEvent(&e);
         }
+
+        currentTime = SDL_GetTicks();
+        deltaTime = (currentTime - lastFrameTime) / 1000.f;
+        lastFrameTime = currentTime;
+
         render();
         update();
     }
@@ -226,7 +235,7 @@ int LWindow::getHeight() {
     return mHeight;
 }
 
-Car::Car (int x, int y, float velocity) {
+Car::Car (float x, float y, float velocity) {
     mRect.x = x;
     mRect.y = y;
     mRect.w = CAR_WIDTH;
@@ -241,7 +250,7 @@ void Car::handleEvent (SDL_Event *e) {
         moveTo(x - CAR_WIDTH / 2, gWindow.getHeight() - 2 * CAR_HEIGHT);
     }
 }
-void Car::moveTo (int x, int y) {
+void Car::moveTo (float x, float y) {
     if (x < ROADSIDE_WIDTH) {
         x = ROADSIDE_WIDTH;
     }
@@ -260,10 +269,10 @@ void Car::setVelY (float velocity) {
 void Car::setVisible (bool state) {
     mVisible = state;
 }
-int Car::getPosX() {
+float Car::getPosX() {
     return mRect.x;
 }
-int Car::getPosY() {
+float Car::getPosY() {
     return mRect.y;
 }
 float Car::getVelY() {
@@ -273,7 +282,7 @@ int Car::getVisibleState() {
     return mVisible;
 }
 
-Obstacle::Obstacle (int x, int y, float velocity, SDL_Rect clip, bool isCrashed) {
+Obstacle::Obstacle (float x, float y, float velocity, SDL_Rect clip, bool isCrashed) {
     mRect.x = x;
     mRect.y = y;
     mRect.w = OBSTACLE_WIDTH;
@@ -285,7 +294,7 @@ Obstacle::Obstacle (int x, int y, float velocity, SDL_Rect clip, bool isCrashed)
 void Obstacle::render (SDL_Texture* texture) {
     blit(texture, mClip, mRect);
 }
-void Obstacle::setPos (int x, int y) {
+void Obstacle::setPos (float x, float y) {
     mRect.x = x;
     mRect.y = y;
 }
@@ -295,10 +304,10 @@ void Obstacle::setVelY (float velocity) {
 void Obstacle::crash() {
     mIsCrashed = true;
 }
-int Obstacle::getPosX() {
+float Obstacle::getPosX() {
     return mRect.x;
 }
-int Obstacle::getPosY() {
+float Obstacle::getPosY() {
     return mRect.y;
 }
 float Obstacle::getVelY() {
@@ -308,7 +317,7 @@ bool Obstacle::checkCrashed() {
     return mIsCrashed;
 }
 
-Item::Item (int type, int duration, float velocity, int x, int y) {
+Item::Item (int type, int duration, float velocity, float x, float y) {
     mType = type;
     mDuration = duration;
     mVelY = velocity;
@@ -321,17 +330,17 @@ Item::Item (int type, int duration, float velocity, int x, int y) {
 void Item::render (SDL_Texture* texture) {
     blit(texture, mRect);
 }
-void Item::setPos (int x, int y) {
+void Item::setPos (float x, float y) {
     mRect.x = x;
     mRect.y = y;
 }
 void Item::setVelY (float velocity) {
     mVelY = velocity;
 }
-int Item::getPosX() {
+float Item::getPosX() {
     return mRect.x;
 }
-int Item::getPosY() {
+float Item::getPosY() {
     return mRect.y;
 }
 float Item::getVelY() {
@@ -379,7 +388,8 @@ bool init() {
 bool loadMedia() {
     bool success = true;
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    backgroundTexture               = loadTexture("assets/images/road.png");
+    backgroundTexture               = loadTexture("assets/images/road_3.png");
+    backgroundTexture2              = loadTexture("assets/images/road_4.png");
     carTexture                      = loadTexture("assets/images/car.png");
     carInvisibleTexture             = loadTexture("assets/images/car_invisible.png");
     obstacleSpriteTexture           = loadTexture("assets/images/cars.png");
@@ -414,8 +424,9 @@ void render() {
 
     // Infinite scrolling background
     // TODO: create background class, change 'gWindow.getHeight()' to 'background.getHeight()'
-    blit(backgroundTexture, 0, -gWindow.getHeight() + offsetY);
-    blit(backgroundTexture, 0, offsetY);
+
+    blit(bg1 ? backgroundTexture : backgroundTexture2, 0, -gWindow.getHeight() + offsetY);
+    blit(bg2 ? backgroundTexture : backgroundTexture2, 0, offsetY);
 
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
@@ -430,18 +441,17 @@ void render() {
     }
 
     yourCar.render((yourCar.getVisibleState() == false ? carInvisibleTexture : carTexture));
-    blit(crashesCounterTexture, 0, 0);
+    blit(crashesCounterTexture, 10, 10);
 
     SDL_RenderPresent(gRenderer);
 }
 
 void updateObstacles() {
     // Update velocity +0.5f every 5 seconds
-    int currentTime = SDL_GetTicks();
-    if (currentTime - lastUpdateTime >= 5000 && yourCar.getVelY() < 13.0f) {
+    if (currentTime - lastUpdateTime >= 5000 && yourCar.getVelY() < 780) {
         gameLevel++;
         lastUpdateTime = currentTime;
-        yourCar.setVelY(yourCar.getVelY() + 0.5f);
+        yourCar.setVelY(yourCar.getVelY() + 30);
         std::cout << yourCar.getVelY() << '\n';
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
@@ -465,10 +475,10 @@ void updateObstacles() {
             }
         }
     }
-    // Move down obstacles & Remove all obstacles that're off-screen
+    // Move obstacles & Remove all obstacles that're off-screen
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            obstacles[i][j].setPos(colRanges[i].startX, obstacles[i][j].getPosY() + obstacles[i][j].getVelY());
+            obstacles[i][j].setPos(colRanges[i].startX, obstacles[i][j].getPosY() + obstacles[i][j].getVelY() * deltaTime);
         }
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
             if (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
@@ -481,7 +491,7 @@ void updateObstacles() {
         if ((obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) && (items[i].empty() || items[i].back().getPosY() > OBSTACLE_HEIGHT)) {
             if (rand() % 300) continue;
             if (obstacles[i].empty()) {
-                int randomNumber = rand() % (std::max(1, gameLevel / 3)) + 1;
+                int randomNumber = rand() % ((gameLevel * 60) / 3) + 60;
                 currentColumnVelocityDif[i] = (rand() % 2 ? randomNumber : 0 - randomNumber);
             }
             Obstacle newObstacle (
@@ -519,7 +529,7 @@ void updateItems() {
     // Move down items & Remove all items that're off-screen or claimed
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) items[i].size(); j++) {
-            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY());
+            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY() * deltaTime);
         }
         for (int j = 0; j < (int) items[i].size(); j++) {
             if (!items[i].empty() && (items[i].front().getPosY() >= gWindow.getHeight() || items[i].front().checkClaimed())) {
@@ -571,14 +581,17 @@ void update() {
     updateItems();
     updateObstacles();
 
-    offsetY += yourCar.getVelY();
+    offsetY += yourCar.getVelY() * deltaTime;
     if (offsetY > gWindow.getHeight()) {
         offsetY = 0;
+        bg2 = bg1;
+        bg1 = (bool) (rand() % 2);
     }
 }
 
 void close() {
     SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyTexture(backgroundTexture2);
     SDL_DestroyTexture(carTexture);
     SDL_DestroyTexture(carInvisibleTexture);
     SDL_DestroyTexture(obstacleSpriteTexture);
