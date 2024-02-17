@@ -104,6 +104,19 @@ private:
     SDL_Rect mRect;
 };
 
+struct Explosion {
+    SDL_Rect srect;
+    SDL_Rect drect;
+    int currentStage;
+    int lastUpdate;
+    float velY;
+
+    Explosion() {};
+    Explosion (float x, float y, float velocity);
+    void render();
+    void updateStage();
+};
+
 struct columnRange {
     int startX;
     int width;
@@ -141,6 +154,7 @@ SDL_Texture* carInvisibleTexture = nullptr;
 SDL_Texture* obstacleSpriteTexture = nullptr;
 SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
 SDL_Texture* crashesCounterTexture = nullptr;
+SDL_Texture* explosionTexture = nullptr;
 SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
 
 std::vector<SDL_Rect> obstaclesClipRect;
@@ -153,6 +167,7 @@ int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Item>      items[NUMBER_OF_COLUMNS];
+std::deque<Explosion> explosions;
 
 int currentItemsDuration[TOTAL_OF_ITEMS];
 int crashesCounter;
@@ -360,6 +375,26 @@ void Item::claim() {
     mIsClaimed = true;
 }
 
+Explosion::Explosion (float x, float y, float velocity) {
+    drect.x = x;
+    drect.y = y;
+    drect.w = OBSTACLE_WIDTH;
+    drect.h = OBSTACLE_WIDTH;
+    srect.x = 0;
+    srect.y = 32;
+    srect.w = 32;
+    srect.h = 32;
+    velY = velocity;
+    currentStage = 1;
+}
+void Explosion::updateStage() {
+    currentStage++;
+    srect.x += srect.w;
+}
+void Explosion::render() {
+    blit(explosionTexture, srect, drect);
+}
+
 bool init() {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         std::cout << "SDL_Init failed: " << SDL_GetError() << '\n';
@@ -397,6 +432,7 @@ bool loadMedia() {
     obstacleCrashedSpriteTexture    = loadTexture("assets/images/cars_crashed.png");
     itemTextures[SPEED_BOOST_ITEM]  = loadTexture("assets/images/items/speed_boost.png");
     itemTextures[INVISIBLE_ITEM]    = loadTexture("assets/images/items/invisible.png");
+    explosionTexture                = loadTexture("assets/images/effects/explosion.png");
     gFont                           = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
     crashesCounterTexture           = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
 
@@ -442,6 +478,12 @@ void render() {
     }
 
     yourCar.render((yourCar.getVisibleState() == false ? carInvisibleTexture : carTexture));
+
+    for (int i = 0; i < (int) explosions.size(); i++) {
+        explosions[i].render();
+    }
+
+    // HUD
     blit(crashesCounterTexture, 10, 10);
 
     SDL_RenderPresent(gRenderer);
@@ -472,19 +514,34 @@ void updateObstacles() {
                                                         "Crashes counter: " + toString(crashesCounter),
                                                         {255, 255, 255, 255}
                                                         );
+
+                    explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getVelY(), yourCar.getVelY()});
+                    explosions.back().lastUpdate = currentTime;
                 }
             }
         }
     }
+
+    for (int i = 0; i < (int) explosions.size(); i++) {
+        if (currentTime - explosions[i].lastUpdate >= 100) {
+            explosions[i].updateStage();
+            explosions[i].lastUpdate = currentTime;
+        }
+    }
+    while (!explosions.empty() && explosions.front().currentStage >= 6) {
+        explosions.pop_front();
+    }
+    for (int i = 0; i < (int) explosions.size(); i++) {
+        explosions[i].drect.y += explosions[i].velY * deltaTime;
+    }
+
     // Move obstacles & Remove all obstacles that're off-screen
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (int j = 0; j < (int) obstacles[i].size(); j++) {
             obstacles[i][j].setPos(colRanges[i].startX, obstacles[i][j].getPosY() + obstacles[i][j].getVelY() * deltaTime);
         }
-        for (int j = 0; j < (int) obstacles[i].size(); j++) {
-            if (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
-                obstacles[i].pop_front();
-            }
+        while (!obstacles[i].empty() && obstacles[i].front().getPosY() >= gWindow.getHeight()) {
+            obstacles[i].pop_front();
         }
     }
     // Generate new obstacles
@@ -529,13 +586,11 @@ void updateItems() {
     }
     // Move down items & Remove all items that're off-screen or claimed
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        for (int j = 0; j < (int) items[i].size(); j++) {
-            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY() * deltaTime);
-        }
-        for (int j = 0; j < (int) items[i].size(); j++) {
-            if (!items[i].empty() && (items[i].front().getPosY() >= gWindow.getHeight() || items[i].front().checkClaimed())) {
-                items[i].pop_front();
-            }
+//        for (int j = 0; j < (int) items[i].size(); j++) {
+//            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY() * deltaTime);
+//        }
+        while (!items[i].empty() && (items[i].front().getPosY() >= gWindow.getHeight() || items[i].front().checkClaimed())) {
+            items[i].pop_front();
         }
     }
     // Generate new items
@@ -598,6 +653,7 @@ void close() {
     SDL_DestroyTexture(obstacleSpriteTexture);
     SDL_DestroyTexture(obstacleCrashedSpriteTexture);
     SDL_DestroyTexture(crashesCounterTexture);
+    SDL_DestroyTexture(explosionTexture);
     for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
         SDL_DestroyTexture(itemTextures[i]);
     }
