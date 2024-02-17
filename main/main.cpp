@@ -190,7 +190,6 @@ int main(int agrc, char* argv[]) {
         return 1;
     }
 
-
     bool quit = false;
     SDL_Event e;
     while (!quit) {
@@ -381,7 +380,7 @@ Explosion::Explosion (float x, float y, float velocity) {
     drect.w = OBSTACLE_WIDTH;
     drect.h = OBSTACLE_WIDTH;
     srect.x = 0;
-    srect.y = 32;
+    srect.y = 13 * 32;
     srect.w = 32;
     srect.h = 32;
     velY = velocity;
@@ -495,7 +494,6 @@ void updateObstacles() {
         gameLevel++;
         lastUpdateTime = currentTime;
         yourCar.setVelY(yourCar.getVelY() + 30);
-//        std::cout << yourCar.getVelY() << '\n';
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
                 items[i][j].setVelY(yourCar.getVelY());
@@ -514,8 +512,7 @@ void updateObstacles() {
                                                         "Crashes counter: " + toString(crashesCounter),
                                                         {255, 255, 255, 255}
                                                         );
-
-                    explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getVelY(), yourCar.getVelY()});
+                    explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), yourCar.getVelY()});
                     explosions.back().lastUpdate = currentTime;
                 }
             }
@@ -586,9 +583,9 @@ void updateItems() {
     }
     // Move down items & Remove all items that're off-screen or claimed
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-//        for (int j = 0; j < (int) items[i].size(); j++) {
-//            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY() * deltaTime);
-//        }
+        for (int j = 0; j < (int) items[i].size(); j++) {
+            items[i][j].setPos(colRanges[i].startX, items[i][j].getPosY() + items[i][j].getVelY() * deltaTime);
+        }
         while (!items[i].empty() && (items[i].front().getPosY() >= gWindow.getHeight() || items[i].front().checkClaimed())) {
             items[i].pop_front();
         }
@@ -713,7 +710,7 @@ void blit (SDL_Texture* texture, int x, int y, int w, int h) {
 
 // Generate column ranges for obstacles
 void generateColumnRanges() {
-    int gap = (gWindow.getWidth() - OBSTACLE_WIDTH * NUMBER_OF_COLUMNS - 2 * ROADSIDE_WIDTH) / 5;
+    int gap = (gWindow.getWidth() - OBSTACLE_WIDTH * NUMBER_OF_COLUMNS - 2 * ROADSIDE_WIDTH) / (NUMBER_OF_COLUMNS + 1);
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         colRanges[i].startX = ROADSIDE_WIDTH + OBSTACLE_WIDTH * i + gap * (i + 1);
         colRanges[i].width = OBSTACLE_WIDTH;
