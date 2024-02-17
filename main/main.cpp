@@ -175,6 +175,7 @@ int main(int agrc, char* argv[]) {
         return 1;
     }
 
+
     bool quit = false;
     SDL_Event e;
     while (!quit) {
@@ -388,8 +389,8 @@ bool init() {
 bool loadMedia() {
     bool success = true;
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-    backgroundTexture               = loadTexture("assets/images/road_3.png");
-    backgroundTexture2              = loadTexture("assets/images/road_4.png");
+    backgroundTexture               = loadTexture("assets/images/road_5.png");
+    backgroundTexture2              = loadTexture("assets/images/road_6.png");
     carTexture                      = loadTexture("assets/images/car.png");
     carInvisibleTexture             = loadTexture("assets/images/car_invisible.png");
     obstacleSpriteTexture           = loadTexture("assets/images/cars.png");
@@ -452,7 +453,7 @@ void updateObstacles() {
         gameLevel++;
         lastUpdateTime = currentTime;
         yourCar.setVelY(yourCar.getVelY() + 30);
-        std::cout << yourCar.getVelY() << '\n';
+//        std::cout << yourCar.getVelY() << '\n';
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (int j = 0; j < (int) obstacles[i].size(); j++) {
                 items[i][j].setVelY(yourCar.getVelY());
