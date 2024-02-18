@@ -12,6 +12,7 @@ const int SCREEN_HEIGHT = 600;
 const int ROADSIDE_WIDTH = 90;
 const int CAR_WIDTH = 50;
 const int CAR_HEIGHT = 100;
+const int INIT_VELOCITY = 6 * 60;
 const int OBSTACLE_WIDTH = 50;
 const int OBSTACLE_HEIGHT = 100;
 const int NUMBER_OF_COLUMNS = 4;
@@ -159,7 +160,7 @@ SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
 
 std::vector<SDL_Rect> obstaclesClipRect;
 
-Car yourCar(0, 0, 6 * 60);
+Car yourCar(0, 0, INIT_VELOCITY);
 columnRange colRanges[NUMBER_OF_COLUMNS];
 int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 
@@ -168,11 +169,11 @@ std::deque<Item>      items[NUMBER_OF_COLUMNS];
 std::deque<Explosion> explosions;
 
 int currentItemsDuration[TOTAL_OF_ITEMS];
-int crashesCounter;
 int offsetY;
-int currentTime, lastFrameTime, lastUpdateTime;
+int startTime, currentTime, lastFrameTime, lastUpdateTime;
 float deltaTime;
 int gameLevel = 1;
+int currentScore;
 bool bg1 = false;
 bool bg2 = true;
 
@@ -485,7 +486,8 @@ void render() {
     }
 
     // HUD
-    drawHUD(goldenFontTexture, 20, 20, "Crashes counter: " + toString(crashesCounter), 2);
+    drawHUD(goldenFontTexture, 20, 20, "SCORE", 2);
+    drawHUD(whiteFontTexture, 20, 40, toString(currentScore), 3);
 
     SDL_RenderPresent(gRenderer);
 }
@@ -509,7 +511,7 @@ void updateObstacles() {
                 if (!obstacles[i][j].checkCrashed() && checkCollision(yourCar, obstacles[i][j])) {
                     obstacles[i][j].crash();
                     obstacles[i][j].setVelY(yourCar.getVelY());
-                    crashesCounter++;
+                    std::cout << "crashed!\n";
                     explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), yourCar.getVelY()});
                     explosions.back().lastUpdate = currentTime;
                 }
@@ -638,6 +640,7 @@ void update() {
         bg2 = bg1;
         bg1 = (bool) (rand() % 2);
     }
+    currentScore += yourCar.getVelY() / 60;
 }
 
 void close() {
