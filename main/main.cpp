@@ -1,6 +1,5 @@
 #include<iostream>
 #include<SDL.h>
-#include<SDL_ttf.h>
 #include<SDL_image.h>
 #include<deque>
 #include<vector>
@@ -124,6 +123,7 @@ struct columnRange {
 
 bool init();
 bool loadMedia();
+void drawHUD (SDL_Texture* texture, float x, float y, std::string text, float scale);
 void render();
 void updateObstacles();
 void updateItems();
@@ -133,7 +133,6 @@ void update();
 void close();
 
 SDL_Texture* loadTexture (std::string path);
-SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor);
 void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect);
 void blit (SDL_Texture* texture, SDL_Rect rect);
 void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
@@ -153,13 +152,12 @@ SDL_Texture* carTexture = nullptr;
 SDL_Texture* carInvisibleTexture = nullptr;
 SDL_Texture* obstacleSpriteTexture = nullptr;
 SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
-SDL_Texture* crashesCounterTexture = nullptr;
 SDL_Texture* explosionTexture = nullptr;
+SDL_Texture* goldenFontTexture = nullptr;
+SDL_Texture* whiteFontTexture = nullptr;
 SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
 
 std::vector<SDL_Rect> obstaclesClipRect;
-
-TTF_Font* gFont = nullptr;
 
 Car yourCar(0, 0, 6 * 60);
 columnRange colRanges[NUMBER_OF_COLUMNS];
@@ -413,16 +411,12 @@ bool init() {
         std::cout << "IMG_Init failed: " << IMG_GetError() << '\n';
         return false;
     }
-    if (TTF_Init() == -1) {
-        std::cout << "TTF_Init failed: " << TTF_GetError() << '\n';
-        return false;
-    }
     return true;
 }
 
 bool loadMedia() {
     bool success = true;
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
     backgroundTexture               = loadTexture("assets/images/road_5.png");
     backgroundTexture2              = loadTexture("assets/images/road_6.png");
     carTexture                      = loadTexture("assets/images/car.png");
@@ -432,8 +426,8 @@ bool loadMedia() {
     itemTextures[SPEED_BOOST_ITEM]  = loadTexture("assets/images/items/speed_boost.png");
     itemTextures[INVISIBLE_ITEM]    = loadTexture("assets/images/items/invisible.png");
     explosionTexture                = loadTexture("assets/images/effects/explosion.png");
-    gFont                           = TTF_OpenFont("assets/fonts/OpenSans.ttf", 20);
-    crashesCounterTexture           = loadTexture(gFont, "Crashes counter: 0", {255, 255, 255, 255});
+    goldenFontTexture               = loadTexture("assets/fonts/golden.png");
+    whiteFontTexture                = loadTexture("assets/fonts/white.png");
 
     obstaclesClipRect.push_back({253, 9, 49, 92});
     obstaclesClipRect.push_back({314, 9, 49, 92});
@@ -441,17 +435,25 @@ bool loadMedia() {
     obstaclesClipRect.push_back({69, 335, 46, 87});
     obstaclesClipRect.push_back({127, 335, 46, 87});
 
-    if (gFont == nullptr)
-        std::cout << "Failed to load font: " << TTF_GetError() << '\n';
-
     success &= (backgroundTexture != nullptr);
     success &= (carTexture != nullptr);
     success &= (obstacleSpriteTexture != nullptr);
     success &= (obstacleCrashedSpriteTexture != nullptr);
-    success &= (gFont != nullptr);
-    success &= (crashesCounterTexture != nullptr);
 
     return success;
+}
+
+void drawHUD (SDL_Texture* texture, float x, float y, std::string text, float scale) {
+    SDL_Rect srect = {0, 0, 8, 8};
+    SDL_Rect drect = {x, y, srect.w * scale, srect.h * scale};
+    for (int i = 0; i < (int) text.size(); i++) {
+        if ('a' <= text[i] && text[i] <= 'z') {
+            text[i] += ('A' - 'a');
+        }
+        srect.x = (text[i] - ' ') * srect.w;
+        blit(texture, srect, drect);
+        drect.x += drect.w;
+    }
 }
 
 void render() {
@@ -483,13 +485,13 @@ void render() {
     }
 
     // HUD
-    blit(crashesCounterTexture, 10, 10);
+    drawHUD(goldenFontTexture, 20, 20, "Crashes counter: " + toString(crashesCounter), 2);
 
     SDL_RenderPresent(gRenderer);
 }
 
 void updateObstacles() {
-    // Update velocity +0.5f every 5 seconds
+    // Add to velocity 30px per second every 5 seconds
     if (currentTime - lastUpdateTime >= 5000 && yourCar.getVelY() < 780) {
         gameLevel++;
         lastUpdateTime = currentTime;
@@ -508,10 +510,6 @@ void updateObstacles() {
                     obstacles[i][j].crash();
                     obstacles[i][j].setVelY(yourCar.getVelY());
                     crashesCounter++;
-                    crashesCounterTexture = loadTexture(gFont,
-                                                        "Crashes counter: " + toString(crashesCounter),
-                                                        {255, 255, 255, 255}
-                                                        );
                     explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), yourCar.getVelY()});
                     explosions.back().lastUpdate = currentTime;
                 }
@@ -649,17 +647,16 @@ void close() {
     SDL_DestroyTexture(carInvisibleTexture);
     SDL_DestroyTexture(obstacleSpriteTexture);
     SDL_DestroyTexture(obstacleCrashedSpriteTexture);
-    SDL_DestroyTexture(crashesCounterTexture);
     SDL_DestroyTexture(explosionTexture);
+    SDL_DestroyTexture(goldenFontTexture);
+    SDL_DestroyTexture(whiteFontTexture);
     for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
         SDL_DestroyTexture(itemTextures[i]);
     }
 
     SDL_DestroyRenderer(gRenderer);
-    TTF_CloseFont(gFont);
     gWindow.free();
 
-    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -670,21 +667,6 @@ SDL_Texture* loadTexture (std::string path) {
     if (texture == nullptr) {
         std::cout << "Failed to load texture from " << path << ' ' << IMG_GetError() << '\n';
     }
-    return texture;
-}
-SDL_Texture* loadTexture (TTF_Font* font, std::string text, SDL_Color textColor) {
-    SDL_Texture* texture = nullptr;
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), textColor);
-    if (surface == nullptr) {
-        std::cout << "Failed to load text surface " << SDL_GetError() << '\n';
-    }
-    else {
-        texture = SDL_CreateTextureFromSurface(gRenderer, surface);
-        if (texture == nullptr) {
-            std::cout << "Failed to convert text surface to texture " << SDL_GetError() << '\n';
-        }
-    }
-    SDL_FreeSurface(surface);
     return texture;
 }
 void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect) {
