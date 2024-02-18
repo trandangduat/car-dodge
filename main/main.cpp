@@ -18,12 +18,13 @@ const int OBSTACLE_HEIGHT = 100;
 const int NUMBER_OF_COLUMNS = 4;
 const int ITEM_WIDTH = 50;
 const int ITEM_HEIGHT = ITEM_WIDTH;
+const int TOTAL_HEARTS = 3;
+const int SPEED_BOOST_AMOUNT = 3 * 60;
 enum item_type {
     SPEED_BOOST_ITEM,
     INVISIBLE_ITEM,
     TOTAL_OF_ITEMS
 };
-const int SPEED_BOOST_AMOUNT = 3 * 60;
 
 class LWindow {
 public:
@@ -124,7 +125,8 @@ struct columnRange {
 
 bool init();
 bool loadMedia();
-void drawHUD (SDL_Texture* texture, float x, float y, std::string text, float scale);
+void drawText (SDL_Texture* texture, float x, float y, std::string text, float scale);
+void drawHearts (SDL_Texture* texture, float x, float y, int remainHearts, float scale);
 void render();
 void updateObstacles();
 void updateItems();
@@ -157,6 +159,7 @@ SDL_Texture* explosionTexture = nullptr;
 SDL_Texture* goldenFontTexture = nullptr;
 SDL_Texture* whiteFontTexture = nullptr;
 SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
+SDL_Texture* heartSymbolTexture = nullptr;
 
 std::vector<SDL_Rect> obstaclesClipRect;
 
@@ -174,6 +177,7 @@ int startTime, currentTime, lastFrameTime, lastUpdateTime;
 float deltaTime;
 int gameLevel = 1;
 int currentScore;
+int remainHearts = 3;
 bool bg1 = false;
 bool bg2 = true;
 
@@ -429,6 +433,7 @@ bool loadMedia() {
     explosionTexture                = loadTexture("assets/images/effects/explosion.png");
     goldenFontTexture               = loadTexture("assets/fonts/golden.png");
     whiteFontTexture                = loadTexture("assets/fonts/white.png");
+    heartSymbolTexture              = loadTexture("assets/images/HUD/heart.png");
 
     obstaclesClipRect.push_back({253, 9, 49, 92});
     obstaclesClipRect.push_back({314, 9, 49, 92});
@@ -444,7 +449,7 @@ bool loadMedia() {
     return success;
 }
 
-void drawHUD (SDL_Texture* texture, float x, float y, std::string text, float scale) {
+void drawText (SDL_Texture* texture, float x, float y, std::string text, float scale) {
     SDL_Rect srect = {0, 0, 8, 8};
     SDL_Rect drect = {x, y, srect.w * scale, srect.h * scale};
     for (int i = 0; i < (int) text.size(); i++) {
@@ -454,6 +459,20 @@ void drawHUD (SDL_Texture* texture, float x, float y, std::string text, float sc
         srect.x = (text[i] - ' ') * srect.w;
         blit(texture, srect, drect);
         drect.x += drect.w;
+    }
+}
+void drawHearts (SDL_Texture* texture, float x, float y, int remainHearts, float scale) {
+    SDL_Rect srect = {0, 0, 16, 16};
+    SDL_Rect drect = {x, y, srect.w * scale, srect.h * scale};
+    for (int i = 1; i <= TOTAL_HEARTS; i++) {
+        if (i <= remainHearts) {
+            srect.x = 0;
+        }
+        else {
+            srect.x = 1 * srect.w;
+        }
+        blit(texture, srect, drect);
+        drect.x += drect.w + 5;
     }
 }
 
@@ -486,8 +505,9 @@ void render() {
     }
 
     // HUD
-    drawHUD(goldenFontTexture, 20, 20, "SCORE", 2);
-    drawHUD(whiteFontTexture, 20, 40, toString(currentScore), 3);
+    drawText(goldenFontTexture, 30, 30, "SCORE", 2);
+    drawText(whiteFontTexture, 30, 50, toString(currentScore), 3);
+    drawHearts(heartSymbolTexture, gWindow.getWidth() - 120, 30, remainHearts, 1.5f);
 
     SDL_RenderPresent(gRenderer);
 }
@@ -512,6 +532,9 @@ void updateObstacles() {
                     obstacles[i][j].crash();
                     obstacles[i][j].setVelY(yourCar.getVelY());
                     std::cout << "crashed!\n";
+
+                    remainHearts -= 1;
+
                     explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), yourCar.getVelY()});
                     explosions.back().lastUpdate = currentTime;
                 }
@@ -653,6 +676,7 @@ void close() {
     SDL_DestroyTexture(explosionTexture);
     SDL_DestroyTexture(goldenFontTexture);
     SDL_DestroyTexture(whiteFontTexture);
+    SDL_DestroyTexture(heartSymbolTexture);
     for (int i = 0; i < TOTAL_OF_ITEMS; i++) {
         SDL_DestroyTexture(itemTextures[i]);
     }
