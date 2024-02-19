@@ -113,8 +113,8 @@ struct Explosion {
     float velY;
 
     Explosion() {};
-    Explosion (float x, float y, float velocity);
-    void render();
+    Explosion (float x, float y, int w, int h, float velocity, int whichSprite);
+    void render (SDL_Texture* texture);
     void updateStage();
 };
 
@@ -156,6 +156,7 @@ SDL_Texture* carInvisibleTexture = nullptr;
 SDL_Texture* obstacleSpriteTexture = nullptr;
 SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
 SDL_Texture* explosionTexture = nullptr;
+SDL_Texture* boostClaimingEffectTexture = nullptr;
 SDL_Texture* goldenFontTexture = nullptr;
 SDL_Texture* whiteFontTexture = nullptr;
 SDL_Texture* itemTextures[TOTAL_OF_ITEMS];
@@ -170,6 +171,7 @@ int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Item>      items[NUMBER_OF_COLUMNS];
 std::deque<Explosion> explosions;
+std::deque<Explosion> boostClaimingEffects;
 
 int currentItemsDuration[TOTAL_OF_ITEMS];
 int offsetY;
@@ -377,13 +379,13 @@ void Item::claim() {
     mIsClaimed = true;
 }
 
-Explosion::Explosion (float x, float y, float velocity) {
+Explosion::Explosion (float x, float y, int w, int h, float velocity, int whichSprite) {
     drect.x = x;
     drect.y = y;
-    drect.w = OBSTACLE_WIDTH;
-    drect.h = OBSTACLE_WIDTH;
+    drect.w = w;
+    drect.h = h;
     srect.x = 0;
-    srect.y = 13 * 32;
+    srect.y = whichSprite * 32;
     srect.w = 32;
     srect.h = 32;
     velY = velocity;
@@ -393,8 +395,8 @@ void Explosion::updateStage() {
     currentStage++;
     srect.x += srect.w;
 }
-void Explosion::render() {
-    blit(explosionTexture, srect, drect);
+void Explosion::render (SDL_Texture* texture) {
+    blit(texture, srect, drect);
 }
 
 bool init() {
@@ -431,6 +433,7 @@ bool loadMedia() {
     itemTextures[SPEED_BOOST_ITEM]  = loadTexture("assets/images/items/speed_boost.png");
     itemTextures[INVISIBLE_ITEM]    = loadTexture("assets/images/items/invisible.png");
     explosionTexture                = loadTexture("assets/images/effects/explosion.png");
+    boostClaimingEffectTexture      = loadTexture("assets/images/effects/boost_claiming.png");
     goldenFontTexture               = loadTexture("assets/fonts/golden.png");
     whiteFontTexture                = loadTexture("assets/fonts/white.png");
     heartSymbolTexture              = loadTexture("assets/images/HUD/heart.png");
@@ -501,13 +504,17 @@ void render() {
     yourCar.render((yourCar.getVisibleState() == false ? carInvisibleTexture : carTexture));
 
     for (int i = 0; i < (int) explosions.size(); i++) {
-        explosions[i].render();
+        explosions[i].render(explosionTexture);
+    }
+
+    for (int i = 0; i < (int) boostClaimingEffects.size(); i++) {
+        boostClaimingEffects[i].render(boostClaimingEffectTexture);
     }
 
     // HUD
     drawText(goldenFontTexture, 30, 30, "SCORE", 2);
     drawText(whiteFontTexture, 30, 50, toString(currentScore), 3);
-    drawHearts(heartSymbolTexture, gWindow.getWidth() - 120, 30, remainHearts, 1.5f);
+    drawHearts(heartSymbolTexture, gWindow.getWidth() - 140, 30, remainHearts, 2.0f);
 
     SDL_RenderPresent(gRenderer);
 }
@@ -535,7 +542,7 @@ void updateObstacles() {
 
                     remainHearts -= 1;
 
-                    explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), yourCar.getVelY()});
+                    explosions.push_back({obstacles[i][j].getPosX(), obstacles[i][j].getPosY(), OBSTACLE_WIDTH, OBSTACLE_WIDTH, yourCar.getVelY(), 13});
                     explosions.back().lastUpdate = currentTime;
                 }
             }
@@ -601,8 +608,23 @@ void updateItems() {
                 }
                 // reset duration
                 currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration();
+                // claiming effects
+                boostClaimingEffects.push_back({items[i][j].getPosX(), items[i][j].getPosY(), ITEM_WIDTH, ITEM_WIDTH, yourCar.getVelY(), 29});
+                boostClaimingEffects.back().lastUpdate = currentTime;
             }
         }
+    }
+    for (int i = 0; i < (int) boostClaimingEffects.size(); i++) {
+        if (currentTime - boostClaimingEffects[i].lastUpdate >= 100) {
+            boostClaimingEffects[i].updateStage();
+            boostClaimingEffects[i].lastUpdate = currentTime;
+        }
+    }
+    while (!boostClaimingEffects.empty() && boostClaimingEffects.front().currentStage >= 6) {
+        boostClaimingEffects.pop_front();
+    }
+    for (int i = 0; i < (int) boostClaimingEffects.size(); i++) {
+        boostClaimingEffects[i].drect.y += boostClaimingEffects[i].velY * deltaTime;
     }
     // Move down items & Remove all items that're off-screen or claimed
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
@@ -674,6 +696,7 @@ void close() {
     SDL_DestroyTexture(obstacleSpriteTexture);
     SDL_DestroyTexture(obstacleCrashedSpriteTexture);
     SDL_DestroyTexture(explosionTexture);
+    SDL_DestroyTexture(boostClaimingEffectTexture);
     SDL_DestroyTexture(goldenFontTexture);
     SDL_DestroyTexture(whiteFontTexture);
     SDL_DestroyTexture(heartSymbolTexture);
