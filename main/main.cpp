@@ -5,8 +5,10 @@
 #include<vector>
 #include<cstdlib>
 #include<ctime>
+#include<cmath>
 #include<algorithm>
 
+const double PI = 3.14159265;
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 600;
 const int ROADSIDE_WIDTH = 90;
@@ -59,6 +61,7 @@ public:
 private:
     SDL_Rect mRect;
     float mVelY;
+    double mTiltedAngle;
     bool mVisible;
 };
 
@@ -137,7 +140,7 @@ void close();
 
 SDL_Texture* loadTexture (std::string path);
 void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect);
-void blit (SDL_Texture* texture, SDL_Rect rect);
+void blit (SDL_Texture* texture, SDL_Rect rect, double angle = 0);
 void blit (SDL_Texture* texture, int x, int y, int w = -1, int h = -1);
 
 void generateColumnRanges();
@@ -261,6 +264,7 @@ Car::Car (float x, float y, float velocity) {
     mRect.w = CAR_WIDTH;
     mRect.h = CAR_HEIGHT;
     mVelY = velocity;
+    mTiltedAngle = 0;
     mVisible = true;
 }
 void Car::handleEvent (SDL_Event *e) {
@@ -277,11 +281,20 @@ void Car::moveTo (float x, float y) {
     if (x + CAR_WIDTH > gWindow.getWidth() - ROADSIDE_WIDTH) {
         x = gWindow.getWidth() - ROADSIDE_WIDTH - CAR_WIDTH;
     }
+
+    if (mRect.x < x) {
+        mTiltedAngle = std::min(7.0, atan(1.0 * (x - mRect.x) / CAR_HEIGHT) * 180 / PI);
+    }
+    else {
+        mTiltedAngle = - std::min(7.0, atan(1.0 * (mRect.x - x) / CAR_HEIGHT) * 180 / PI);
+    }
+//    mTiltedAngle = 7;
+
     mRect.x = x;
     mRect.y = y;
 }
 void Car::render(SDL_Texture* texture) {
-    blit(texture, mRect);
+    blit(texture, mRect, mTiltedAngle);
 }
 void Car::setVelY (float velocity) {
     mVelY = velocity;
@@ -724,9 +737,9 @@ void blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect) {
     SDL_Rect drect = rect;
     SDL_RenderCopy(gRenderer, texture, &srect, &drect);
 }
-void blit (SDL_Texture* texture, SDL_Rect rect) {
+void blit (SDL_Texture* texture, SDL_Rect rect, double angle) {
     SDL_Rect drect = rect;
-    SDL_RenderCopy(gRenderer, texture, nullptr, &drect);
+    SDL_RenderCopyEx(gRenderer, texture, nullptr, &drect, angle, nullptr, SDL_FLIP_NONE);
 }
 void blit (SDL_Texture* texture, int x, int y, int w, int h) {
     SDL_Rect dest;
