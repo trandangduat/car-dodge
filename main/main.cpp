@@ -288,7 +288,9 @@ void Car::moveTo (float x, float y) {
     else {
         mTiltedAngle = - std::min(7.0, atan(1.0 * (mRect.x - x) / CAR_HEIGHT) * 180 / PI);
     }
-//    mTiltedAngle = 7;
+    if (fabs(mTiltedAngle) < 5) {
+        mTiltedAngle = 0;
+    }
 
     mRect.x = x;
     mRect.y = y;
@@ -467,7 +469,7 @@ bool loadMedia() {
 
 void drawText (SDL_Texture* texture, float x, float y, std::string text, float scale) {
     SDL_Rect srect = {0, 0, 8, 8};
-    SDL_Rect drect = {x, y, srect.w * scale, srect.h * scale};
+    SDL_Rect drect = {x, y, int(srect.w * scale), int(srect.h * scale)};
     for (int i = 0; i < (int) text.size(); i++) {
         if ('a' <= text[i] && text[i] <= 'z') {
             text[i] += ('A' - 'a');
@@ -479,7 +481,7 @@ void drawText (SDL_Texture* texture, float x, float y, std::string text, float s
 }
 void drawHearts (SDL_Texture* texture, float x, float y, int remainHearts, float scale) {
     SDL_Rect srect = {0, 0, 16, 16};
-    SDL_Rect drect = {x, y, srect.w * scale, srect.h * scale};
+    SDL_Rect drect = {x, y, int(srect.w * scale), int(srect.h * scale)};
     for (int i = 1; i <= TOTAL_HEARTS; i++) {
         if (i <= remainHearts) {
             srect.x = 0;
@@ -622,13 +624,13 @@ void updateItems() {
                 // reset duration
                 currentItemsDuration[items[i][j].getType()] = items[i][j].getDuration();
                 // claiming effects
-                boostClaimingEffects.push_back({items[i][j].getPosX(), items[i][j].getPosY(), ITEM_WIDTH, ITEM_WIDTH, yourCar.getVelY(), 29});
+                boostClaimingEffects.push_back({items[i][j].getPosX(), items[i][j].getPosY(), ITEM_WIDTH, ITEM_WIDTH, yourCar.getVelY(), 5});
                 boostClaimingEffects.back().lastUpdate = currentTime;
             }
         }
     }
     for (int i = 0; i < (int) boostClaimingEffects.size(); i++) {
-        if (currentTime - boostClaimingEffects[i].lastUpdate >= 100) {
+        if (currentTime - boostClaimingEffects[i].lastUpdate >= 50) {
             boostClaimingEffects[i].updateStage();
             boostClaimingEffects[i].lastUpdate = currentTime;
         }
@@ -654,12 +656,18 @@ void updateItems() {
             if (rand() % 1000) continue;
             Item newItem (
                           rand() % TOTAL_OF_ITEMS,
-                          100,
+                          500,
                           yourCar.getVelY(),
                           colRanges[i].startX,
                           -ITEM_HEIGHT
                           );
             items[i].push_back(newItem);
+        }
+    }
+    // Change items' velocity to that of player's car
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (int j = 0; j < (int) items[i].size(); i++) {
+            items[i][j].setVelY(yourCar.getVelY());
         }
     }
 }
