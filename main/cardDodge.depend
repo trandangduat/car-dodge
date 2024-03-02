@@ -1,14 +1,11 @@
 # depslib dependency file v1.0
-1708769502 source:d:\cppgames\car-dodge\main\main.cpp
-	<iostream>
-	<SDL.h>
-	<SDL_image.h>
-	<deque>
-	<vector>
-	<cstdlib>
-	<ctime>
-	<cmath>
-	<algorithm>
+1709385472 source:d:\cppgames\car-dodge\main\main.cpp
+	"logic.hpp"
+	"timer.hpp"
+	"background.hpp"
+	"car.hpp"
+	"obstacle.hpp"
+	"hud.hpp"
 
 1706832967 d:\cppgames\include\sdl2\sdl.h
 	"SDL_main.h"
@@ -413,4 +410,119 @@
 	"SDL_version.h"
 	"begin_code.h"
 	"close_code.h"
+
+1708955127 d:\cppgames\car-dodge\main\test.hpp
+
+1709368423 d:\cppgames\car-dodge\main\car.hpp
+	"gamewindow.hpp"
+
+1708960017 d:\cppgames\car-dodge\main\parameters.hpp
+
+1709104792 d:\cppgames\car-dodge\main\lwindow.hpp
+	<SDL.h>
+	"parameters.hpp"
+
+1709002182 source:d:\cppgames\car-dodge\main\explosion.cpp
+	"explosion.hpp"
+
+1709108737 d:\cppgames\car-dodge\main\explosion.hpp
+	<SDL.h>
+	"blitter.hpp"
+
+1709109265 d:\cppgames\car-dodge\main\declarations.hpp
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<deque>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<cmath>
+	<algorithm>
+	"parameters.hpp"
+	"lwindow.hpp"
+	"blitter.hpp"
+	"car.hpp"
+	"obstacle.hpp"
+	"item.hpp"
+	"explosion.hpp"
+
+1709379132 d:\cppgames\car-dodge\main\obstacle.hpp
+	"gamewindow.hpp"
+
+1709108734 d:\cppgames\car-dodge\main\item.hpp
+	<SDL.h>
+	"parameters.hpp"
+	"blitter.hpp"
+
+1709108298 source:d:\cppgames\car-dodge\main\declarations.cpp
+	"declarations.hpp"
+
+1708960654 source:d:\cppgames\car-dodge\main\lwindow.cpp
+	"lwindow.hpp"
+
+1709368484 source:d:\cppgames\car-dodge\main\car.cpp
+	"car.hpp"
+
+1708961019 source:d:\cppgames\car-dodge\main\item.cpp
+	"item.hpp"
+
+1709379121 source:d:\cppgames\car-dodge\main\obstacle.cpp
+	"obstacle.hpp"
+
+1709108561 d:\cppgames\car-dodge\main\blit.hpp
+
+1709109263 d:\cppgames\car-dodge\main\blitter.hpp
+	<SDL.h>
+
+1709108685 source:d:\cppgames\car-dodge\main\blitter.cpp
+	"blitter.hpp"
+
+1709366953 d:\cppgames\car-dodge\main\gamewindow.hpp
+	"params.hpp"
+	<iostream>
+	<deque>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<cmath>
+	<algorithm>
+	<SDL.h>
+	<SDL_image.h>
+
+1709386275 source:d:\cppgames\car-dodge\main\gamewindow.cpp
+	"gamewindow.hpp"
+
+1709387357 d:\cppgames\car-dodge\main\params.hpp
+
+1709367814 d:\cppgames\car-dodge\main\background.hpp
+	"gamewindow.hpp"
+
+1709367858 source:d:\cppgames\car-dodge\main\background.cpp
+	"background.hpp"
+
+1709364854 source:d:\cppgames\car-dodge\main\timer.cpp
+	"timer.hpp"
+	<SDL.h>
+
+1709364868 d:\cppgames\car-dodge\main\timer.hpp
+
+1709369008 source:d:\cppgames\car-dodge\main\logic.cpp
+	"logic.hpp"
+
+1709369015 d:\cppgames\car-dodge\main\logic.hpp
+	<SDL.h>
+
+1709388071 source:d:\cppgames\car-dodge\main\hud.cpp
+	"hud.hpp"
+
+1709387870 d:\cppgames\car-dodge\main\hud.hpp
+	"gamewindow.hpp"
+	"gamestate.hpp"
+
+1709388053 source:d:\cppgames\car-dodge\main\gamestate.cpp
+	"gamestate.hpp"
+	"params.hpp"
+
+1709388008 d:\cppgames\car-dodge\main\gamestate.hpp
 

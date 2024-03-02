@@ -40,7 +40,20 @@
 			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/lib" />
 			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/lib" />
 		</Linker>
+		<Unit filename="background.cpp" />
+		<Unit filename="background.hpp" />
+		<Unit filename="car.cpp" />
+		<Unit filename="car.hpp" />
+		<Unit filename="gamewindow.cpp" />
+		<Unit filename="gamewindow.hpp" />
+		<Unit filename="logic.cpp" />
+		<Unit filename="logic.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="obstacle.cpp" />
+		<Unit filename="obstacle.hpp" />
+		<Unit filename="params.hpp" />
+		<Unit filename="timer.cpp" />
+		<Unit filename="timer.hpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
