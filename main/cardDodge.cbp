@@ -44,8 +44,14 @@
 		<Unit filename="background.hpp" />
 		<Unit filename="car.cpp" />
 		<Unit filename="car.hpp" />
+		<Unit filename="coin.cpp" />
+		<Unit filename="coin.hpp" />
+		<Unit filename="gamestate.cpp" />
+		<Unit filename="gamestate.hpp" />
 		<Unit filename="gamewindow.cpp" />
 		<Unit filename="gamewindow.hpp" />
+		<Unit filename="hud.cpp" />
+		<Unit filename="hud.hpp" />
 		<Unit filename="logic.cpp" />
 		<Unit filename="logic.hpp" />
 		<Unit filename="main.cpp" />

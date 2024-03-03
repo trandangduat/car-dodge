@@ -1,11 +1,13 @@
 # depslib dependency file v1.0
-1709385472 source:d:\cppgames\car-dodge\main\main.cpp
+1709488095 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"background.hpp"
 	"car.hpp"
 	"obstacle.hpp"
+	"coin.hpp"
 	"hud.hpp"
+	"gamestate.hpp"
 
 1706832967 d:\cppgames\include\sdl2\sdl.h
 	"SDL_main.h"
@@ -461,7 +463,7 @@
 1708960654 source:d:\cppgames\car-dodge\main\lwindow.cpp
 	"lwindow.hpp"
 
-1709368484 source:d:\cppgames\car-dodge\main\car.cpp
+1709466302 source:d:\cppgames\car-dodge\main\car.cpp
 	"car.hpp"
 
 1708961019 source:d:\cppgames\car-dodge\main\item.cpp
@@ -493,7 +495,7 @@
 1709386275 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
-1709387357 d:\cppgames\car-dodge\main\params.hpp
+1709476170 d:\cppgames\car-dodge\main\params.hpp
 
 1709367814 d:\cppgames\car-dodge\main\background.hpp
 	"gamewindow.hpp"
@@ -525,4 +527,11 @@
 	"params.hpp"
 
 1709388008 d:\cppgames\car-dodge\main\gamestate.hpp
+
+1709483167 d:\cppgames\car-dodge\main\coin.hpp
+	"gamewindow.hpp"
+	"timer.hpp"
+
+1709487323 source:d:\cppgames\car-dodge\main\coin.cpp
+	"coin.hpp"
 

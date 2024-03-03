@@ -13,14 +13,8 @@ const int INIT_VELOCITY = 6 * 60;
 const int OBSTACLE_WIDTH = 50;
 const int OBSTACLE_HEIGHT = 100;
 const int NUMBER_OF_COLUMNS = 4;
-const int ITEM_WIDTH = 50;
-const int ITEM_HEIGHT = ITEM_WIDTH;
+const int COIN_WIDTH = 30;
+const int COIN_HEIGHT = 30;
 const int NUMBER_OF_LIVES = 3;
-const int SPEED_BOOST_AMOUNT = 3 * 60;
-enum item_type {
-    SPEED_BOOST_ITEM,
-    INVISIBLE_ITEM,
-    TOTAL_OF_ITEMS
-};
 
 #endif // PARAMS_HPP

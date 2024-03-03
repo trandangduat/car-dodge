@@ -23,6 +23,7 @@ void Car::moveTo (float x, float y) {
     if (x + CAR_WIDTH > SCREEN_WIDTH - ROADSIDE_WIDTH) {
         x = SCREEN_WIDTH - ROADSIDE_WIDTH - CAR_WIDTH;
     }
+    /*
     if (this->mRect.x < x) {
         this->mTiltedAngle = std::min(7.0, atan(1.0 * (x - mRect.x) / CAR_HEIGHT) * 180 / PI);
     }
@@ -32,6 +33,7 @@ void Car::moveTo (float x, float y) {
     if (fabs(this->mTiltedAngle) < 5) {
         this->mTiltedAngle = 0;
     }
+    */
     this->mRect.x = x;
     this->mRect.y = y;
 }
