@@ -74,9 +74,9 @@ int main(int agrc, char* argv[]) {
         player.render(carTexture);
 
 
-        hud.drawText(goldenFontTexture, 30, 30, "SCORE", 2);
-        hud.drawText(whiteFontTexture, 30, 50, std::to_string(state.currentScore()), 3);
-        hud.drawHearts(heartSymbolTexture, SCREEN_WIDTH - 140, 30, state.remainLives(), 2.0f);
+        hud.drawText(whiteFontTexture, 30, 30, std::to_string(state.currentScore()), 3, HUD_FLOAT_RIGHT);
+        hud.drawText(goldenFontTexture, 30, 70, std::to_string(state.currentCoins()), 2.5f, HUD_FLOAT_RIGHT);
+        hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2, HUD_FLOAT_LEFT);
 
         win.presentRender();
 
@@ -190,6 +190,7 @@ void checkCollisionsWithCoins() {
         for (Coin& C : coins[i]) {
             if (!C.isClaimed() && checkCollision(player.getRect(), C.getRect())) {
                 C.claimed();
+                state.updateCoins(state.currentCoins() + 1);
             }
         }
     }
