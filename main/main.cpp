@@ -15,6 +15,7 @@ SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
 SDL_Texture* coinSprite = nullptr;
 SDL_Texture* goldenFontTexture = nullptr;
 SDL_Texture* whiteFontTexture = nullptr;
+SDL_Texture* metalFontTexture = nullptr;
 SDL_Texture* heartSymbolTexture = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 SDL_Rect colRanges[NUMBER_OF_COLUMNS];
@@ -63,6 +64,7 @@ int main(int agrc, char* argv[]) {
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
+            if (state.isGameOver()) continue;
             player.handleEvent(&e);
         }
         //Render
@@ -75,8 +77,19 @@ int main(int agrc, char* argv[]) {
 
 
         hud.drawText(whiteFontTexture, 30, 30, std::to_string(state.currentScore()), 3, HUD_FLOAT_RIGHT);
-        hud.drawText(goldenFontTexture, 30, 70, std::to_string(state.currentCoins()), 2.5f, HUD_FLOAT_RIGHT);
+        hud.drawText(goldenFontTexture, 30, 65, std::to_string(state.currentCoins()), 2.5f, HUD_FLOAT_RIGHT);
         hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2, HUD_FLOAT_LEFT);
+
+
+        if (state.isGameOver()) {
+            SDL_SetRenderDrawColor(win.gRenderer, 0, 0, 0, 180);
+            SDL_SetRenderDrawBlendMode(win.gRenderer, SDL_BLENDMODE_BLEND);
+            SDL_Rect fullScreenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+            SDL_RenderFillRect(win.gRenderer, &fullScreenRect);
+            hud.drawText(metalFontTexture, 0, 80, "GAME OVER", 0.6f, HUD_FLOAT_CENTER);
+            hud.drawText(whiteFontTexture, 0, 160, "SCORE", 2, HUD_FLOAT_CENTER);
+            hud.drawText(whiteFontTexture, 0, 185, std::to_string(state.currentScore()), 4, HUD_FLOAT_CENTER);
+        }
 
         win.presentRender();
 
@@ -240,6 +253,7 @@ void loadMedia() {
     coinSprite                      = win.loadTexture("assets/images/items/coin.png");
     goldenFontTexture               = win.loadTexture("assets/fonts/golden.png");
     whiteFontTexture                = win.loadTexture("assets/fonts/white.png");
+    metalFontTexture                = win.loadTexture("assets/fonts/metal.png");
     heartSymbolTexture              = win.loadTexture("assets/images/HUD/heart.png");
     obstaclesClipRect.push_back({253, 9, 49, 92});
     obstaclesClipRect.push_back({314, 9, 49, 92});

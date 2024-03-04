@@ -4,8 +4,9 @@
 #include "gamewindow.hpp"
 #include "gamestate.hpp"
 
-#define HUD_FLOAT_RIGHT 0
-#define HUD_FLOAT_LEFT 1
+#define HUD_FLOAT_LEFT 0
+#define HUD_FLOAT_RIGHT 1
+#define HUD_FLOAT_CENTER 2
 
 class HUD {
 private:
@@ -15,8 +16,8 @@ private:
 public:
     HUD() {};
     HUD (GameWindow* gw, GameState* gs);
-    void drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, bool align);
-    void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, bool align);
+    void drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, int alignX);
+    void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
 };
 
 #endif // HUD_HPP

@@ -10,22 +10,38 @@ void GameState::reset() {
     this->lives = NUMBER_OF_LIVES;
     this->coins = 0;
     this->stage = 1;
+    this->gameOver = 0;
+}
+
+void GameState::endGame() {
+    this->gameOver = 1;
 }
 
 void GameState::updateScore (int _score) {
+    if (gameOver) return;
     this->score = _score;
 }
 
 void GameState::updateLives (int _lives) {
+    if (gameOver) return;
     this->lives = _lives;
+    if (this->lives == 0) {
+        this->endGame();
+    }
 }
 
 void GameState::updateStage (int _stage) {
+    if (gameOver) return;
     this->stage = _stage;
 }
 
 void GameState::updateCoins (int _coins) {
+    if (gameOver) return;
     this->coins = _coins;
+}
+
+bool GameState::isGameOver() {
+    return this->gameOver;
 }
 
 int GameState::currentScore() {

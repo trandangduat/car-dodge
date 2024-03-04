@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1709545346 source:d:\cppgames\car-dodge\main\main.cpp
+1709566969 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"background.hpp"
@@ -515,18 +515,18 @@
 1709369015 d:\cppgames\car-dodge\main\logic.hpp
 	<SDL.h>
 
-1709544523 source:d:\cppgames\car-dodge\main\hud.cpp
+1709565638 source:d:\cppgames\car-dodge\main\hud.cpp
 	"hud.hpp"
 
-1709544051 d:\cppgames\car-dodge\main\hud.hpp
+1709561068 d:\cppgames\car-dodge\main\hud.hpp
 	"gamewindow.hpp"
 	"gamestate.hpp"
 
-1709542625 source:d:\cppgames\car-dodge\main\gamestate.cpp
+1709560517 source:d:\cppgames\car-dodge\main\gamestate.cpp
 	"gamestate.hpp"
 	"params.hpp"
 
-1709542570 d:\cppgames\car-dodge\main\gamestate.hpp
+1709559918 d:\cppgames\car-dodge\main\gamestate.hpp
 
 1709483167 d:\cppgames\car-dodge\main\coin.hpp
 	"gamewindow.hpp"
