@@ -1,23 +1,14 @@
 #include "logic.hpp"
 #include "timer.hpp"
+#include "assets.hpp"
 #include "background.hpp"
 #include "car.hpp"
 #include "obstacle.hpp"
 #include "coin.hpp"
 #include "hud.hpp"
 #include "gamestate.hpp"
+#include "gameover.hpp"
 
-std::vector<SDL_Texture*> backgroundTextures(2, nullptr);
-SDL_Texture* carTexture = nullptr;
-SDL_Texture* carInvisibleTexture = nullptr;
-SDL_Texture* obstacleSpriteTexture = nullptr;
-SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
-SDL_Texture* coinSprite = nullptr;
-SDL_Texture* goldenFontTexture = nullptr;
-SDL_Texture* whiteFontTexture = nullptr;
-SDL_Texture* metalFontTexture = nullptr;
-SDL_Texture* heartSymbolTexture = nullptr;
-std::vector<SDL_Rect> obstaclesClipRect;
 SDL_Rect colRanges[NUMBER_OF_COLUMNS];
 int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
 
@@ -32,7 +23,6 @@ Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEI
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
 
-void loadMedia();
 void generateColumnRanges();
 void updateBgVelocity();
 
@@ -52,7 +42,7 @@ int main(int agrc, char* argv[]) {
     srand(time(nullptr));
 
     win.init();
-    loadMedia();
+    loadMedia(&win);
 
     frameTimer.start();
     veloTimer.start();
@@ -82,13 +72,7 @@ int main(int agrc, char* argv[]) {
 
 
         if (state.isGameOver()) {
-            SDL_SetRenderDrawColor(win.gRenderer, 0, 0, 0, 180);
-            SDL_SetRenderDrawBlendMode(win.gRenderer, SDL_BLENDMODE_BLEND);
-            SDL_Rect fullScreenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-            SDL_RenderFillRect(win.gRenderer, &fullScreenRect);
-            hud.drawText(metalFontTexture, 0, 80, "GAME OVER", 0.6f, HUD_FLOAT_CENTER);
-            hud.drawText(whiteFontTexture, 0, 160, "SCORE", 2, HUD_FLOAT_CENTER);
-            hud.drawText(whiteFontTexture, 0, 185, std::to_string(state.currentScore()), 4, HUD_FLOAT_CENTER);
+            renderGameOverScreen(&win, &state, &hud);
         }
 
         win.presentRender();
@@ -240,24 +224,4 @@ void generateCoins() {
             }
         }
     }
-}
-
-void loadMedia() {
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    backgroundTextures[0]           = win.loadTexture("assets/images/road_5.png");
-    backgroundTextures[1]           = win.loadTexture("assets/images/road_6.png");
-    carTexture                      = win.loadTexture("assets/images/car.png");
-    carInvisibleTexture             = win.loadTexture("assets/images/car_invisible.png");
-    obstacleSpriteTexture           = win.loadTexture("assets/images/cars.png");
-    obstacleCrashedSpriteTexture    = win.loadTexture("assets/images/cars_crashed.png");
-    coinSprite                      = win.loadTexture("assets/images/items/coin.png");
-    goldenFontTexture               = win.loadTexture("assets/fonts/golden.png");
-    whiteFontTexture                = win.loadTexture("assets/fonts/white.png");
-    metalFontTexture                = win.loadTexture("assets/fonts/metal.png");
-    heartSymbolTexture              = win.loadTexture("assets/images/HUD/heart.png");
-    obstaclesClipRect.push_back({253, 9, 49, 92});
-    obstaclesClipRect.push_back({314, 9, 49, 92});
-    obstaclesClipRect.push_back({373, 9, 49, 92});
-    obstaclesClipRect.push_back({69, 335, 46, 87});
-    obstaclesClipRect.push_back({127, 335, 46, 87});
 }

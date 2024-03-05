@@ -40,12 +40,16 @@
 			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/lib" />
 			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/lib" />
 		</Linker>
+		<Unit filename="assets.cpp" />
+		<Unit filename="assets.hpp" />
 		<Unit filename="background.cpp" />
 		<Unit filename="background.hpp" />
 		<Unit filename="car.cpp" />
 		<Unit filename="car.hpp" />
 		<Unit filename="coin.cpp" />
 		<Unit filename="coin.hpp" />
+		<Unit filename="gameover.cpp" />
+		<Unit filename="gameover.hpp" />
 		<Unit filename="gamestate.cpp" />
 		<Unit filename="gamestate.hpp" />
 		<Unit filename="gamewindow.cpp" />
