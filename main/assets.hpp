@@ -3,17 +3,17 @@
 
 #include "gamewindow.hpp"
 
-std::vector<SDL_Texture*> backgroundTextures(2, nullptr);
-SDL_Texture* carTexture = nullptr;
-SDL_Texture* carInvisibleTexture = nullptr;
-SDL_Texture* obstacleSpriteTexture = nullptr;
-SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
-SDL_Texture* coinSprite = nullptr;
-SDL_Texture* goldenFontTexture = nullptr;
-SDL_Texture* whiteFontTexture = nullptr;
-SDL_Texture* metalFontTexture = nullptr;
-SDL_Texture* heartSymbolTexture = nullptr;
-std::vector<SDL_Rect> obstaclesClipRect;
+extern std::vector<SDL_Texture*> backgroundTextures;
+extern SDL_Texture* carTexture;
+extern SDL_Texture* carInvisibleTexture;
+extern SDL_Texture* obstacleSpriteTexture;
+extern SDL_Texture* obstacleCrashedSpriteTexture;
+extern SDL_Texture* coinSprite;
+extern SDL_Texture* goldenFontTexture;
+extern SDL_Texture* whiteFontTexture;
+extern SDL_Texture* metalFontTexture;
+extern SDL_Texture* heartSymbolTexture;
+extern std::vector<SDL_Rect> obstaclesClipRect;
 
 void loadMedia (GameWindow* win);
 
