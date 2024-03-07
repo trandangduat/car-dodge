@@ -6,7 +6,7 @@ bool GameWindow::init() {
         return false;
     }
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if (IMG_Init(imgFlags) & (imgFlags) == 0) {
+    if (!(IMG_Init(imgFlags) & (imgFlags))) {
         std::cout << "IMG_Init failed\n";
         return false;
     }

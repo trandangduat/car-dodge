@@ -8,12 +8,10 @@ Car::Car (GameWindow* gw, float x, float y, float velocity) {
     this->mVisible = true;
 }
 
-void Car::handleEvent (SDL_Event* e) {
-    if (e->type == SDL_MOUSEMOTION) {
-        int x, y;
-        SDL_GetMouseState(&x, &y);
-        moveTo(x - CAR_WIDTH / 2, SCREEN_HEIGHT - 2 * CAR_HEIGHT);
-    }
+void Car::moveWithMouse() {
+    int mX, mY;
+    SDL_GetMouseState(&mX, &mY);
+    moveTo(mX - CAR_WIDTH / 2, SCREEN_HEIGHT - 2 * CAR_HEIGHT);
 }
 
 void Car::moveTo (float x, float y) {
@@ -23,19 +21,16 @@ void Car::moveTo (float x, float y) {
     if (x + CAR_WIDTH > SCREEN_WIDTH - ROADSIDE_WIDTH) {
         x = SCREEN_WIDTH - ROADSIDE_WIDTH - CAR_WIDTH;
     }
-    /*
-    if (this->mRect.x < x) {
-        this->mTiltedAngle = std::min(7.0, atan(1.0 * (x - mRect.x) / CAR_HEIGHT) * 180 / PI);
-    }
-    else {
-        this->mTiltedAngle = - std::min(7.0, atan(1.0 * (mRect.x - x) / CAR_HEIGHT) * 180 / PI);
-    }
-    if (fabs(this->mTiltedAngle) < 5) {
-        this->mTiltedAngle = 0;
-    }
-    */
-    this->mRect.x = x;
-    this->mRect.y = y;
+
+    int dx = x - this->mRect.x;
+    int dy = y - this->mRect.y;
+
+    this->mTiltedAngle = atan(MOVEMENT_DELAY * dx / CAR_HEIGHT) * 180 / M_PI;
+    if (this->mTiltedAngle >=  10) this->mTiltedAngle =  10;
+    if (this->mTiltedAngle <= -10) this->mTiltedAngle = -10;
+
+    this->mRect.x += MOVEMENT_DELAY * dx;
+    this->mRect.y += MOVEMENT_DELAY * dy;
 }
 
 void Car::render (SDL_Texture* tex) {

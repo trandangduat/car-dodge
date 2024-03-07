@@ -54,9 +54,12 @@ int main(int agrc, char* argv[]) {
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
-            if (state.isGameOver()) continue;
-            player.handleEvent(&e);
         }
+
+        if (!state.isGameOver()) {
+            player.moveWithMouse();
+        }
+
         //Render
         win.clearRender();
 

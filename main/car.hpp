@@ -8,13 +8,13 @@ private:
     GameWindow* gwin = nullptr;
     SDL_Rect mRect;
     float mVelY;
-    double mTiltedAngle;
+    int mTiltedAngle;
     bool mVisible;
 
 public:
     Car() {};
     Car (GameWindow* gw, float x, float y, float velocity);
-    void handleEvent (SDL_Event* e);
+    void moveWithMouse();
     void moveTo (float x, float y);
     void render (SDL_Texture* tex);
     void setVelY (float velocity);

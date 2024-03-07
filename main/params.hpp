@@ -3,7 +3,7 @@
 
 #define GAME_TITLE "CarDodge"
 
-const double PI = 3.14159265;
+const double MOVEMENT_DELAY = 0.15;
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 600;
 const int ROADSIDE_WIDTH = 90;

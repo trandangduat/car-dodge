@@ -44,5 +44,3 @@ void Obstacle::crash() {
 bool Obstacle::isCrashed() {
     return this->mIsCrashed;
 }
-
-
