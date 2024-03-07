@@ -1,0 +1,16 @@
+format: TÊN - CHỨC NĂNG - THỜI GIAN (giây) / SỐ LƯỢNG - GIÁ
+least -> most useful abilities
+
+TIER 3: 
+	CẢNH BÁO - báo hiệu khi sắp có chướng ngại vật - 5s - 25
+	TĂNG TỐC - tăng tốc độ của xe - 5s - 40
+TIER 2:
+	NAM CHÂM - hút tiền - 7s - 50
+	X2 TIỀN - x2 số tiền ăn được - 7s - 50	
+	x5 ĐẠN - được cho 5 viên đạn, bắn viên đạn đi thẳng, nếu dính sẽ nổ chướng ngại - 5 viên - 75
+
+TIER 1:	
+	TÀNG HÌNH - tàng hình, đi vào chướng ngại vật sẽ không mất mạng - 5s - 100
+	CUỒNG NỘ - các chướng ngại vật tự động nổ ngay sau khi spawn - 7s - 150
+	x10 ĐẠN - được cho 10 viên đạn, bắn viên đạn đi thẳng, nếu dính sẽ nổ chướng ngại - 10 viên - 200
+	x1 MẠNG - thêm 1 mạng sống - ? - 500
