@@ -48,8 +48,6 @@
 		<Unit filename="car.hpp" />
 		<Unit filename="coin.cpp" />
 		<Unit filename="coin.hpp" />
-		<Unit filename="gameover.cpp" />
-		<Unit filename="gameover.hpp" />
 		<Unit filename="gamestate.cpp" />
 		<Unit filename="gamestate.hpp" />
 		<Unit filename="gamewindow.cpp" />

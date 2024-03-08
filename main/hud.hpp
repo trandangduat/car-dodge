@@ -18,6 +18,9 @@ public:
     HUD (GameWindow* gw, GameState* gs);
     void drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, int alignX);
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
+    void renderGameOverScreen();
+    void renderPauseScreen();
+    void drawFadeOverlay (int fadePercentage);
 };
 
 #endif // HUD_HPP

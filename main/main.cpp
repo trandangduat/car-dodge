@@ -7,10 +7,9 @@
 #include "coin.hpp"
 #include "hud.hpp"
 #include "gamestate.hpp"
-#include "gameover.hpp"
 
-SDL_Rect colRanges[NUMBER_OF_COLUMNS];
-int currentColumnVelocityDif[NUMBER_OF_COLUMNS];
+SDL_Rect column[NUMBER_OF_COLUMNS];
+int colVelocity[NUMBER_OF_COLUMNS];
 
 GameWindow win;
 GameState state;
@@ -54,9 +53,23 @@ int main(int agrc, char* argv[]) {
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
+            if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_SPACE:
+                        if (!state.isPausing()) {
+                            std::cout << "pause!\n";
+                            state.pause();
+                        }
+                        else {
+                            std::cout << "unpause!\n";
+                            state.unpause();
+                        }
+                        break;
+                }
+            }
         }
 
-        if (!state.isGameOver()) {
+        if (!state.isPausing() && !state.isGameOver()) {
             player.moveWithMouse();
         }
 
@@ -75,17 +88,23 @@ int main(int agrc, char* argv[]) {
 
 
         if (state.isGameOver()) {
-            renderGameOverScreen(&win, &state, &hud);
+            hud.renderGameOverScreen();
+        }
+
+        if (state.isPausing()) {
+            hud.renderPauseScreen();
         }
 
         win.presentRender();
 
         //Update
-        background.update(frameTimer.elapsedTime() / 1000.f);
-        updateBgVelocity();
-        updateObstacles();
-        updateCoins();
-        state.updateScore(state.currentScore() + background.getVelY() / 60);
+        if (!state.isPausing() && !state.isGameOver()) {
+            background.update(frameTimer.elapsedTime() / 1000.f);
+            updateBgVelocity();
+            updateObstacles();
+            updateCoins();
+            state.updateScore(state.currentScore() + background.getVelY() / 60);
+        }
 
         frameTimer.start();
     }
@@ -96,8 +115,8 @@ int main(int agrc, char* argv[]) {
 void generateColumnRanges() {
     int gap = (SCREEN_WIDTH - OBSTACLE_WIDTH * NUMBER_OF_COLUMNS - 2 * ROADSIDE_WIDTH) / (NUMBER_OF_COLUMNS + 1);
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-        colRanges[i].x = ROADSIDE_WIDTH + OBSTACLE_WIDTH * i + gap * (i + 1);
-        colRanges[i].w = OBSTACLE_WIDTH;
+        column[i].x = ROADSIDE_WIDTH + OBSTACLE_WIDTH * i + gap * (i + 1);
+        column[i].w = OBSTACLE_WIDTH;
     }
 }
 
@@ -143,7 +162,7 @@ void manageObstaclesMovement() {
     // Move obstacles & Remove all obstacles that're off-screen
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
-            X.setPos(colRanges[i].x, X.getPosY() + X.getVelY() * frameTimer.elapsedTime() / 1000.f);
+            X.setPos(column[i].x, X.getPosY() + X.getVelY() * frameTimer.elapsedTime() / 1000.f);
         }
         while (!obstacles[i].empty() && obstacles[i].front().getPosY() >= SCREEN_HEIGHT) {
             obstacles[i].pop_front();
@@ -157,13 +176,13 @@ void generateObstacles() {
             if (rand() % 300) continue;
             if (obstacles[i].empty()) {
                 int randomNumber = rand() % ((state.currentStage() * 60) / 3) + 60;
-                currentColumnVelocityDif[i] = (rand() % 2 ? randomNumber : 0 - randomNumber);
+                colVelocity[i] = (rand() % 2 ? randomNumber : 0 - randomNumber);
             }
             Obstacle newObstacle (
                 &win,
-                colRanges[i].x,
+                column[i].x,
                 -OBSTACLE_HEIGHT,
-                background.getVelY() + currentColumnVelocityDif[i],
+                background.getVelY() + colVelocity[i],
                 obstaclesClipRect[rand() % (int) obstaclesClipRect.size()]
             );
             obstacles[i].push_back(newObstacle);
@@ -202,8 +221,8 @@ void manageCoinsMovement() {
             /*
                 using 'gap' offset to put the coin in the center of the road column
             */
-            float gap = (colRanges[i].w - COIN_WIDTH) / 2;
-            C.setPos(colRanges[i].x + gap, C.posY() + background.getVelY() * frameTimer.elapsedTime() / 1000.f);
+            float gap = (column[i].w - COIN_WIDTH) / 2;
+            C.setPos(column[i].x + gap, C.posY() + background.getVelY() * frameTimer.elapsedTime() / 1000.f);
             C.animate();
         }
         while (!coins[i].empty() && coins[i].front().posY() >= SCREEN_HEIGHT) {
@@ -221,7 +240,7 @@ void generateCoins() {
             float current_y = 0;
             while (numberOfCoins--) {
                 current_y -= COIN_HEIGHT;
-                Coin C(&win, colRanges[i].x, current_y);
+                Coin C(&win, column[i].x, current_y);
                 coins[i].push_back(C);
                 current_y -= gap;
             }

@@ -10,7 +10,16 @@ void GameState::reset() {
     this->lives = NUMBER_OF_LIVES;
     this->coins = 0;
     this->stage = 1;
+    this->paused = 0;
     this->gameOver = 0;
+}
+
+void GameState::pause() {
+    this->paused = 1;
+}
+
+void GameState::unpause() {
+    this->paused = 0;
 }
 
 void GameState::endGame() {
@@ -38,6 +47,10 @@ void GameState::updateStage (int _stage) {
 void GameState::updateCoins (int _coins) {
     if (gameOver) return;
     this->coins = _coins;
+}
+
+bool GameState::isPausing() {
+    return this->paused;
 }
 
 bool GameState::isGameOver() {
