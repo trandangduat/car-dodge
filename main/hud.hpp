@@ -17,9 +17,11 @@ public:
     HUD() {};
     HUD (GameWindow* gw, GameState* gs);
     void drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, int alignX);
+    void drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth, int letterHeight, float SCALE);
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
+    void drawBox (SDL_Texture* tex, SDL_Rect srect, SDL_Rect drect);
     void renderGameOverScreen();
-    void renderPauseScreen();
+    void renderPauseScreen (int t1id, int t2id, int t3id);
     void drawFadeOverlay (int fadePercentage);
 };
 

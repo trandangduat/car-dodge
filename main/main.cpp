@@ -107,7 +107,7 @@ int main(int agrc, char* argv[]) {
         }
 
         if (state.isPausing()) {
-            hud.renderPauseScreen();
+            hud.renderPauseScreen(1, 2, 3);
         }
 
         win.presentRender();

@@ -40,6 +40,8 @@
 			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/lib" />
 			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/lib" />
 		</Linker>
+		<Unit filename="abilities.cpp" />
+		<Unit filename="abilities.hpp" />
 		<Unit filename="assets.cpp" />
 		<Unit filename="assets.hpp" />
 		<Unit filename="background.cpp" />
