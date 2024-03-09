@@ -7,6 +7,7 @@
 #include "coin.hpp"
 #include "hud.hpp"
 #include "gamestate.hpp"
+#include "abilities.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -47,6 +48,20 @@ int main(int agrc, char* argv[]) {
     veloTimer.start();
 
     generateColumnRanges();
+
+    // load abilities
+    for (int i = 0; i < 3; i++) {
+        std::string path = "abilities/tier";
+        path += (char) (i + 1 + '0');
+        path += ".txt";
+        loadAbilities (i, path);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (Ability& A : abils[i]) {
+            std::cout << A.name << '\n' << A.desc << '\n' << "$" << A.coins << "\n\n";
+        }
+    }
 
     bool quit = false;
     SDL_Event e;

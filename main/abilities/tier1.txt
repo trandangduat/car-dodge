@@ -1,0 +1,3 @@
+INVISIBILITY$Makes the player's vehicle invisible, allowing it to pass through obstacles without taking damage$100
+x10 BULLETS$Gives you 10 bullets that explode upon hitting obstacles$200
+EXTRA LIFE$Adds 1 additional life$400
