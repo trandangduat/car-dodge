@@ -7,32 +7,39 @@ HUD::HUD (GameWindow* gw, GameState* gs) {
     this->gstate = gs;
 }
 
-void HUD::drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, int alignX) {
-    /*
-        Get the width, height of the font sprite,
-        then the letter size is the minimum of the two
-    */
+void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int letterWidth, int letterHeight, float SCALE, int alignX) {
     int texW, texH;
     SDL_QueryTexture(tex, nullptr, nullptr, &texW, &texH);
-    int letterSize = std::min(texW, texH);
-    SDL_Rect srect = {0, 0, letterSize, letterSize};
-    SDL_Rect drect = {x, y, (int) (scale * srect.w), (int) (scale * srect.h)};
-    int totalLength = drect.w * int(text.size());
+    int spriteCols = texW / letterWidth;
+    int spriteRows = texH / letterHeight;
+    int scaledLetterWidth = SCALE * letterWidth;
+    int scaledLetterHeight = SCALE * letterHeight;
+
+    float letterSpacing = -3;
+
+    int totalLength = scaledLetterWidth * int(text.size());
     switch (alignX) {
         case HUD_FLOAT_RIGHT:
-            drect.x = SCREEN_WIDTH - x - totalLength;
+            x = SCREEN_WIDTH - x - totalLength;
             break;
         case HUD_FLOAT_CENTER:
-            drect.x = SCREEN_WIDTH / 2 - totalLength / 2;
+            x = SCREEN_WIDTH / 2 - totalLength / 2;
             break;
     }
+
     for (char &c : text) {
         if ('a' <= c && c <= 'z') {
             c += ('A' - 'a');
         }
-        srect.x = int(c - ' ') * srect.w;
-        this->gwin->blit(tex, srect, drect);
-        drect.x += drect.w;
+        int asciiOrder = int(c - ' ');
+        SDL_Rect srect = {
+            (asciiOrder % spriteCols) * letterWidth,
+            (asciiOrder / spriteCols) * letterHeight,
+            letterWidth,
+            letterHeight
+        };
+        this->gwin->blit(tex, srect, {x, y, scaledLetterWidth, scaledLetterHeight});
+        x += scaledLetterWidth + letterSpacing;
     }
 }
 
@@ -43,19 +50,37 @@ void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int
     SDL_QueryTexture(tex, nullptr, nullptr, &texW, &texH);
     int spriteCols = texW / letterWidth;
     int spriteRows = texH / letterHeight;
-    int lineSpacing = 3;
+    int scaledLetterWidth = SCALE * letterWidth;
+    int scaledLetterHeight = SCALE * letterHeight;
 
-    int x = drect.x;
-    int y = drect.y;
-    for (char& c : text) {
-        int asciiOrder = int(c - ' ');
-        SDL_Rect srect = {(asciiOrder % spriteCols) * letterWidth, (asciiOrder / spriteCols) * letterHeight, letterWidth, letterHeight};
-        if (x + SCALE * letterWidth > drect.x + drect.w) {
-            x = drect.x;
-            y += SCALE * letterHeight + lineSpacing;
+    float lineSpacing = -2;
+    float letterSpacing = 0;
+
+    float x = drect.x;
+    float y = drect.y;
+    for (int i = 0; i < (int) text.size(); i++) {
+        std::string word = "";
+        int j;
+        for (j = i; j < (int) text.size(); j++) {
+            word += text[j];
+            if (text[j] == ' ') break;
         }
-        this->gwin->blit(tex, srect, {x, y, SCALE * letterWidth, SCALE * letterHeight});
-        x += SCALE * letterWidth;
+        if (x + scaledLetterWidth * ((int) word.size() - 1) > drect.x + drect.w) {
+            x = drect.x;
+            y += scaledLetterHeight + lineSpacing;
+        }
+        for (char &c : word) {
+            int asciiOrder = int(c - ' ');
+            SDL_Rect srect = {
+                (asciiOrder % spriteCols) * letterWidth,
+                (asciiOrder / spriteCols) * letterHeight,
+                letterWidth,
+                letterHeight
+            };
+            this->gwin->blit(tex, srect, {x, y, scaledLetterWidth, scaledLetterHeight});
+            x += scaledLetterWidth + letterSpacing;
+        }
+        i = j;
     }
 }
 
@@ -78,10 +103,6 @@ void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, floa
     }
 }
 
-void HUD::drawBox (SDL_Texture* tex, SDL_Rect srect, SDL_Rect drect) {
-    this->gwin->blit(tex, srect, drect);
-}
-
 void HUD::drawFadeOverlay (int fadePercentage) {
     /* Draw a 'fadePercentage' opacity black rectangle covering the screen */
     SDL_SetRenderDrawColor(gwin->gRenderer, 0, 0, 0, fadePercentage * 255 / 100);
@@ -92,27 +113,48 @@ void HUD::drawFadeOverlay (int fadePercentage) {
 
 void HUD::renderGameOverScreen() {
     this->drawFadeOverlay(70);
-    this->drawText(metalFontTexture, 0, 80, "GAME OVER", 0.6f, HUD_FLOAT_CENTER);
-    this->drawText(whiteFontTexture, 0, 160, "SCORE", 2, HUD_FLOAT_CENTER);
-    this->drawText(whiteFontTexture, 0, 185, std::to_string(gstate->currentScore()), 4, HUD_FLOAT_CENTER);
+    this->drawText(metalFontTexture, "GAME OVER", 0, 80, 64, 64, 0.6f, HUD_FLOAT_CENTER);
+    this->drawText(whiteFontTexture, "SCORE", 0, 160, 8, 8, 2.0f, HUD_FLOAT_CENTER);
+    this->drawText(whiteFontTexture, std::to_string(gstate->currentScore()), 0, 185, 8, 8, 4.0f, HUD_FLOAT_CENTER);
 }
 
-void HUD::renderPauseScreen (int t1id, int t2id, int t3id) {
-    this->drawFadeOverlay(70);
-    this->drawText(whiteFontTexture, 0, 50, "PAUSED", 3, HUD_FLOAT_CENTER);
-    SDL_SetRenderDrawColor(this->gwin->gRenderer, 255, 255, 255, 255);
+void HUD::renderPauseScreen() {
+    this->drawFadeOverlay(75);
+    this->drawText(whiteFontTexture, "PAUSED", 0, 35, 8, 8, 3.0f, HUD_FLOAT_CENTER);
+}
+
+void HUD::renderStore (int id_tier[]) {
     SDL_Rect box, paraRect;
 
-    box = {50, 100, 400, 150};
-    SDL_RenderDrawRect(this->gwin->gRenderer, &box);
-    this->drawText(whiteFontTexture, 60, 110, abils[0][t1id - 1].name, 2, HUD_FLOAT_LEFT);
-    this->drawText(goldenFontTexture, 60, 110, "#" + std::to_string(abils[0][t1id - 1].coins), 2, HUD_FLOAT_RIGHT);
-    paraRect = {60, 140, 380, 140};
-    this->drawParagraph(abils[0][t1id - 1].desc, paraRect, plainWhiteFontTexture, 16, 16, 0.8f);
+    box = {20, 70, 460, 500};
+    gwin->blit(frameTexture, box);
 
-    box = {50, 250, 400, 150};
-    SDL_RenderDrawRect(this->gwin->gRenderer, &box);
+    int x = 40;
+    int y = 100;
+    for (int i = 0; i < 3; i++) {
+        box = {x, y, 420, 150};
+        SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
+        if (i < 2) {
+            SDL_RenderDrawLine(this->gwin->gRenderer, box.x, box.y + box.h, box.x + box.w, box.y + box.h);
+        }
+//        SDL_RenderDrawRect(this->gwin->gRenderer, &box);
 
-    box = {50, 400, 400, 150};
-    SDL_RenderDrawRect(this->gwin->gRenderer, &box);
+        this->drawText(
+            plainWhiteFontTexture,
+            abils[i][id_tier[i] - 1].name,
+            60, y + 15, 16, 16, 1.2f
+        );
+
+        this->drawText(
+            goldenFontTexture,
+            std::to_string(abils[i][id_tier[i] - 1].coins),
+            60, y + 15, 8, 8, 2.0f,
+            HUD_FLOAT_RIGHT
+        );
+
+        paraRect = {60, y + 40, 380, 90};
+        this->drawParagraph(abils[i][id_tier[i] - 1].desc, paraRect, plainBlackFontTexture, 6, 12, 2);
+
+        y += box.h;
+    }
 }

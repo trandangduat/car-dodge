@@ -1,0 +1,3 @@
+COIN MAGNET$Attracts coins towards your car$50
+DOUBLE COINS$Doubles the amount of coins you collect$50
+x5 BULLETS$Gives you 5 bullets that explode upon hitting obstacles$75

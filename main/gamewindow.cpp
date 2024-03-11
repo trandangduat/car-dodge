@@ -35,7 +35,7 @@ SDL_Texture* GameWindow::loadTexture (std::string path) {
 void GameWindow::blit (SDL_Texture* texture, SDL_Rect clip, SDL_Rect rect) {
     SDL_Rect srect = clip;
     SDL_Rect drect = rect;
-    SDL_RenderCopy(gRenderer, texture, &srect, &drect);
+    SDL_RenderCopyEx(gRenderer, texture, &srect, &drect, 0, nullptr, SDL_FLIP_NONE);
 }
 
 void GameWindow::blit (SDL_Texture* texture, SDL_Rect rect, double angle) {
@@ -44,11 +44,11 @@ void GameWindow::blit (SDL_Texture* texture, SDL_Rect rect, double angle) {
 }
 
 void GameWindow::blit (SDL_Texture* texture, int x, int y, int w, int h) {
-    SDL_Rect dest = {x, y, w, h};
-    if (dest.w == -1 && dest.h == -1) {
-        SDL_QueryTexture(texture, nullptr, nullptr, &dest.w, &dest.h);
+    SDL_Rect drect = {x, y, w, h};
+    if (drect.w == -1 && drect.h == -1) {
+        SDL_QueryTexture(texture, nullptr, nullptr, &drect.w, &drect.h);
     }
-    SDL_RenderCopy(gRenderer, texture, nullptr, &dest);
+    SDL_RenderCopyEx(gRenderer, texture, nullptr, &drect, 0, nullptr, SDL_FLIP_NONE);
 }
 
 void GameWindow::clearRender() {

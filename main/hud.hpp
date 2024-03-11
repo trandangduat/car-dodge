@@ -16,12 +16,12 @@ private:
 public:
     HUD() {};
     HUD (GameWindow* gw, GameState* gs);
-    void drawText (SDL_Texture* tex, float x, float y, std::string text, float scale, int alignX);
-    void drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth, int letterHeight, float SCALE);
+    void drawText (SDL_Texture* tex, std::string text, float x, float y, int letterWidth = 8, int letterHeight = 8, float SCALE = 1, int alignX = HUD_FLOAT_LEFT);
+    void drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth = 8, int letterHeight = 8, float SCALE = 1);
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
-    void drawBox (SDL_Texture* tex, SDL_Rect srect, SDL_Rect drect);
     void renderGameOverScreen();
-    void renderPauseScreen (int t1id, int t2id, int t3id);
+    void renderPauseScreen();
+    void renderStore (int id_tier[]);
     void drawFadeOverlay (int fadePercentage);
 };
 

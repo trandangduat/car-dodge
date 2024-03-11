@@ -97,9 +97,9 @@ int main(int agrc, char* argv[]) {
         player.render(carTexture);
 
 
-        hud.drawText(whiteFontTexture, 30, 30, std::to_string(state.currentScore()), 3, HUD_FLOAT_RIGHT);
-        hud.drawText(goldenFontTexture, 30, 65, std::to_string(state.currentCoins()), 2.5f, HUD_FLOAT_RIGHT);
-        hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2, HUD_FLOAT_LEFT);
+        hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
+        hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
+        hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
 
 
         if (state.isGameOver()) {
@@ -107,7 +107,9 @@ int main(int agrc, char* argv[]) {
         }
 
         if (state.isPausing()) {
-            hud.renderPauseScreen(1, 2, 3);
+            hud.renderPauseScreen();
+            int id_tier[3] = {1, 1, 1};
+            hud.renderStore(id_tier);
         }
 
         win.presentRender();

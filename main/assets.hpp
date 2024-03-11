@@ -10,12 +10,13 @@ extern SDL_Texture* obstacleSpriteTexture;
 extern SDL_Texture* obstacleCrashedSpriteTexture;
 extern SDL_Texture* coinSprite;
 extern SDL_Texture* goldenFontTexture;
+extern SDL_Texture* blueFontTexture;
 extern SDL_Texture* whiteFontTexture;
 extern SDL_Texture* metalFontTexture;
 extern SDL_Texture* plainWhiteFontTexture;
+extern SDL_Texture* plainBlackFontTexture;
 extern SDL_Texture* heartSymbolTexture;
-extern SDL_Texture* GUISprite;
-extern std::vector<SDL_Rect> GUIRect;
+extern SDL_Texture* frameTexture;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 void loadMedia (GameWindow* win);

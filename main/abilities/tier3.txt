@@ -1,0 +1,2 @@
+WARNING SIGNAL$Alerts you when obstacles are approaching$25
+SPEED BOOST$Increases your car's speed$40
