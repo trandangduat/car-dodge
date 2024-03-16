@@ -8,6 +8,7 @@
 #include "hud.hpp"
 #include "gamestate.hpp"
 #include "abilities.hpp"
+#include "button.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -22,6 +23,7 @@ Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
+std::vector<Button>   storeOption;
 
 void generateColumnRanges();
 void updateBgVelocity();
@@ -56,11 +58,14 @@ int main(int agrc, char* argv[]) {
         path += ".txt";
         loadAbilities (i, path);
     }
-
+    // create store buttons
+    int x = 40;
+    int y = 100;
     for (int i = 0; i < 3; i++) {
-        for (Ability& A : abils[i]) {
-            std::cout << A.name << '\n' << A.desc << '\n' << "$" << A.coins << "\n\n";
-        }
+        SDL_Rect box = {x, y, 420, 120};
+        Button newButton (&win, box, nullptr, nullptr, nullptr);
+        storeOption.push_back(newButton);
+        y += box.h;
     }
 
     bool quit = false;
@@ -68,7 +73,7 @@ int main(int agrc, char* argv[]) {
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
-            if (e.type == SDL_KEYDOWN) {
+            else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_SPACE:
                         if (!state.isPausing()) {
@@ -80,6 +85,22 @@ int main(int agrc, char* argv[]) {
                             state.unpause();
                         }
                         break;
+                }
+            }
+            else if (e.type == SDL_MOUSEMOTION) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                for (Button& B : storeOption) {
+                    if (!state.isPausing()) continue;
+                    B.isPointInsideButton(x, y);
+                }
+            }
+            else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                for (Button& B : storeOption) {
+                    if (!state.isPausing()) continue;
+                    if (B.isPointInsideButton(x, y)) B.click();
                 }
             }
         }
@@ -109,7 +130,7 @@ int main(int agrc, char* argv[]) {
         if (state.isPausing()) {
             hud.renderPauseScreen();
             int id_tier[3] = {1, 1, 1};
-            hud.renderStore(id_tier);
+            hud.renderStore(id_tier, storeOption);
         }
 
         win.presentRender();

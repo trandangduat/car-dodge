@@ -3,6 +3,7 @@
 
 #include "gamewindow.hpp"
 #include "gamestate.hpp"
+#include "button.hpp"
 
 #define HUD_FLOAT_LEFT 0
 #define HUD_FLOAT_RIGHT 1
@@ -21,7 +22,7 @@ public:
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
     void renderGameOverScreen();
     void renderPauseScreen();
-    void renderStore (int id_tier[]);
+    void renderStore (int id_tier[], std::vector<Button> &storeOption);
     void drawFadeOverlay (int fadePercentage);
 };
 

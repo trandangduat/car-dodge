@@ -33,7 +33,7 @@ void loadMedia (GameWindow* win) {
     whiteFontTexture                = win->loadTexture("assets/fonts/white.png");
     metalFontTexture                = win->loadTexture("assets/fonts/metal.png");
     plainWhiteFontTexture           = win->loadTexture("assets/fonts/plain_white.png");
-    plainBlackFontTexture           = win->loadTexture("assets/fonts/plain_black.png");
+    plainBlackFontTexture           = win->loadTexture("assets/fonts/plain_black2.png");
     heartSymbolTexture              = win->loadTexture("assets/images/HUD/heart.png");
     frameTexture                    = win->loadTexture("assets/images/HUD/frame2.png");
     clipObstacles();

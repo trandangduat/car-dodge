@@ -15,7 +15,7 @@ void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int le
     int scaledLetterWidth = SCALE * letterWidth;
     int scaledLetterHeight = SCALE * letterHeight;
 
-    float letterSpacing = -3;
+    float letterSpacing = 0;
 
     int totalLength = scaledLetterWidth * int(text.size());
     switch (alignX) {
@@ -53,7 +53,7 @@ void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int
     int scaledLetterWidth = SCALE * letterWidth;
     int scaledLetterHeight = SCALE * letterHeight;
 
-    float lineSpacing = -2;
+    float lineSpacing = 2;
     float letterSpacing = 0;
 
     float x = drect.x;
@@ -70,6 +70,10 @@ void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int
             y += scaledLetterHeight + lineSpacing;
         }
         for (char &c : word) {
+            if (c == ' ') {
+                x += scaledLetterWidth / 2;
+                continue;
+            }
             int asciiOrder = int(c - ' ');
             SDL_Rect srect = {
                 (asciiOrder % spriteCols) * letterWidth,
@@ -123,37 +127,46 @@ void HUD::renderPauseScreen() {
     this->drawText(whiteFontTexture, "PAUSED", 0, 35, 8, 8, 3.0f, HUD_FLOAT_CENTER);
 }
 
-void HUD::renderStore (int id_tier[]) {
+void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption) {
     SDL_Rect box, paraRect;
 
-    box = {20, 70, 460, 500};
+    box = {30, 80, 440, 440};
     gwin->blit(frameTexture, box);
 
     int x = 40;
     int y = 100;
     for (int i = 0; i < 3; i++) {
-        box = {x, y, 420, 150};
+        box = {x, y, 420, 120};
         SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
-        if (i < 2) {
-            SDL_RenderDrawLine(this->gwin->gRenderer, box.x, box.y + box.h, box.x + box.w, box.y + box.h);
+        SDL_RenderDrawLine(this->gwin->gRenderer, box.x, box.y + box.h, box.x + box.w, box.y + box.h);
+        if (storeOption[i].onHover()) {
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
+            SDL_RenderFillRect(this->gwin->gRenderer, &box);
         }
-//        SDL_RenderDrawRect(this->gwin->gRenderer, &box);
-
+        else if (storeOption[i].onClicked()) {
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 177, 127, 57, 255);
+            SDL_RenderFillRect(this->gwin->gRenderer, &box);
+            storeOption[i].disable();
+        }
+        else if (storeOption[i].isDisabled()) {
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 150, 150, 150, 255);
+            SDL_RenderFillRect(this->gwin->gRenderer, &box);
+        }
         this->drawText(
-            plainWhiteFontTexture,
+            plainBlackFontTexture,
             abils[i][id_tier[i] - 1].name,
-            60, y + 15, 16, 16, 1.2f
+            60, y + 15, 8, 16, 2
         );
 
         this->drawText(
-            goldenFontTexture,
+            plainBlackFontTexture,
             std::to_string(abils[i][id_tier[i] - 1].coins),
-            60, y + 15, 8, 8, 2.0f,
+            60, y + 15, 8, 16, 1.3f,
             HUD_FLOAT_RIGHT
         );
 
-        paraRect = {60, y + 40, 380, 90};
-        this->drawParagraph(abils[i][id_tier[i] - 1].desc, paraRect, plainBlackFontTexture, 6, 12, 2);
+        paraRect = {60, y + 50, 380, 90};
+        this->drawParagraph(abils[i][id_tier[i] - 1].desc, paraRect, plainBlackFontTexture, 8, 16, 1);
 
         y += box.h;
     }
