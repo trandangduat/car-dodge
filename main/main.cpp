@@ -16,7 +16,8 @@ int colVelocity[NUMBER_OF_COLUMNS];
 GameWindow win;
 GameState state;
 Timer frameTimer, // timer to get time per frame
-      veloTimer; // timer to change velocity
+      veloTimer, // timer to change velocity
+      storeTimer; // timer to reset store's items
 
 HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures, INIT_VELOCITY);
@@ -24,6 +25,7 @@ Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEI
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
 std::vector<Button>   storeOption;
+int storeItemsId[NUMBER_OF_ITEM_TIER];
 
 void generateColumnRanges();
 void updateBgVelocity();
@@ -48,6 +50,7 @@ int main(int agrc, char* argv[]) {
 
     frameTimer.start();
     veloTimer.start();
+    storeTimer.start();
 
     generateColumnRanges();
 
@@ -58,7 +61,10 @@ int main(int agrc, char* argv[]) {
         path += ".txt";
         loadAbilities (i, path);
     }
-    // create store buttons
+    // init store
+    for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
+        storeItemsId[i] = rand() % (int) abils[i].size() + 1;
+    }
     int x = 40;
     int y = 100;
     for (int i = 0; i < 3; i++) {
@@ -98,9 +104,17 @@ int main(int agrc, char* argv[]) {
             else if (e.type == SDL_MOUSEBUTTONDOWN) {
                 int x, y;
                 SDL_GetMouseState(&x, &y);
+                int tier = 0;
                 for (Button& B : storeOption) {
                     if (!state.isPausing()) continue;
-                    if (B.isPointInsideButton(x, y)) B.click();
+                    if (!B.isDisabled()
+                        && state.currentCoins() >= abils[tier][storeItemsId[tier] - 1].coins
+                        && B.isPointInsideButton(x, y)
+                    ) {
+                        B.click();
+                        activeAbility(&state, tier, storeItemsId[tier]);
+                    }
+                    tier++;
                 }
             }
         }
@@ -111,28 +125,25 @@ int main(int agrc, char* argv[]) {
 
         //Render
         win.clearRender();
+        {
+            background.render();
+            renderCoins();
+            renderObstacles();
+            player.render(carTexture);
 
-        background.render();
-        renderCoins();
-        renderObstacles();
-        player.render(carTexture);
+            hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
+            hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
+            hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
 
+            if (state.isGameOver()) {
+                hud.renderGameOverScreen();
+            }
 
-        hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
-        hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
-        hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
-
-
-        if (state.isGameOver()) {
-            hud.renderGameOverScreen();
+            if (state.isPausing()) {
+                hud.renderPauseScreen();
+                hud.renderStore(storeItemsId, storeOption, &storeTimer);
+            }
         }
-
-        if (state.isPausing()) {
-            hud.renderPauseScreen();
-            int id_tier[3] = {1, 1, 1};
-            hud.renderStore(id_tier, storeOption);
-        }
-
         win.presentRender();
 
         //Update
@@ -142,6 +153,15 @@ int main(int agrc, char* argv[]) {
             updateObstacles();
             updateCoins();
             state.updateScore(state.currentScore() + background.getVelY() / 60);
+        }
+
+        if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
+            std::cout << "store reset!\n";
+            for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
+                storeItemsId[i] = rand() % (int) abils[i].size() + 1;
+                storeOption[i].reset();
+            }
+            storeTimer.start();
         }
 
         frameTimer.start();

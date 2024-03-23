@@ -33,7 +33,7 @@ void Timer::unpause() {
 
 int Timer::elapsedTime() {
     if (this->isPausing) {
-        return this->lastPause - - this->startTime - this->freezeTime;
+        return this->lastPause - this->startTime - this->freezeTime;
     }
     else {
         return (SDL_GetTicks() - this->startTime - this->freezeTime);

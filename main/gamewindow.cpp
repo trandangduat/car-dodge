@@ -10,14 +10,24 @@ bool GameWindow::init() {
         std::cout << "IMG_Init failed\n";
         return false;
     }
-    gWindow = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-    if (gWindow == nullptr) {
+    if (TTF_Init() == -1) {
+        std::cout << "TTF_Init failed\n";
+        return false;
+    }
+    this->gWindow = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    if (this->gWindow == nullptr) {
         std::cout << "SDL_CreateWindow failed\n";
         return false;
     }
-    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (gRenderer == nullptr) {
+    this->gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (this->gRenderer == nullptr) {
         std::cout << "SDL_CreateRenderer failed\n";
+        return false;
+    }
+    this->KarenFat = TTF_OpenFont("assets/fonts/KarenFat.ttf", 28);
+    this->AvenuePixel = TTF_OpenFont("assets/fonts/AvenuePixel.ttf", 28);
+    if (this->KarenFat == nullptr || this->AvenuePixel == nullptr) {
+        std::cout << "Failed to load font " << TTF_GetError() << '\n';
         return false;
     }
     return true;

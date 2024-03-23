@@ -7,6 +7,23 @@ HUD::HUD (GameWindow* gw, GameState* gs) {
     this->gstate = gs;
 }
 
+void HUD::drawTTFText (TTF_Font* font, std::string text, int fontSize, int x, int y, SDL_Color textColor, int alignX, int wrapLength) {
+    TTF_SetFontSize(font, fontSize);
+    SDL_Surface* textSurface = TTF_RenderUTF8_Solid_Wrapped(font, text.c_str(), textColor, wrapLength);
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(this->gwin->gRenderer, textSurface);
+    switch (alignX) {
+        case HUD_FLOAT_RIGHT:
+            x = SCREEN_WIDTH - x - textSurface->w;
+            break;
+        case HUD_FLOAT_CENTER:
+            x = SCREEN_WIDTH / 2 - textSurface->w / 2;
+            break;
+    }
+    SDL_Rect drect = { x, y, textSurface->w, textSurface->h };
+    SDL_FreeSurface(textSurface);
+    this->gwin->blit(tex, drect);
+}
+
 void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int letterWidth, int letterHeight, float SCALE, int alignX) {
     int texW, texH;
     SDL_QueryTexture(tex, nullptr, nullptr, &texW, &texH);
@@ -127,7 +144,7 @@ void HUD::renderPauseScreen() {
     this->drawText(whiteFontTexture, "PAUSED", 0, 35, 8, 8, 3.0f, HUD_FLOAT_CENTER);
 }
 
-void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption) {
+void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer) {
     SDL_Rect box, paraRect;
 
     box = {30, 80, 440, 440};
@@ -149,25 +166,41 @@ void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption) {
             storeOption[i].disable();
         }
         else if (storeOption[i].isDisabled()) {
-            SDL_SetRenderDrawColor(this->gwin->gRenderer, 150, 150, 150, 255);
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 137, 87, 60, 255);
             SDL_RenderFillRect(this->gwin->gRenderer, &box);
         }
-        this->drawText(
-            plainBlackFontTexture,
+        this->drawTTFText(
+            this->gwin->KarenFat,
             abils[i][id_tier[i] - 1].name,
-            60, y + 15, 8, 16, 2
+            32, 60, y + 15,
+            {81, 18, 9, 255}
         );
 
-        this->drawText(
-            plainBlackFontTexture,
+        this->drawTTFText(
+            this->gwin->AvenuePixel,
             std::to_string(abils[i][id_tier[i] - 1].coins),
-            60, y + 15, 8, 16, 1.3f,
+            30, 60, y + 15,
+            {81, 18, 9, 255},
             HUD_FLOAT_RIGHT
         );
 
-        paraRect = {60, y + 50, 380, 90};
-        this->drawParagraph(abils[i][id_tier[i] - 1].desc, paraRect, plainBlackFontTexture, 8, 16, 1);
-
+        paraRect = {60, y + 45, 380, 90};
+        this->drawTTFText(
+            this->gwin->AvenuePixel,
+            abils[i][id_tier[i] - 1].desc,
+            26, 60, y + 45,
+            {0, 0, 0, 255},
+            HUD_FLOAT_LEFT,
+            380
+        );
         y += box.h;
     }
+
+    this->drawTTFText(
+        this->gwin->AvenuePixel,
+        "RESET STORE AFTER: " + std::to_string(STORE_DURATION - 1 - (int) (storeTimer->elapsedTime() / 1000.f)),
+        25, 0, y + 10,
+        {0, 0, 0, 255},
+        HUD_FLOAT_CENTER
+    );
 }

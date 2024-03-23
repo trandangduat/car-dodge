@@ -7,9 +7,11 @@ Ability::Ability (std::string _name, std::string _desc, int _coins, int _id) {
     this->desc = _desc;
     this->coins = _coins;
     this->id = _id;
+    this->isActive = 0;
 }
 
 std::vector<std::vector<Ability>> abils(3);
+std::vector<std::deque<int>> activeAbils(3);
 
 void loadAbilities (int tier, std::string path) {
     std::ifstream file(path);
@@ -45,4 +47,13 @@ void loadAbilities (int tier, std::string path) {
     }
 
     file.close();
+}
+
+void activeAbility (GameState* gState, int tier, int id) {
+    if (!abils[tier][id - 1].isActive) {
+        abils[tier][id - 1].isActive = 1;
+        activeAbils[tier].push_back(id);
+    }
+    abils[tier][id - 1].timer->start();
+    gState->updateCoins(gState->currentCoins() - abils[tier][id - 1].coins);
 }

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1710575883 source:d:\cppgames\car-dodge\main\main.cpp
+1710821642 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"assets.hpp"
@@ -483,7 +483,7 @@
 1709108685 source:d:\cppgames\car-dodge\main\blitter.cpp
 	"blitter.hpp"
 
-1709797019 d:\cppgames\car-dodge\main\gamewindow.hpp
+1710834714 d:\cppgames\car-dodge\main\gamewindow.hpp
 	"params.hpp"
 	<iostream>
 	<deque>
@@ -494,11 +494,12 @@
 	<algorithm>
 	<SDL.h>
 	<SDL_image.h>
+	<SDL_ttf.h>
 
-1710162178 source:d:\cppgames\car-dodge\main\gamewindow.cpp
+1710834704 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
-1709801540 d:\cppgames\car-dodge\main\params.hpp
+1710821280 d:\cppgames\car-dodge\main\params.hpp
 
 1709746048 d:\cppgames\car-dodge\main\background.hpp
 	"gamewindow.hpp"
@@ -506,7 +507,7 @@
 1709746048 source:d:\cppgames\car-dodge\main\background.cpp
 	"background.hpp"
 
-1709746048 source:d:\cppgames\car-dodge\main\timer.cpp
+1710683220 source:d:\cppgames\car-dodge\main\timer.cpp
 	"timer.hpp"
 	<SDL.h>
 
@@ -518,15 +519,16 @@
 1709746048 d:\cppgames\car-dodge\main\logic.hpp
 	<SDL.h>
 
-1710576344 source:d:\cppgames\car-dodge\main\hud.cpp
+1710925370 source:d:\cppgames\car-dodge\main\hud.cpp
 	"hud.hpp"
 	"assets.hpp"
 	"abilities.hpp"
 
-1710572537 d:\cppgames\car-dodge\main\hud.hpp
+1710924499 d:\cppgames\car-dodge\main\hud.hpp
 	"gamewindow.hpp"
 	"gamestate.hpp"
 	"button.hpp"
+	"timer.hpp"
 
 1709909381 source:d:\cppgames\car-dodge\main\gamestate.cpp
 	"gamestate.hpp"
@@ -551,15 +553,17 @@
 1710211764 source:d:\cppgames\car-dodge\main\assets.cpp
 	"assets.hpp"
 
-1709968710 source:d:\cppgames\car-dodge\main\abilities.cpp
+1710818738 source:d:\cppgames\car-dodge\main\abilities.cpp
 	"abilities.hpp"
 	<fstream>
 	<iostream>
 
-1709968697 d:\cppgames\car-dodge\main\abilities.hpp
+1710818661 d:\cppgames\car-dodge\main\abilities.hpp
 	<vector>
+	<deque>
 	<string>
 	"timer.hpp"
+	"gamestate.hpp"
 
 1710572997 d:\cppgames\car-dodge\main\button.hpp
 	"gamewindow.hpp"

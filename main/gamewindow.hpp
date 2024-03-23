@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <SDL.h>
 #include <SDL_image.h>
-
+#include <SDL_ttf.h>
 
 class GameWindow {
 private:
@@ -22,6 +22,8 @@ public:
     GameWindow() {};
     SDL_Window* gWindow = nullptr;
     SDL_Renderer* gRenderer = nullptr;
+    TTF_Font* KarenFat = nullptr;
+    TTF_Font* AvenuePixel = nullptr;
     bool init();
     SDL_Texture* loadTexture (std::string path);
     void blit (SDL_Texture* tex, SDL_Rect clip, SDL_Rect rect);

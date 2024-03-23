@@ -16,5 +16,7 @@ const int NUMBER_OF_COLUMNS = 4;
 const int COIN_WIDTH = 30;
 const int COIN_HEIGHT = 30;
 const int NUMBER_OF_LIVES = 3;
+const int NUMBER_OF_ITEM_TIER = 3;
+const int STORE_DURATION = 5;
 
 #endif // PARAMS_HPP

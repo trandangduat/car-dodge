@@ -4,6 +4,7 @@
 #include "gamewindow.hpp"
 #include "gamestate.hpp"
 #include "button.hpp"
+#include "timer.hpp"
 
 #define HUD_FLOAT_LEFT 0
 #define HUD_FLOAT_RIGHT 1
@@ -17,12 +18,13 @@ private:
 public:
     HUD() {};
     HUD (GameWindow* gw, GameState* gs);
+    void drawTTFText (TTF_Font* font, std::string text, int fontSize, int x, int y, SDL_Color textColor, int alignX = HUD_FLOAT_LEFT, int wrapLength = SCREEN_WIDTH);
     void drawText (SDL_Texture* tex, std::string text, float x, float y, int letterWidth = 8, int letterHeight = 8, float SCALE = 1, int alignX = HUD_FLOAT_LEFT);
     void drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth = 8, int letterHeight = 8, float SCALE = 1);
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
     void renderGameOverScreen();
     void renderPauseScreen();
-    void renderStore (int id_tier[], std::vector<Button> &storeOption);
+    void renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer);
     void drawFadeOverlay (int fadePercentage);
 };
 
