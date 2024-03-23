@@ -2,6 +2,9 @@
 #include <fstream>
 #include <iostream>
 
+std::vector<std::vector<Ability>> abils(3);
+std::vector<std::deque<int>> activeAbils(3);
+
 Ability::Ability (std::string _name, std::string _desc, int _coins, int _duration, int _id) {
     this->name = _name;
     this->desc = _desc;
@@ -12,8 +15,6 @@ Ability::Ability (std::string _name, std::string _desc, int _coins, int _duratio
     this->isActive = 0;
 }
 
-std::vector<std::vector<Ability>> abils(3);
-std::vector<std::deque<int>> activeAbils(3);
 
 void loadAbilities (int tier, std::string path) {
     std::ifstream file(path);

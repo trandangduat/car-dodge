@@ -17,6 +17,7 @@ extern SDL_Texture* plainWhiteFontTexture;
 extern SDL_Texture* plainBlackFontTexture;
 extern SDL_Texture* heartSymbolTexture;
 extern SDL_Texture* frameTexture;
+extern SDL_Texture* bulletTexture;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 void loadMedia (GameWindow* win);

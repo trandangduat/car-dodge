@@ -12,6 +12,7 @@ void GameState::reset() {
     this->stage = 1;
     this->paused = 0;
     this->gameOver = 0;
+    this->bullets = 0;
 }
 
 void GameState::pause() {
@@ -49,26 +50,15 @@ void GameState::updateCoins (int _coins) {
     this->coins = _coins;
 }
 
-bool GameState::isPausing() {
-    return this->paused;
+void GameState::updateBullets (int _bullets) {
+    this->bullets = _bullets;
 }
 
-bool GameState::isGameOver() {
-    return this->gameOver;
-}
+bool GameState::isPausing() { return this->paused; }
+bool GameState::isGameOver() { return this->gameOver; }
 
-int GameState::currentScore() {
-    return this->score;
-}
-
-int GameState::remainLives() {
-    return this->lives;
-}
-
-int GameState::currentCoins() {
-    return this->coins;
-}
-
-int GameState::currentStage() {
-    return this->stage;
-}
+int GameState::currentScore() { return this->score; }
+int GameState::remainLives() { return this->lives; }
+int GameState::currentCoins() { return this->coins; }
+int GameState::currentStage() { return this->stage; }
+int GameState::currentBullets() { return this->bullets; }

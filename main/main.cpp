@@ -9,6 +9,7 @@
 #include "gamestate.hpp"
 #include "abilities.hpp"
 #include "button.hpp"
+#include "bullet.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -24,6 +25,7 @@ Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
+std::deque<Bullet>    firedBullets;
 std::vector<Button>   storeOption;
 int storeItemsId[NUMBER_OF_ITEM_TIER];
 
@@ -104,19 +106,28 @@ int main(int agrc, char* argv[]) {
                 }
             }
             else if (e.type == SDL_MOUSEBUTTONDOWN) {
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                int tier = 0;
-                for (Button& B : storeOption) {
-                    if (!state.isPausing()) continue;
-                    if (!B.isDisabled()
-                        && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
-                        && B.isPointInsideButton(x, y)
-                    ) {
-                        B.click();
-                        activeAbility(&state, tier, storeItemsId[tier]);
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+                switch (e.button.button) {
+                    case SDL_BUTTON_LEFT: {
+                        if (!state.isPausing()) {
+                            Bullet bullet (&win, &state, mouseX - BULLET_WIDTH / 2, player.getPosY());
+                            firedBullets.push_back(bullet);
+                        }
+                        else {
+                            int tier = 0;
+                            for (Button& B : storeOption) {
+                                if (!B.isDisabled()
+                                    && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
+                                    && B.isPointInsideButton(mouseX, mouseY)
+                                ) {
+                                    B.click();
+                                    activeAbility(&state, tier, storeItemsId[tier]);
+                                }
+                                tier++;
+                            }
+                        }
                     }
-                    tier++;
                 }
             }
         }
@@ -132,6 +143,7 @@ int main(int agrc, char* argv[]) {
             renderCoins();
             renderObstacles();
             player.render(carTexture);
+            for (Bullet& B : firedBullets) B.render();
 
             hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
             hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
@@ -156,6 +168,7 @@ int main(int agrc, char* argv[]) {
             updateBgVelocity();
             updateObstacles();
             updateCoins();
+            for (Bullet& B : firedBullets) B.move(frameTimer.elapsedTime() / 1000.f);
             state.updateScore(state.currentScore() + background.getVelY() / 60);
         }
 
