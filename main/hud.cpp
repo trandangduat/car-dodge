@@ -171,23 +171,22 @@ void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* s
         }
         this->drawTTFText(
             this->gwin->KarenFat,
-            abils[i][id_tier[i] - 1].name,
+            abils[i][id_tier[i]].name,
             32, 60, y + 15,
             {81, 18, 9, 255}
         );
 
         this->drawTTFText(
             this->gwin->AvenuePixel,
-            std::to_string(abils[i][id_tier[i] - 1].coins),
+            std::to_string(abils[i][id_tier[i]].coins),
             30, 60, y + 15,
             {81, 18, 9, 255},
             HUD_FLOAT_RIGHT
         );
 
-        paraRect = {60, y + 45, 380, 90};
         this->drawTTFText(
             this->gwin->AvenuePixel,
-            abils[i][id_tier[i] - 1].desc,
+            abils[i][id_tier[i]].desc,
             26, 60, y + 45,
             {0, 0, 0, 255},
             HUD_FLOAT_LEFT,

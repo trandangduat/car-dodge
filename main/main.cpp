@@ -55,7 +55,7 @@ int main(int agrc, char* argv[]) {
     generateColumnRanges();
 
     // load abilities
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
         std::string path = "abilities/tier";
         path += (char) (i + 1 + '0');
         path += ".txt";
@@ -63,7 +63,7 @@ int main(int agrc, char* argv[]) {
     }
     // init store
     for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
-        storeItemsId[i] = rand() % (int) abils[i].size() + 1;
+        storeItemsId[i] = rand() % (int) abils[i].size();
     }
     int x = 40;
     int y = 100;
@@ -73,6 +73,8 @@ int main(int agrc, char* argv[]) {
         storeOption.push_back(newButton);
         y += box.h;
     }
+
+    state.updateCoins(1000); // cheats
 
     bool quit = false;
     SDL_Event e;
@@ -108,7 +110,7 @@ int main(int agrc, char* argv[]) {
                 for (Button& B : storeOption) {
                     if (!state.isPausing()) continue;
                     if (!B.isDisabled()
-                        && state.currentCoins() >= abils[tier][storeItemsId[tier] - 1].coins
+                        && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
                         && B.isPointInsideButton(x, y)
                     ) {
                         B.click();
@@ -135,6 +137,8 @@ int main(int agrc, char* argv[]) {
             hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
             hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
 
+            renderActiveAbilities(&win, &hud);
+
             if (state.isGameOver()) {
                 hud.renderGameOverScreen();
             }
@@ -158,11 +162,13 @@ int main(int agrc, char* argv[]) {
         if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
             std::cout << "store reset!\n";
             for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
-                storeItemsId[i] = rand() % (int) abils[i].size() + 1;
+                storeItemsId[i] = rand() % (int) abils[i].size();
                 storeOption[i].reset();
             }
             storeTimer.start();
         }
+
+        updateActiveAbilities();
 
         frameTimer.start();
     }
