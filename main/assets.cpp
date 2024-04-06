@@ -15,6 +15,7 @@ SDL_Texture* plainBlackFontTexture = nullptr;
 SDL_Texture* heartSymbolTexture = nullptr;
 SDL_Texture* frameTexture = nullptr;
 SDL_Texture* bulletTexture = nullptr;
+SDL_Texture* bulletIcon = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 void clipObstacles();
@@ -37,6 +38,7 @@ void loadMedia (GameWindow* win) {
     heartSymbolTexture              = win->loadTexture("assets/images/HUD/heart.png");
     frameTexture                    = win->loadTexture("assets/images/HUD/frame2.png");
     bulletTexture                   = win->loadTexture("assets/images/bullet.png");
+    bulletIcon                      = win->loadTexture("assets/images/HUD/bullet_hud.png");
     clipObstacles();
 }
 

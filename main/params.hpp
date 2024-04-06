@@ -3,7 +3,7 @@
 
 #define GAME_TITLE "CarDodge"
 
-const double MOVEMENT_DELAY = 0.15; // the more the faster
+const double MOVEMENT_DELAY = 0.15; // the higher the value the faster
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 600;
 const int ROADSIDE_WIDTH = 90;
@@ -18,8 +18,8 @@ const int COIN_HEIGHT = 30;
 const int NUMBER_OF_LIVES = 3;
 const int NUMBER_OF_ITEM_TIER = 3;
 const int STORE_DURATION = 5;
-const int BULLET_WIDTH = 40;
-const int BULLET_HEIGHT = 25;
-const int BULLET_VELOCITY = 8 * 60;
+const int BULLET_WIDTH = 25;
+const int BULLET_HEIGHT = 15;
+const int BULLET_VELOCITY = 12 * 60;
 
 #endif // PARAMS_HPP

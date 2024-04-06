@@ -34,7 +34,8 @@ void updateBgVelocity();
 
 void renderObstacles();
 void updateObstacles();
-void checkCollisionsWithObstacles();
+void checkCollisionsWithPlayer();
+void checkCollisionsWithBullets();
 void manageObstaclesMovement();
 void generateObstacles();
 
@@ -77,6 +78,7 @@ int main(int agrc, char* argv[]) {
     }
 
     state.updateCoins(1000); // cheats
+    state.updateBullets(10);
 
     bool quit = false;
     SDL_Event e;
@@ -111,8 +113,16 @@ int main(int agrc, char* argv[]) {
                 switch (e.button.button) {
                     case SDL_BUTTON_LEFT: {
                         if (!state.isPausing()) {
-                            Bullet bullet (&win, &state, mouseX - BULLET_WIDTH / 2, player.getPosY());
-                            firedBullets.push_back(bullet);
+                            if (state.currentBullets() > 0) {
+                                Bullet bullet (
+                                    &win,
+                                    &state,
+                                    std::max(std::min(mouseX, SCREEN_WIDTH - ROADSIDE_WIDTH), ROADSIDE_WIDTH) - BULLET_WIDTH / 2,
+                                    player.getPosY()
+                                );
+                                firedBullets.push_back(bullet);
+                                state.updateBullets(state.currentBullets() - 1);
+                            }
                         }
                         else {
                             int tier = 0;
@@ -143,11 +153,17 @@ int main(int agrc, char* argv[]) {
             renderCoins();
             renderObstacles();
             player.render(carTexture);
-            for (Bullet& B : firedBullets) B.render();
+            for (Bullet& B : firedBullets) {
+                if (B.getState() != BULLET_EXPLODED) {
+                    B.render();
+                }
+            }
 
             hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
             hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
             hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
+            win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
+            hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
 
             renderActiveAbilities(&win, &hud);
 
@@ -215,13 +231,14 @@ void updateBgVelocity() {
 
 void updateObstacles() {
     if (player.isVisible()) {
-        checkCollisionsWithObstacles();
+        checkCollisionsWithPlayer();
     }
+    checkCollisionsWithBullets();
     manageObstaclesMovement();
     generateObstacles();
 }
 
-void checkCollisionsWithObstacles() {
+void checkCollisionsWithPlayer() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
             if (!X.isCrashed() && checkCollision(player.getRect(), X.getRect())) {
@@ -231,6 +248,30 @@ void checkCollisionsWithObstacles() {
 
                 std::cout << "crashed!\n";
             }
+        }
+    }
+}
+
+void checkCollisionsWithBullets() {
+    for (Bullet& B : firedBullets) {
+        if (B.getState() == BULLET_EXPLODED) continue;
+        bool bulletHitsObstacle = false;
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+            for (Obstacle& X : obstacles[i]) {
+                if (!X.isCrashed() && checkCollision(B.getRect(), X.getRect())) {
+                    X.crash();
+                    X.setVelY(background.getVelY());
+                    bulletHitsObstacle = true;
+                    std::cout << "bullet hits obstacle!";
+                    break;
+                }
+            }
+            if (bulletHitsObstacle) {
+                break;
+            }
+        }
+        if (bulletHitsObstacle) {
+            B.setState(BULLET_EXPLODED);
         }
     }
 }
