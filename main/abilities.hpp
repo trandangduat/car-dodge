@@ -19,9 +19,8 @@ struct Ability {
 };
 
 extern std::vector<std::vector<Ability>> abils;
-extern std::vector<std::deque<int>> activeAbils;
 
-void loadAbilities (int tier, std::string path);
+void loadAbilitiesFromFiles();
 void activeAbility (GameState* gState, int tier, int id);
 void renderActiveAbilities (GameWindow* gWin, HUD* gHud);
 void updateActiveAbilities();

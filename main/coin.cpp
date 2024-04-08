@@ -1,5 +1,7 @@
 #include "coin.hpp"
 
+int COIN_MULTIPLIER = 1;
+
 Coin::Coin (GameWindow* gw, float x, float y) {
     this->gwin = gw;
     this->mRect = {(int) x, (int) y, COIN_WIDTH, COIN_HEIGHT};

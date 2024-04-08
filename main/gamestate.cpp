@@ -35,6 +35,9 @@ void GameState::updateScore (int _score) {
 void GameState::updateLives (int _lives) {
     if (gameOver) return;
     this->lives = _lives;
+    if (this->lives > NUMBER_OF_LIVES) {
+        this->lives = NUMBER_OF_LIVES;
+    }
     if (this->lives == 0) {
         this->endGame();
     }

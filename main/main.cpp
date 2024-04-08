@@ -27,7 +27,7 @@ std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
 std::deque<Bullet>    firedBullets;
 std::vector<Button>   storeOption;
-int storeItemsId[NUMBER_OF_ITEM_TIER];
+int storeItemsId[NUMBER_OF_ABILITY_TIER];
 
 void generateColumnRanges();
 void updateBgVelocity();
@@ -45,6 +45,8 @@ void checkCollisionsWithCoins();
 void manageCoinsMovement();
 void generateCoins();
 
+void useAbilities();
+
 int main(int agrc, char* argv[]) {
     srand(time(nullptr));
 
@@ -56,16 +58,10 @@ int main(int agrc, char* argv[]) {
     storeTimer.start();
 
     generateColumnRanges();
+    loadAbilitiesFromFiles();
 
-    // load abilities
-    for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
-        std::string path = "abilities/tier";
-        path += (char) (i + 1 + '0');
-        path += ".txt";
-        loadAbilities (i, path);
-    }
     // init store
-    for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
+    for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
         storeItemsId[i] = rand() % (int) abils[i].size();
     }
     int x = 40;
@@ -117,7 +113,7 @@ int main(int agrc, char* argv[]) {
                                 Bullet bullet (
                                     &win,
                                     &state,
-                                    std::max(std::min(mouseX, SCREEN_WIDTH - ROADSIDE_WIDTH), ROADSIDE_WIDTH) - BULLET_WIDTH / 2,
+                                    player.getPosX() + BULLET_WIDTH / 2,
                                     player.getPosY()
                                 );
                                 firedBullets.push_back(bullet);
@@ -190,7 +186,7 @@ int main(int agrc, char* argv[]) {
 
         if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
             std::cout << "store reset!\n";
-            for (int i = 0; i < NUMBER_OF_ITEM_TIER; i++) {
+            for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
                 storeItemsId[i] = rand() % (int) abils[i].size();
                 storeOption[i].reset();
             }
@@ -198,6 +194,7 @@ int main(int agrc, char* argv[]) {
         }
 
         updateActiveAbilities();
+        useAbilities();
 
         frameTimer.start();
     }
@@ -230,6 +227,10 @@ void updateBgVelocity() {
 }
 
 void updateObstacles() {
+    /*
+        if the player is invisible then we do not check
+        collisions with the obstacles
+    */
     if (player.isVisible()) {
         checkCollisionsWithPlayer();
     }
@@ -327,7 +328,7 @@ void checkCollisionsWithCoins() {
         for (Coin& C : coins[i]) {
             if (!C.isClaimed() && checkCollision(player.getRect(), C.getRect())) {
                 C.claimed();
-                state.updateCoins(state.currentCoins() + 1);
+                state.updateCoins(state.currentCoins() + COIN_MULTIPLIER);
             }
         }
     }
@@ -361,6 +362,67 @@ void generateCoins() {
                 Coin C(&win, column[i].x, current_y);
                 coins[i].push_back(C);
                 current_y -= gap;
+            }
+        }
+    }
+}
+
+void useAbilities() {
+    for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+        for (Ability& A : abils[tier]) {
+            switch (tier) {
+                case 0:
+                    switch (A.id) {
+                        case 0: // Invisibility
+                            if (A.isActive) {
+                                player.setVisible(false);
+                                SDL_SetTextureAlphaMod(carTexture, 180);
+                            }
+                            else {
+                                player.setVisible(true);
+                                SDL_SetTextureAlphaMod(carTexture, 255);
+                            }
+                            break;
+
+                        case 1: // x10 Bullets
+                            if (A.isActive)
+                                state.updateBullets(state.currentBullets() + 10);
+                            A.isActive = 0;
+                            break;
+
+                        case 2: // Extra Life
+                            if (A.isActive)
+                                state.updateLives(state.remainLives() + 1);
+                            A.isActive = 0;
+                            break;
+                    }
+                    break;
+
+                case 1:
+                    switch (A.id) {
+                        case 0: // Coin Magnet
+                            break;
+                        case 1: // Double Coins
+                            COIN_MULTIPLIER = (A.isActive ? 2 : 1);
+                            break;
+                        case 2: // x5 Bullets
+                            if (A.isActive)
+                                state.updateBullets(state.currentBullets() + 5);
+                            A.isActive = 0;
+                            break;
+                        case 3: // Shrink
+                            break;
+                    }
+                    break;
+
+                case 2:
+                    switch (A.id) {
+                        case 0: // Warning Signal
+                            break;
+                        case 1: // Speed Boost
+                            break;
+                    }
+                    break;
             }
         }
     }
