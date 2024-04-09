@@ -4,12 +4,12 @@ Bullet::Bullet (GameWindow* gw, GameState* gs, int x, int y) {
     this->gWin = gw;
     this->gState = gs;
     this->mRect = {x, y, BULLET_WIDTH, BULLET_HEIGHT};
-    this->mVelY = BULLET_VELOCITY;
+    this->mVelY = - BULLET_VELOCITY;
     this->mState = BULLET_NORMAL;
 }
 
 void Bullet::move (float dTime) {
-    this->mRect.y -= this->mVelY * dTime;
+    this->mRect.y += this->mVelY * dTime;
 }
 
 void Bullet::render() {

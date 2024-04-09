@@ -180,7 +180,9 @@ int main(int agrc, char* argv[]) {
             updateBgVelocity();
             updateObstacles();
             updateCoins();
-            for (Bullet& B : firedBullets) B.move(frameTimer.elapsedTime() / 1000.f);
+            for (Bullet& B : firedBullets) {
+                B.move(frameTimer.elapsedTime() / 1000.f);
+            }
             state.updateScore(state.currentScore() + background.getVelY() / 60);
         }
 
@@ -341,7 +343,18 @@ void manageCoinsMovement() {
                 using 'gap' offset to put the coin in the center of the road column
             */
             float gap = (column[i].w - COIN_WIDTH) / 2;
-            C.setPos(column[i].x + gap, C.posY() + background.getVelY() * frameTimer.elapsedTime() / 1000.f);
+            if (!C.isClaimed() && state.magnetIsEnabled() && abs(C.posY() - player.getPosY()) <= 10) {
+                float dx = player.getPosX() + CAR_WIDTH / 2 - C.posX();
+                C.setPos(
+                    C.posX() + dx * MOVEMENT_DELAY,
+                    player.getPosY()
+                );
+            } else {
+                C.setPos(
+                    column[i].x + gap,
+                    C.posY() + background.getVelY() * frameTimer.elapsedTime() / 1000.f
+                );
+            }
             C.animate();
         }
         while (!coins[i].empty() && coins[i].front().posY() >= SCREEN_HEIGHT) {
@@ -401,15 +414,22 @@ void useAbilities() {
                 case 1:
                     switch (A.id) {
                         case 0: // Coin Magnet
+                            if (A.isActive)
+                                state.updateMagnet(true);
+                            else
+                                state.updateMagnet(false);
                             break;
+
                         case 1: // Double Coins
                             COIN_MULTIPLIER = (A.isActive ? 2 : 1);
                             break;
+
                         case 2: // x5 Bullets
                             if (A.isActive)
                                 state.updateBullets(state.currentBullets() + 5);
                             A.isActive = 0;
                             break;
+
                         case 3: // Shrink
                             break;
                     }

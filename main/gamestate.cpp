@@ -13,6 +13,7 @@ void GameState::reset() {
     this->paused = 0;
     this->gameOver = 0;
     this->bullets = 0;
+    this->magnetEnabled = 0;
 }
 
 void GameState::pause() {
@@ -57,8 +58,13 @@ void GameState::updateBullets (int _bullets) {
     this->bullets = _bullets;
 }
 
+void GameState::updateMagnet (bool state) {
+    this->magnetEnabled = state;
+}
+
 bool GameState::isPausing() { return this->paused; }
 bool GameState::isGameOver() { return this->gameOver; }
+bool GameState::magnetIsEnabled() { return this->magnetEnabled; }
 
 int GameState::currentScore() { return this->score; }
 int GameState::remainLives() { return this->lives; }

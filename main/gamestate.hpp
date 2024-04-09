@@ -6,6 +6,7 @@ private:
     bool gameOver;
     bool paused;
     int score, lives, coins, stage, bullets;
+    bool magnetEnabled;
 
 public:
     GameState();
@@ -17,9 +18,11 @@ public:
     void updateLives (int _lives);
     void updateCoins (int _coins);
     void updateStage (int _stage);
+    void updateMagnet (bool state);
     void updateBullets (int _bullets);
     bool isPausing();
     bool isGameOver();
+    bool magnetIsEnabled();
     int currentScore();
     int remainLives();
     int currentStage();
