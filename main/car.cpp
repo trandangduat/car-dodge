@@ -11,15 +11,15 @@ Car::Car (GameWindow* gw, float x, float y, float velocity) {
 void Car::moveWithMouse() {
     int mX, mY;
     SDL_GetMouseState(&mX, &mY);
-    moveTo(mX - CAR_WIDTH / 2, SCREEN_HEIGHT - 2 * CAR_HEIGHT);
+    moveTo(mX - mRect.w / 2, SCREEN_HEIGHT - 2 * mRect.h);
 }
 
 void Car::moveTo (float x, float y) {
     if (x < ROADSIDE_WIDTH) {
         x = ROADSIDE_WIDTH;
     }
-    if (x + CAR_WIDTH > SCREEN_WIDTH - ROADSIDE_WIDTH) {
-        x = SCREEN_WIDTH - ROADSIDE_WIDTH - CAR_WIDTH;
+    if (x + mRect.w > SCREEN_WIDTH - ROADSIDE_WIDTH) {
+        x = SCREEN_WIDTH - ROADSIDE_WIDTH - mRect.w;
     }
 
     int dx = x - this->mRect.x;
@@ -42,6 +42,10 @@ void Car::setVelY (float velocity) {
 }
 void Car::setVisible (bool state) {
     this->mVisible = state;
+}
+void Car::setScale (float scale) {
+    this->mRect.w = scale * CAR_WIDTH;
+    this->mRect.h = scale * CAR_HEIGHT;
 }
 float Car::getPosX() {
     return this->mRect.x;

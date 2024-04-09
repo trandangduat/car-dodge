@@ -19,6 +19,7 @@ public:
     void render (SDL_Texture* tex);
     void setVelY (float velocity);
     void setVisible (bool state);
+    void setScale (float scale);
     float getPosX();
     float getPosY();
     float getVelY();

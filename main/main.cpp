@@ -344,7 +344,7 @@ void manageCoinsMovement() {
             */
             float gap = (column[i].w - COIN_WIDTH) / 2;
             if (!C.isClaimed() && state.magnetIsEnabled() && abs(C.posY() - player.getPosY()) <= 10) {
-                float dx = player.getPosX() + CAR_WIDTH / 2 - C.posX();
+                float dx = player.getPosX() + player.getRect().w / 2 - C.posX();
                 C.setPos(
                     C.posX() + dx * MOVEMENT_DELAY,
                     player.getPosY()
@@ -431,6 +431,10 @@ void useAbilities() {
                             break;
 
                         case 3: // Shrink
+                            if (A.isActive)
+                                player.setScale(0.75);
+                            else
+                                player.setScale(1);
                             break;
                     }
                     break;
