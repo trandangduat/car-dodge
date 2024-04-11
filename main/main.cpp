@@ -10,6 +10,7 @@
 #include "abilities.hpp"
 #include "button.hpp"
 #include "bullet.hpp"
+#include "vfx.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -23,6 +24,7 @@ Timer frameTimer, // timer to get time per frame
 HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
+VFX speedBoostEffect;
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
 std::deque<Bullet>    firedBullets;
@@ -59,6 +61,8 @@ int main(int agrc, char* argv[]) {
 
     generateColumnRanges();
     loadAbilitiesFromFiles();
+
+    speedBoostEffect = VFX(&win, 0, 0, player.getRect().w - 10, player.getRect().h, gasSmoke, 32, 32);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
@@ -146,6 +150,9 @@ int main(int agrc, char* argv[]) {
         win.clearRender();
         {
             background.render();
+            if (state.speedBoostIsEnabled()) {
+                speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
+            }
             renderCoins();
             renderObstacles();
             player.render(carTexture);
@@ -183,6 +190,16 @@ int main(int agrc, char* argv[]) {
             for (Bullet& B : firedBullets) {
                 B.move(frameTimer.elapsedTime() / 1000.f);
             }
+            if (state.speedBoostIsEnabled()) {
+                speedBoostEffect.animate();
+                speedBoostEffect.mRect.w = player.getRect().w - 10;
+                speedBoostEffect.mRect.h = player.getRect().h;
+                speedBoostEffect.setPos(
+                    player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
+                    player.getPosY() + player.getRect().h - 10
+                );
+            }
+
             state.updateScore(state.currentScore() + background.getVelY() / 60);
         }
 
@@ -343,11 +360,12 @@ void manageCoinsMovement() {
                 using 'gap' offset to put the coin in the center of the road column
             */
             float gap = (column[i].w - COIN_WIDTH) / 2;
-            if (!C.isClaimed() && state.magnetIsEnabled() && abs(C.posY() - player.getPosY()) <= 10) {
+            if (!C.isClaimed() && state.magnetIsEnabled() && abs(C.posY() - player.getPosY()) <= 50) {
                 float dx = player.getPosX() + player.getRect().w / 2 - C.posX();
+                float dy = player.getPosY() - C.posY();
                 C.setPos(
                     C.posX() + dx * MOVEMENT_DELAY,
-                    player.getPosY()
+                    C.posY() + dy * MOVEMENT_DELAY
                 );
             } else {
                 C.setPos(
@@ -444,6 +462,14 @@ void useAbilities() {
                         case 0: // Warning Signal
                             break;
                         case 1: // Speed Boost
+                            if (A.isActive && !state.speedBoostIsEnabled()) {
+                                background.setVelY(background.getVelY() + 5 * 60);
+                                state.updateSpeedBoost(true);
+                            }
+                            else if (!A.isActive && state.speedBoostIsEnabled()) {
+                                background.setVelY(background.getVelY() - 5 * 60);
+                                state.updateSpeedBoost(false);
+                            }
                             break;
                     }
                     break;

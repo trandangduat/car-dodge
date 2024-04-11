@@ -16,6 +16,7 @@ SDL_Texture* heartSymbolTexture = nullptr;
 SDL_Texture* frameTexture = nullptr;
 SDL_Texture* bulletTexture = nullptr;
 SDL_Texture* bulletIcon = nullptr;
+SDL_Texture* gasSmoke = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 void clipObstacles();
@@ -39,6 +40,7 @@ void loadMedia (GameWindow* win) {
     frameTexture                    = win->loadTexture("assets/images/HUD/frame2.png");
     bulletTexture                   = win->loadTexture("assets/images/bullet.png");
     bulletIcon                      = win->loadTexture("assets/images/HUD/bullet_hud.png");
+    gasSmoke                        = win->loadTexture("assets/images/effects/speed_boost.png");
     clipObstacles();
 }
 

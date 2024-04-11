@@ -68,6 +68,8 @@
 		<Unit filename="params.hpp" />
 		<Unit filename="timer.cpp" />
 		<Unit filename="timer.hpp" />
+		<Unit filename="vfx.cpp" />
+		<Unit filename="vfx.hpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

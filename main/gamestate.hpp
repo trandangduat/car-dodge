@@ -7,6 +7,7 @@ private:
     bool paused;
     int score, lives, coins, stage, bullets;
     bool magnetEnabled;
+    bool speedBoostEnabled;
 
 public:
     GameState();
@@ -20,9 +21,11 @@ public:
     void updateStage (int _stage);
     void updateMagnet (bool state);
     void updateBullets (int _bullets);
+    void updateSpeedBoost (bool state);
     bool isPausing();
     bool isGameOver();
     bool magnetIsEnabled();
+    bool speedBoostIsEnabled();
     int currentScore();
     int remainLives();
     int currentStage();

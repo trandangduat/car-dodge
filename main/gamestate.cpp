@@ -14,6 +14,7 @@ void GameState::reset() {
     this->gameOver = 0;
     this->bullets = 0;
     this->magnetEnabled = 0;
+    this->speedBoostEnabled = 0;
 }
 
 void GameState::pause() {
@@ -62,9 +63,14 @@ void GameState::updateMagnet (bool state) {
     this->magnetEnabled = state;
 }
 
+void GameState::updateSpeedBoost (bool state) {
+    this->speedBoostEnabled = state;
+}
+
 bool GameState::isPausing() { return this->paused; }
 bool GameState::isGameOver() { return this->gameOver; }
 bool GameState::magnetIsEnabled() { return this->magnetEnabled; }
+bool GameState::speedBoostIsEnabled() { return this->speedBoostEnabled; }
 
 int GameState::currentScore() { return this->score; }
 int GameState::remainLives() { return this->lives; }
