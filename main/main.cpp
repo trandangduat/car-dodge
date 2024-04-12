@@ -82,6 +82,7 @@ int main(int agrc, char* argv[]) {
 
     bool quit = false;
     SDL_Event e;
+    std::deque<std::pair<int, int>> abilitiesToActive;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) quit = true;
@@ -132,7 +133,8 @@ int main(int agrc, char* argv[]) {
                                     && B.isPointInsideButton(mouseX, mouseY)
                                 ) {
                                     B.click();
-                                    activeAbility(&state, tier, storeItemsId[tier]);
+                                    abilitiesToActive.push_back({tier, storeItemsId[tier]});
+//                                    activeAbility(&state, tier, storeItemsId[tier]);
                                 }
                                 tier++;
                             }
@@ -144,6 +146,24 @@ int main(int agrc, char* argv[]) {
 
         if (!state.isPausing() && !state.isGameOver()) {
             player.moveWithMouse();
+            while (!abilitiesToActive.empty()) {
+                int tier = abilitiesToActive.front().first;
+                int id   = abilitiesToActive.front().second;
+                activeAbility(&state, tier, id);
+                abilitiesToActive.pop_front();
+            }
+            for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+                for (Ability& A : abils[tier]) {
+                    if (A.isActive) A.timer->unpause();
+                }
+            }
+        }
+        else if (state.isPausing()) {
+            for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+                for (Ability& A : abils[tier]) {
+                    if (A.isActive) A.timer->pause();
+                }
+            }
         }
 
         //Render
