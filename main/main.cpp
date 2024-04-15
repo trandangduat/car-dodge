@@ -134,7 +134,6 @@ int main(int agrc, char* argv[]) {
                                 ) {
                                     B.click();
                                     abilitiesToActive.push_back({tier, storeItemsId[tier]});
-//                                    activeAbility(&state, tier, storeItemsId[tier]);
                                 }
                                 tier++;
                             }
@@ -252,7 +251,7 @@ void generateColumnRanges() {
 void renderObstacles() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
-            X.render(X.isCrashed() ? obstacleCrashedSpriteTexture : obstacleSpriteTexture);
+            X.render();
         }
     }
 }
@@ -333,11 +332,14 @@ void generateObstacles() {
         if (obstacles[i].empty() || obstacles[i].back().getPosY() > OBSTACLE_HEIGHT) {
             if (rand() % 300) continue;
             if (obstacles[i].empty()) {
-                int randomNumber = rand() % ((state.currentStage() * 60) / 3) + 60;
+                int randomNumber = rand() % ((state.currentStage() * 60) / 4) + 60;
                 colVelocity[i] = (rand() % 2 ? randomNumber : 0 - randomNumber);
             }
             Obstacle newObstacle (
                 &win,
+                obstaclesTexture,
+                obstaclesCrashedTexture,
+                obstaclesCrashedWhiteTexture,
                 column[i].x,
                 -OBSTACLE_HEIGHT,
                 background.getVelY() + colVelocity[i],
@@ -427,7 +429,7 @@ void useAbilities() {
                         case 0: // Invisibility
                             if (A.isActive) {
                                 player.setVisible(false);
-                                SDL_SetTextureAlphaMod(carTexture, 180);
+                                SDL_SetTextureAlphaMod(carTexture, 150);
                             }
                             else {
                                 player.setVisible(true);

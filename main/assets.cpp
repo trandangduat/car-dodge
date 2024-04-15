@@ -3,8 +3,9 @@
 std::vector<SDL_Texture*> backgroundTextures(2, nullptr);
 SDL_Texture* carTexture = nullptr;
 SDL_Texture* carInvisibleTexture = nullptr;
-SDL_Texture* obstacleSpriteTexture = nullptr;
-SDL_Texture* obstacleCrashedSpriteTexture = nullptr;
+SDL_Texture* obstaclesTexture = nullptr;
+SDL_Texture* obstaclesCrashedTexture = nullptr;
+SDL_Texture* obstaclesCrashedWhiteTexture = nullptr;
 SDL_Texture* coinSprite = nullptr;
 SDL_Texture* goldenFontTexture = nullptr;
 SDL_Texture* blueFontTexture = nullptr;
@@ -27,8 +28,9 @@ void loadMedia (GameWindow* win) {
     backgroundTextures[1]           = win->loadTexture("assets/images/road_6.png");
     carTexture                      = win->loadTexture("assets/images/car.png");
     carInvisibleTexture             = win->loadTexture("assets/images/car_invisible.png");
-    obstacleSpriteTexture           = win->loadTexture("assets/images/cars.png");
-    obstacleCrashedSpriteTexture    = win->loadTexture("assets/images/cars_crashed.png");
+    obstaclesTexture                = win->loadTexture("assets/images/cars.png");
+    obstaclesCrashedTexture         = win->loadTexture("assets/images/cars_crashed.png");
+    obstaclesCrashedWhiteTexture    = win->loadTexture("assets/images/cars_crashed_white.png");
     coinSprite                      = win->loadTexture("assets/images/items/coin.png");
     goldenFontTexture               = win->loadTexture("assets/fonts/golden.png");
     blueFontTexture                 = win->loadTexture("assets/fonts/blue.png");

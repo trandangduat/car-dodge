@@ -5,9 +5,9 @@
 
 extern std::vector<SDL_Texture*> backgroundTextures;
 extern SDL_Texture* carTexture;
-extern SDL_Texture* carInvisibleTexture;
-extern SDL_Texture* obstacleSpriteTexture;
-extern SDL_Texture* obstacleCrashedSpriteTexture;
+extern SDL_Texture* obstaclesTexture;
+extern SDL_Texture* obstaclesCrashedTexture;
+extern SDL_Texture* obstaclesCrashedWhiteTexture;
 extern SDL_Texture* coinSprite;
 extern SDL_Texture* goldenFontTexture;
 extern SDL_Texture* blueFontTexture;
