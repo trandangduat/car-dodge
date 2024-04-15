@@ -8,12 +8,20 @@ Bullet::Bullet (GameWindow* gw, GameState* gs, int x, int y) {
     this->mState = BULLET_NORMAL;
 }
 
-void Bullet::move (float dTime) {
-    this->mRect.y += this->mVelY * dTime;
+void Bullet::move (SDL_Point target, float dTime) {
+    if (target.x == oo || target.y == oo) {
+        this->mRect.y += this->mVelY * dTime;
+        return;
+    }
+    float dx = target.x - this->mRect.x;
+    float dy = target.y - this->mRect.y;
+    float delay = 0.2f;
+    this->mRect.x += dx * delay;
+    this->mRect.y += dy * delay;
 }
 
 void Bullet::render() {
-    this->gWin->blit(bulletTexture, this->mRect, -90);
+    this->gWin->blit(bulletTexture, this->mRect);
 }
 
 SDL_Rect Bullet::getRect() {

@@ -4,6 +4,7 @@
 #include "gamewindow.hpp"
 #include "gamestate.hpp"
 #include "assets.hpp"
+#include "timer.hpp"
 
 #define BULLET_NORMAL 0
 #define BULLET_EXPLODED 1
@@ -19,7 +20,7 @@ private:
 public:
     Bullet() {};
     Bullet (GameWindow* gw, GameState* gs, int x, int y);
-    void move (float dTime);
+    void move (SDL_Point target, float dTime);
     void render();
     SDL_Rect getRect();
     void setState (int _state);

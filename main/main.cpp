@@ -33,6 +33,7 @@ int storeItemsId[NUMBER_OF_ABILITY_TIER];
 
 void generateColumnRanges();
 void updateBgVelocity();
+SDL_Point getNearestObstacle (float x, float y);
 
 void renderObstacles();
 void updateObstacles();
@@ -46,6 +47,10 @@ void updateCoins();
 void checkCollisionsWithCoins();
 void manageCoinsMovement();
 void generateCoins();
+
+void renderBullets();
+void updateBullets();
+void generateBullet();
 
 void useAbilities();
 
@@ -77,8 +82,8 @@ int main(int agrc, char* argv[]) {
         y += box.h;
     }
 
-    state.updateCoins(1000); // cheats
-    state.updateBullets(10);
+    state.updateCoins(9999); // cheats
+    state.updateBullets(999);
 
     bool quit = false;
     SDL_Event e;
@@ -115,13 +120,7 @@ int main(int agrc, char* argv[]) {
                     case SDL_BUTTON_LEFT: {
                         if (!state.isPausing()) {
                             if (state.currentBullets() > 0) {
-                                Bullet bullet (
-                                    &win,
-                                    &state,
-                                    player.getPosX() + BULLET_WIDTH / 2,
-                                    player.getPosY()
-                                );
-                                firedBullets.push_back(bullet);
+                                generateBullet();
                                 state.updateBullets(state.currentBullets() - 1);
                             }
                         }
@@ -175,11 +174,7 @@ int main(int agrc, char* argv[]) {
             renderCoins();
             renderObstacles();
             player.render(carTexture);
-            for (Bullet& B : firedBullets) {
-                if (B.getState() != BULLET_EXPLODED) {
-                    B.render();
-                }
-            }
+            renderBullets();
 
             hud.drawText(whiteFontTexture, std::to_string(state.currentScore()), 30, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
             hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()), 30, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
@@ -206,9 +201,7 @@ int main(int agrc, char* argv[]) {
             updateBgVelocity();
             updateObstacles();
             updateCoins();
-            for (Bullet& B : firedBullets) {
-                B.move(frameTimer.elapsedTime() / 1000.f);
-            }
+            updateBullets();
             if (state.speedBoostIsEnabled()) {
                 speedBoostEffect.animate();
                 speedBoostEffect.mRect.w = player.getRect().w - 10;
@@ -254,6 +247,24 @@ void renderObstacles() {
             X.render();
         }
     }
+}
+
+SDL_Point getNearestObstacle (float x, float y) {
+    SDL_Point ret = {oo, oo};
+    float shortestDistanceSq = oo;
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (Obstacle& O : obstacles[i]) {
+            if (O.isCrashed()) continue;
+
+            float distanceSq = (x - O.getPosX()) * (x - O.getPosX()) + (y - O.getPosY()) * (y - O.getPosY());
+            if (distanceSq < shortestDistanceSq) {
+                ret.x = O.getPosX();
+                ret.y = O.getPosY();
+                shortestDistanceSq = distanceSq;
+            }
+        }
+    }
+    return ret;
 }
 
 void updateBgVelocity() {
@@ -418,6 +429,38 @@ void generateCoins() {
             }
         }
     }
+}
+
+void renderBullets() {
+    for (Bullet& B : firedBullets) {
+        if (B.getState() != BULLET_EXPLODED) {
+            B.render();
+        }
+    }
+}
+
+void updateBullets() {
+    for (Bullet& B : firedBullets) {
+        if (B.getRect().y < 0 || B.getRect().y > SCREEN_HEIGHT) {
+            B.setState(BULLET_EXPLODED);
+            continue;
+        }
+        SDL_Point nearestObstacle = getNearestObstacle(B.getRect().x, B.getRect().y);
+        B.move(nearestObstacle, frameTimer.elapsedTime() / 1000.f);
+    }
+    while (!firedBullets.empty() && firedBullets.back().getState() == BULLET_EXPLODED) {
+        firedBullets.pop_front();
+    }
+}
+
+void generateBullet() {
+    Bullet bullet (
+        &win,
+        &state,
+        player.getPosX() + player.getRect().w / 2 - BULLET_WIDTH / 2,
+        player.getPosY()
+    );
+    firedBullets.push_back(bullet);
 }
 
 void useAbilities() {
