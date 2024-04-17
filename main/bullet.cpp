@@ -6,6 +6,7 @@ Bullet::Bullet (GameWindow* gw, GameState* gs, int x, int y) {
     this->mRect = {x, y, BULLET_WIDTH, BULLET_HEIGHT};
     this->mVelY = - BULLET_VELOCITY;
     this->mState = BULLET_NORMAL;
+    this->mAngle = 0;
 }
 
 void Bullet::move (SDL_Point target, float dTime) {
@@ -15,13 +16,20 @@ void Bullet::move (SDL_Point target, float dTime) {
     }
     float dx = target.x - this->mRect.x;
     float dy = target.y - this->mRect.y;
+    this->mAngle = atan2(fabs(dy), fabs(dx)) / M_PI * 180;
+    if (this->mAngle > 25) {
+        this->mAngle = 25;
+    }
+    if (dx < 0) {
+        this->mAngle = -this->mAngle;
+    }
     float delay = 0.2f;
     this->mRect.x += dx * delay;
     this->mRect.y += dy * delay;
 }
 
 void Bullet::render() {
-    this->gWin->blit(bulletTexture, this->mRect);
+    this->gWin->blit(bulletTexture, this->mRect, this->mAngle);
 }
 
 SDL_Rect Bullet::getRect() {

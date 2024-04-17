@@ -48,6 +48,10 @@ void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int le
         if ('a' <= c && c <= 'z') {
             c += ('A' - 'a');
         }
+        if (c == ' ') {
+            x += scaledLetterWidth / 2 + letterSpacing;
+            continue;
+        }
         int asciiOrder = int(c - ' ');
         SDL_Rect srect = {
             (asciiOrder % spriteCols) * letterWidth,

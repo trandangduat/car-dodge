@@ -19,7 +19,7 @@ const int COIN_HEIGHT = 30;
 const int NUMBER_OF_LIVES = 3;
 const int NUMBER_OF_ABILITY_TIER = 3;
 const int STORE_DURATION = 5;
-const int BULLET_WIDTH = 15;
+const int BULLET_WIDTH = 12;
 const int BULLET_HEIGHT = 25;
 const int BULLET_VELOCITY = 15 * 60;
 

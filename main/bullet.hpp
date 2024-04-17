@@ -16,6 +16,7 @@ private:
     SDL_Rect mRect;
     int mVelY;
     int mState;
+    int mAngle;
 
 public:
     Bullet() {};
