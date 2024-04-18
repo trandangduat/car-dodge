@@ -5,9 +5,9 @@
 
 const double oo = 2e9;
 const double MOVEMENT_DELAY = 0.20; // the higher the value the faster
-const int SCREEN_WIDTH = 500;
+const int SCREEN_WIDTH = 900;
 const int SCREEN_HEIGHT = 600;
-const int ROADSIDE_WIDTH = 90;
+const int ROADSIDE_WIDTH = 290;
 const int CAR_WIDTH = 50;
 const int CAR_HEIGHT = 100;
 const int INIT_VELOCITY = 6 * 60;

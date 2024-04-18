@@ -24,8 +24,7 @@ Timer frameTimer, // timer to get time per frame
 HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
-VFX speedBoostEffect,
-    speedBoostHUD;
+VFX speedBoostEffect;
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -70,16 +69,15 @@ int main(int agrc, char* argv[]) {
     loadAbilitiesFromFiles();
 
     speedBoostEffect    = VFX(&win, 0, 0, player.getRect().w - 10, player.getRect().h, gasSmoke, 32, 32);
-    speedBoostHUD       = VFX(&win, 0, 0, 60, 50, nitroHUD, 32, 32);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
         storeItemsId[i] = rand() % (int) abils[i].size();
     }
-    int x = 40;
+    int x = 100;
     int y = 100;
     for (int i = 0; i < 3; i++) {
-        SDL_Rect box = {x, y, 420, 120};
+        SDL_Rect box = {x, y, SCREEN_WIDTH - x * 2, 120};
         Button newButton (&win, box, nullptr, nullptr, nullptr);
         storeOption.push_back(newButton);
         y += box.h;
@@ -171,29 +169,31 @@ int main(int agrc, char* argv[]) {
         win.clearRender();
         {
             background.render();
-            if (state.speedBoostIsEnabled()) {
-                speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
-            }
             renderCoins();
             renderObstacles();
             player.render(carTexture);
+
+            if (state.speedBoostIsEnabled()) {
+                speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
+            }
             renderBullets();
 
             // LEFT
             hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
-            if (state.speedBoostIsEnabled()) {
-                speedBoostHUD.setPos(30, 55);
-                speedBoostHUD.render(0, SDL_FLIP_NONE);
-            }
-            hud.drawText(
-                state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
-                std::to_string(int(background.getVelY() / 5)),
-                30, 70, 8, 8, 2.5f
-            );
 
             // RIGHT
-            hud.drawText(whiteFontTexture, std::to_string(state.currentScore()) + " $", 17, 30, 8, 8, 3.0f, HUD_FLOAT_RIGHT);
-            hud.drawText(goldenFontTexture, std::to_string(state.currentCoins()) + " #", 20, 65, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
+            hud.drawText(
+                state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
+                std::to_string(state.currentScore()),
+                27, 30, 8, 8, 3.5f,
+                HUD_FLOAT_RIGHT
+            );
+            hud.drawText(
+                goldenFontTexture,
+                std::to_string(state.currentCoins()) + " #",
+                20, 65, 8, 8, 2.5f,
+                HUD_FLOAT_RIGHT
+            );
             win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
             hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
 
@@ -225,7 +225,6 @@ int main(int agrc, char* argv[]) {
                     player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
                     player.getPosY() + player.getRect().h - 10
                 );
-                speedBoostHUD.animate();
             }
 
             state.updateScore(state.currentScore() + background.getVelY() / 60);
@@ -540,9 +539,7 @@ void useAbilities() {
 
                 case 2:
                     switch (A.id) {
-                        case 0: // Warning Signal
-                            break;
-                        case 1: // Speed Boost
+                        case 0: // Speed Boost
                             if (A.isActive && !state.speedBoostIsEnabled()) {
                                 background.setVelY(background.getVelY() + 5 * 60);
                                 state.updateSpeedBoost(true);

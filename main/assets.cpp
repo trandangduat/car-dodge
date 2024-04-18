@@ -16,15 +16,14 @@ SDL_Texture* frameTexture = nullptr;
 SDL_Texture* bulletTexture = nullptr;
 SDL_Texture* bulletIcon = nullptr;
 SDL_Texture* gasSmoke = nullptr;
-SDL_Texture* nitroHUD = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 void clipObstacles();
 
 void loadMedia (GameWindow* win) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-    backgroundTextures[0]           = win->loadTexture("assets/images/road_5.png");
-    backgroundTextures[1]           = win->loadTexture("assets/images/road_6.png");
+    backgroundTextures[0]           = win->loadTexture("assets/images/road_7.png");
+    backgroundTextures[1]           = win->loadTexture("assets/images/road_8.png");
     carTexture                      = win->loadTexture("assets/images/car.png");
     carInvisibleTexture             = win->loadTexture("assets/images/car_invisible.png");
     obstaclesTexture                = win->loadTexture("assets/images/cars.png");
@@ -40,7 +39,6 @@ void loadMedia (GameWindow* win) {
     bulletTexture                   = win->loadTexture("assets/images/items/bullet.png");
     bulletIcon                      = win->loadTexture("assets/images/HUD/bullet_hud.png");
     gasSmoke                        = win->loadTexture("assets/images/effects/speed_boost.png");
-    nitroHUD                        = win->loadTexture("assets/images/effects/nitro_hud.png");
     clipObstacles();
 }
 

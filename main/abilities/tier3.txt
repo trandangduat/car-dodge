@@ -1,2 +1,1 @@
-Warning Signal$Alerts you when obstacles are approaching$25
 Speed Boost$Increases your car's speed$40

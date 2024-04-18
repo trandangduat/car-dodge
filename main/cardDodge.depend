@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1713199694 source:d:\cppgames\car-dodge\main\main.cpp
+1713372832 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"assets.hpp"
@@ -502,7 +502,7 @@
 1711168321 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
-1713196601 d:\cppgames\car-dodge\main\params.hpp
+1713371395 d:\cppgames\car-dodge\main\params.hpp
 
 1709746048 d:\cppgames\car-dodge\main\background.hpp
 	"gamewindow.hpp"
@@ -522,12 +522,12 @@
 1709746048 d:\cppgames\car-dodge\main\logic.hpp
 	<SDL.h>
 
-1713239419 source:d:\cppgames\car-dodge\main\hud.cpp
+1713372662 source:d:\cppgames\car-dodge\main\hud.cpp
 	"hud.hpp"
 	"assets.hpp"
 	"abilities.hpp"
 
-1711168321 d:\cppgames\car-dodge\main\hud.hpp
+1713368311 d:\cppgames\car-dodge\main\hud.hpp
 	"gamewindow.hpp"
 	"gamestate.hpp"
 	"button.hpp"
@@ -546,14 +546,14 @@
 1712594050 source:d:\cppgames\car-dodge\main\coin.cpp
 	"coin.hpp"
 
-1713199043 d:\cppgames\car-dodge\main\assets.hpp
+1713361328 d:\cppgames\car-dodge\main\assets.hpp
 	"gamewindow.hpp"
 
 1709914982 d:\cppgames\car-dodge\main\gameover.hpp
 
 1709914974 source:d:\cppgames\car-dodge\main\gameover.cpp
 
-1713199332 source:d:\cppgames\car-dodge\main\assets.cpp
+1713426936 source:d:\cppgames\car-dodge\main\assets.cpp
 	"assets.hpp"
 
 1712584287 source:d:\cppgames\car-dodge\main\abilities.cpp
@@ -578,7 +578,7 @@
 	"assets.hpp"
 	"timer.hpp"
 
-1713240549 source:d:\cppgames\car-dodge\main\bullet.cpp
+1713360951 source:d:\cppgames\car-dodge\main\bullet.cpp
 	"bullet.hpp"
 
 1712724824 d:\cppgames\car-dodge\main\vfx.hpp

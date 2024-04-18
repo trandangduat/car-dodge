@@ -11,6 +11,7 @@ Bullet::Bullet (GameWindow* gw, GameState* gs, int x, int y) {
 
 void Bullet::move (SDL_Point target, float dTime) {
     if (target.x == oo || target.y == oo) {
+        this->mAngle = 0;
         this->mRect.y += this->mVelY * dTime;
         return;
     }

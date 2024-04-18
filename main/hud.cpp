@@ -29,7 +29,7 @@ void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int le
     SDL_QueryTexture(tex, nullptr, nullptr, &texW, &texH);
     int spriteCols = texW / letterWidth;
     int spriteRows = texH / letterHeight;
-    int scaledLetterWidth = SCALE * letterWidth;
+    int scaledLetterWidth = SCALE * letterWidth * 0.8;
     int scaledLetterHeight = SCALE * letterHeight;
 
     float letterSpacing = 0;
@@ -122,7 +122,7 @@ void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, floa
             break;
     }
     for (int i = 1; i <= NUMBER_OF_LIVES; i++) {
-        srect.x = (i <= gstate->remainLives() ? 0 : srect.w);
+        srect.x = (i <= gstate->remainLives() ? 0 : 1) * srect.w;
         this->gwin->blit(tex, srect, drect);
         drect.x += drect.w + 5;
     }
@@ -151,13 +151,13 @@ void HUD::renderPauseScreen() {
 void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer) {
     SDL_Rect box, paraRect;
 
-    box = {30, 80, 440, 440};
+    box = {100, 80, SCREEN_WIDTH - 100 * 2, 440};
     gwin->blit(frameTexture, box);
 
-    int x = 40;
+    int x = 110;
     int y = 100;
     for (int i = 0; i < 3; i++) {
-        box = {x, y, 420, 120};
+        box = {x, y, SCREEN_WIDTH - x * 2, 120};
         SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
         SDL_RenderDrawLine(this->gwin->gRenderer, box.x, box.y + box.h, box.x + box.w, box.y + box.h);
         if (storeOption[i].onHover()) {
@@ -173,29 +173,36 @@ void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* s
             SDL_SetRenderDrawColor(this->gwin->gRenderer, 137, 87, 60, 255);
             SDL_RenderFillRect(this->gwin->gRenderer, &box);
         }
+        // Ability Name
         this->drawTTFText(
             this->gwin->KarenFat,
             abils[i][id_tier[i]].name,
-            32, 60, y + 15,
+            32,
+            x + 25, y + 15,
             {81, 18, 9, 255}
         );
 
+        // Ability desc
+        this->drawTTFText(
+            this->gwin->AvenuePixel,
+            abils[i][id_tier[i]].desc,
+            26,
+            x + 30, y + 45,
+            {0, 0, 0, 255},
+            HUD_FLOAT_LEFT,
+            SCREEN_WIDTH - 2 * (x + 30)
+        );
+
+        // Ability price
         this->drawTTFText(
             this->gwin->AvenuePixel,
             std::to_string(abils[i][id_tier[i]].coins),
-            30, 60, y + 15,
+            30,
+            x + 25, y + 15,
             {81, 18, 9, 255},
             HUD_FLOAT_RIGHT
         );
 
-        this->drawTTFText(
-            this->gwin->AvenuePixel,
-            abils[i][id_tier[i]].desc,
-            26, 60, y + 45,
-            {0, 0, 0, 255},
-            HUD_FLOAT_LEFT,
-            380
-        );
         y += box.h;
     }
 
