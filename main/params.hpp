@@ -22,6 +22,8 @@ const int STORE_DURATION = 5;
 const int BULLET_WIDTH = 12;
 const int BULLET_HEIGHT = 25;
 const int BULLET_VELOCITY = 15 * 60;
+const int BOSS_WIDTH = 60;
+const int BOSS_HEIGHT = 60;
 
 extern int COIN_MULTIPLIER;
 

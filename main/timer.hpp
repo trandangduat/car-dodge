@@ -13,6 +13,8 @@ public:
     void start();
     void pause();
     void unpause();
+    void reset();
+    bool isPaused();
     int elapsedTime(); // return in miliseconds
 };
 

@@ -11,6 +11,7 @@
 #include "button.hpp"
 #include "bullet.hpp"
 #include "vfx.hpp"
+#include "boss.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -25,6 +26,7 @@ HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
 VFX speedBoostEffect;
+Boss boss             (&win, nullptr);
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -52,6 +54,8 @@ void generateCoins();
 void renderBullets();
 void updateBullets();
 void generateBullet();
+
+void updateAI();
 
 void useAbilities();
 
@@ -177,6 +181,7 @@ int main(int agrc, char* argv[]) {
                 speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
             }
             renderBullets();
+            boss.render();
 
             // LEFT
             hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
@@ -217,6 +222,7 @@ int main(int agrc, char* argv[]) {
             updateObstacles();
             updateCoins();
             updateBullets();
+            updateAI();
             if (state.speedBoostIsEnabled()) {
                 speedBoostEffect.animate();
                 speedBoostEffect.mRect.w = player.getRect().w - 10;
@@ -476,6 +482,14 @@ void generateBullet() {
         player.getPosY()
     );
     firedBullets.push_back(bullet);
+}
+
+void updateAI() {
+    boss.move(player.getPosX(), rand() % 100);
+    boss.animate();
+    if (!boss.isInCoolDown()) {
+        boss.ult();
+    }
 }
 
 void useAbilities() {

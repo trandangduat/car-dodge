@@ -1,12 +1,16 @@
 #include "timer.hpp"
 #include <SDL.h>
 
-Timer::Timer() {
+void Timer::reset() {
     this->startTime = 0;
     this->lastPause = 0;
     this->lastUnpause = 0;
     this->freezeTime = 0;
     this->isPausing = 1;
+}
+
+Timer::Timer() {
+    this->reset();
 }
 
 void Timer::start() {
@@ -29,6 +33,10 @@ void Timer::unpause() {
         this->lastPause = this->lastUnpause;
         this->isPausing = 0;
     }
+}
+
+bool Timer::isPaused() {
+    return this->isPausing;
 }
 
 int Timer::elapsedTime() {

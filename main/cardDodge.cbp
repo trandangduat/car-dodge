@@ -47,6 +47,8 @@
 		<Unit filename="assets.hpp" />
 		<Unit filename="background.cpp" />
 		<Unit filename="background.hpp" />
+		<Unit filename="boss.cpp" />
+		<Unit filename="boss.hpp" />
 		<Unit filename="bullet.cpp" />
 		<Unit filename="bullet.hpp" />
 		<Unit filename="button.hpp" />
