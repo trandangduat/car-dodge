@@ -22,7 +22,7 @@ void loadAbilitiesFromFiles () {
         path += ".txt";
         std::ifstream file(path);
         if (!file.is_open()) {
-            std::cout << "Failed to open: " << path << '\n';
+            std::clog << "Failed to open: " << path << '\n';
             return;
         }
 

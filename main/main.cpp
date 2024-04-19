@@ -105,11 +105,11 @@ int main(int agrc, char* argv[]) {
                 switch (e.key.keysym.sym) {
                     case SDLK_SPACE:
                         if (!state.isPausing()) {
-                            std::cout << "pause!\n";
+                            std::clog << "pause!\n";
                             state.pause();
                         }
                         else {
-                            std::cout << "unpause!\n";
+                            std::clog << "unpause!\n";
                             state.unpause();
                         }
                         break;
@@ -241,7 +241,7 @@ int main(int agrc, char* argv[]) {
         }
 
         if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
-            std::cout << "store reset!\n";
+            std::clog << "store reset!\n";
             for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
                 storeItemsId[i] = rand() % (int) abils[i].size();
                 storeOption[i].reset();
@@ -321,7 +321,7 @@ void checkCollisionsWithPlayer() {
                 X.setVelY(background.getVelY());
                 state.updateLives(state.remainLives() - 1);
 
-                std::cout << "crashed!\n";
+                std::clog << "crashed!\n";
             }
         }
     }
@@ -337,7 +337,7 @@ void checkCollisionsWithBullets() {
                     X.crash();
                     X.setVelY(background.getVelY());
                     bulletHitsObstacle = true;
-                    std::cout << "bullet hits obstacle!";
+                    std::clog << "bullet hits obstacle!";
                     break;
                 }
             }
@@ -521,7 +521,7 @@ void checkCollisionWithBossUltimate() {
     if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
         state.updateLives(state.remainLives() - 1);
         player.getsHitByBossUltimate(true);
-        std::cout << "hit by boss ultimate\n";
+        std::clog << "hit by boss ultimate\n";
     }
 }
 
