@@ -19,10 +19,14 @@ private:
     Timer* mTimer = nullptr;
     Timer* mAnimationTimer = nullptr;
     int mState;
+    int mAnimStage;
+    SDL_RendererFlip mFlip;
+    double mAngle;
 
 public:
     Boss() {};
-    Boss (GameWindow* gw, SDL_Texture* tex);
+    Boss (GameWindow* gw);
+    void updateTexture (SDL_Texture* tex, int sprite_width, int sprite_height);
     void move (int x, int y);
     void animate();
     void ult();

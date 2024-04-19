@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1713511837 source:d:\cppgames\car-dodge\main\main.cpp
+1713516451 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"assets.hpp"
@@ -503,7 +503,7 @@
 1711168321 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
-1713432418 d:\cppgames\car-dodge\main\params.hpp
+1713515712 d:\cppgames\car-dodge\main\params.hpp
 
 1709746048 d:\cppgames\car-dodge\main\background.hpp
 	"gamewindow.hpp"
@@ -547,14 +547,14 @@
 1712594050 source:d:\cppgames\car-dodge\main\coin.cpp
 	"coin.hpp"
 
-1713506775 d:\cppgames\car-dodge\main\assets.hpp
+1713512771 d:\cppgames\car-dodge\main\assets.hpp
 	"gamewindow.hpp"
 
 1709914982 d:\cppgames\car-dodge\main\gameover.hpp
 
 1709914974 source:d:\cppgames\car-dodge\main\gameover.cpp
 
-1713506860 source:d:\cppgames\car-dodge\main\assets.cpp
+1713512765 source:d:\cppgames\car-dodge\main\assets.cpp
 	"assets.hpp"
 
 1712584287 source:d:\cppgames\car-dodge\main\abilities.cpp
@@ -586,13 +586,13 @@
 	"gamewindow.hpp"
 	"timer.hpp"
 
-1713511404 source:d:\cppgames\car-dodge\main\vfx.cpp
+1713512031 source:d:\cppgames\car-dodge\main\vfx.cpp
 	"vfx.hpp"
 
-1713507421 d:\cppgames\car-dodge\main\boss.hpp
+1713516507 d:\cppgames\car-dodge\main\boss.hpp
 	"gamewindow.hpp"
 	"timer.hpp"
 
-1713510995 source:d:\cppgames\car-dodge\main\boss.cpp
+1713517651 source:d:\cppgames\car-dodge\main\boss.cpp
 	"boss.hpp"
 

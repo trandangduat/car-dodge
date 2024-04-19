@@ -27,7 +27,7 @@ Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
 VFX speedBoostEffect,
     bossUltimateFx;
-Boss boss             (&win, nullptr);
+Boss* boss = new Boss(&win);
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -77,6 +77,7 @@ int main(int agrc, char* argv[]) {
 
     speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
     bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
+    boss->updateTexture(bossSprite, 48, 41);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
@@ -488,22 +489,22 @@ void generateBullet() {
 }
 
 void renderAIBoss() {
-    boss.render();
-    if (boss.getState() == BOSS_ULTING) {
+    boss->render();
+    if (boss->getState() == BOSS_ULTING) {
         bossUltimateFx.render(0, SDL_FLIP_NONE);
     }
 }
 
 void updateAIBoss() {
-    boss.animate();
-    boss.move(player.getPosX(), rand() % 100);
-    if (boss.getState() == BOSS_MOVING) {
+    boss->animate();
+    boss->move(player.getPosX(), rand() % 100);
+    if (boss->getState() == BOSS_MOVING) {
         player.getsHitByBossUltimate(false);
     }
-    if (boss.getState() == BOSS_ULTING) {
+    if (boss->getState() == BOSS_ULTING) {
         bossUltimateFx.animate();
-        bossUltimateFx.mRect = boss.getUltRect();
-        boss.ult();
+        bossUltimateFx.mRect = boss->getUltRect();
+        boss->ult();
         checkCollisionWithBossUltimate();
     }
 }
@@ -511,13 +512,13 @@ void updateAIBoss() {
 void checkCollisionWithBossUltimate() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
-            if (!X.isCrashed() && checkCollision(boss.getUltRect(), X.getRect())) {
+            if (!X.isCrashed() && checkCollision(boss->getUltRect(), X.getRect())) {
                 X.crash();
                 X.setVelY(background.getVelY());
             }
         }
     }
-    if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss.getUltRect(), player.getRect())) {
+    if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
         state.updateLives(state.remainLives() - 1);
         player.getsHitByBossUltimate(true);
         std::cout << "hit by boss ultimate\n";
