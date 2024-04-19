@@ -25,7 +25,8 @@ Timer frameTimer, // timer to get time per frame
 HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures, INIT_VELOCITY);
 Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
-VFX speedBoostEffect;
+VFX speedBoostEffect,
+    bossUltimateFx;
 Boss boss             (&win, nullptr);
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
@@ -55,7 +56,8 @@ void renderBullets();
 void updateBullets();
 void generateBullet();
 
-void updateAI();
+void renderAIBoss();
+void updateAIBoss();
 void checkCollisionWithBossUltimate();
 
 void useAbilities();
@@ -73,7 +75,8 @@ int main(int agrc, char* argv[]) {
     generateColumnRanges();
     loadAbilitiesFromFiles();
 
-    speedBoostEffect    = VFX(&win, 0, 0, player.getRect().w - 10, player.getRect().h, gasSmoke, 32, 32);
+    speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
+    bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
@@ -176,13 +179,12 @@ int main(int agrc, char* argv[]) {
             background.render();
             renderCoins();
             renderObstacles();
-            player.render(carTexture);
-
             if (state.speedBoostIsEnabled()) {
                 speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
             }
+            player.render(carTexture);
             renderBullets();
-            boss.render();
+            renderAIBoss();
 
             // LEFT
             hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
@@ -223,10 +225,10 @@ int main(int agrc, char* argv[]) {
             updateObstacles();
             updateCoins();
             updateBullets();
-            updateAI();
+            updateAIBoss();
             if (state.speedBoostIsEnabled()) {
                 speedBoostEffect.animate();
-                speedBoostEffect.mRect.w = player.getRect().w - 10;
+                speedBoostEffect.mRect.w = player.getRect().w;
                 speedBoostEffect.mRect.h = player.getRect().h;
                 speedBoostEffect.setPos(
                     player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
@@ -485,13 +487,22 @@ void generateBullet() {
     firedBullets.push_back(bullet);
 }
 
-void updateAI() {
+void renderAIBoss() {
+    boss.render();
+    if (boss.getState() == BOSS_ULTING) {
+        bossUltimateFx.render(0, SDL_FLIP_NONE);
+    }
+}
+
+void updateAIBoss() {
     boss.animate();
     boss.move(player.getPosX(), rand() % 100);
     if (boss.getState() == BOSS_MOVING) {
         player.getsHitByBossUltimate(false);
     }
     if (boss.getState() == BOSS_ULTING) {
+        bossUltimateFx.animate();
+        bossUltimateFx.mRect = boss.getUltRect();
         boss.ult();
         checkCollisionWithBossUltimate();
     }
@@ -506,7 +517,7 @@ void checkCollisionWithBossUltimate() {
             }
         }
     }
-    if (!player.isGotHitByBossUltimate() && checkCollision(boss.getUltRect(), player.getRect())) {
+    if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss.getUltRect(), player.getRect())) {
         state.updateLives(state.remainLives() - 1);
         player.getsHitByBossUltimate(true);
         std::cout << "hit by boss ultimate\n";

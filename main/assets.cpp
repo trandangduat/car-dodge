@@ -16,6 +16,7 @@ SDL_Texture* frameTexture = nullptr;
 SDL_Texture* bulletTexture = nullptr;
 SDL_Texture* bulletIcon = nullptr;
 SDL_Texture* gasSmoke = nullptr;
+SDL_Texture* bossLaser = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 void clipObstacles();
@@ -39,6 +40,7 @@ void loadMedia (GameWindow* win) {
     bulletTexture                   = win->loadTexture("assets/images/items/bullet.png");
     bulletIcon                      = win->loadTexture("assets/images/HUD/bullet_hud.png");
     gasSmoke                        = win->loadTexture("assets/images/effects/speed_boost.png");
+    bossLaser                       = win->loadTexture("assets/images/effects/laser_beam_sprite.png");
     clipObstacles();
 }
 

@@ -43,12 +43,11 @@ void Boss::move (int x, int y) {
 }
 
 void Boss::animate() {
-
 }
 
 void Boss::ult() {
 //    std::cout << "ULTTTTTT\n";
-    this->mUltimateRect = {this->mRect.x, this->mRect.y + this->mRect.h, this->mRect.w, SCREEN_HEIGHT};
+    this->mUltimateRect = {this->mRect.x, this->mRect.y + this->mRect.h, 0.6 * this->mRect.w, SCREEN_HEIGHT - this->mRect.y};
     if (this->mState == BOSS_ULTING && this->mTimer->elapsedTime() >= 1500) {
         this->mState = BOSS_MOVING;
         this->mTimer->start();
@@ -57,10 +56,10 @@ void Boss::ult() {
 
 void Boss::render() {
     SDL_RenderDrawRect(this->gwin->gRenderer, &this->mRect);
-    if (this->mState == BOSS_ULTING) {
-        SDL_SetRenderDrawColor(this->gwin->gRenderer, 200, 100, 60, 255);
-        SDL_RenderFillRect(this->gwin->gRenderer, &this->mUltimateRect);
-    }
+//    if (this->mState == BOSS_ULTING) {
+//        SDL_SetRenderDrawColor(this->gwin->gRenderer, 0, 0, 0, 255);
+//        SDL_RenderFillRect(this->gwin->gRenderer, &this->mUltimateRect);
+//    }
 }
 
 int Boss::getState() {
