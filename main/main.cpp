@@ -485,9 +485,9 @@ void generateBullet() {
 }
 
 void updateAI() {
-    boss.move(player.getPosX(), rand() % 100);
     boss.animate();
-    if (!boss.isInCoolDown()) {
+    boss.move(player.getPosX(), rand() % 100);
+    if (boss.getState() == BOSS_ULTING) {
         boss.ult();
     }
 }

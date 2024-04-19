@@ -1,6 +1,10 @@
 #ifndef BOSS_HPP
 #define BOSS_HPP
 
+#define BOSS_MOVING 1
+#define BOSS_DELAY 2
+#define BOSS_ULTING 3
+
 #include "gamewindow.hpp"
 #include "timer.hpp"
 
@@ -12,9 +16,9 @@ private:
     SDL_Rect mClip;
     SDL_Rect mUltimateRect;
     SDL_Point destination;
-    Timer* mCooldownTimer = nullptr;
+    Timer* mTimer = nullptr;
     Timer* mAnimationTimer = nullptr;
-    Timer* mUltTimer = nullptr;
+    int mState;
 
 public:
     Boss() {};
@@ -23,7 +27,7 @@ public:
     void animate();
     void ult();
     void render();
-    bool isInCoolDown();
+    int getState();
 };
 
 #endif // BOSS_HPP
