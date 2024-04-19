@@ -66,3 +66,7 @@ void Boss::render() {
 int Boss::getState() {
     return this->mState;
 }
+
+SDL_Rect Boss::getUltRect() {
+    return this->mUltimateRect;
+}

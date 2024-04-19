@@ -56,6 +56,7 @@ void updateBullets();
 void generateBullet();
 
 void updateAI();
+void checkCollisionWithBossUltimate();
 
 void useAbilities();
 
@@ -487,8 +488,28 @@ void generateBullet() {
 void updateAI() {
     boss.animate();
     boss.move(player.getPosX(), rand() % 100);
+    if (boss.getState() == BOSS_MOVING) {
+        player.getsHitByBossUltimate(false);
+    }
     if (boss.getState() == BOSS_ULTING) {
         boss.ult();
+        checkCollisionWithBossUltimate();
+    }
+}
+
+void checkCollisionWithBossUltimate() {
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (Obstacle& X : obstacles[i]) {
+            if (!X.isCrashed() && checkCollision(boss.getUltRect(), X.getRect())) {
+                X.crash();
+                X.setVelY(background.getVelY());
+            }
+        }
+    }
+    if (!player.isGotHitByBossUltimate() && checkCollision(boss.getUltRect(), player.getRect())) {
+        state.updateLives(state.remainLives() - 1);
+        player.getsHitByBossUltimate(true);
+        std::cout << "hit by boss ultimate\n";
     }
 }
 

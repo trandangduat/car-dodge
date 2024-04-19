@@ -6,6 +6,15 @@ Car::Car (GameWindow* gw, float x, float y, float velocity) {
     this->mVelY = velocity;
     this->mTiltedAngle = 0;
     this->mVisible = true;
+    this->mIsHitByBoss = false;
+}
+
+void Car::getsHitByBossUltimate (bool state) {
+    this->mIsHitByBoss = state;
+}
+
+bool Car::isGotHitByBossUltimate() {
+    return this->mIsHitByBoss;
 }
 
 void Car::moveWithMouse() {

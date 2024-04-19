@@ -10,6 +10,7 @@ private:
     float mVelY;
     int mTiltedAngle;
     bool mVisible;
+    bool mIsHitByBoss;
 
 public:
     Car() {};
@@ -25,6 +26,8 @@ public:
     float getVelY();
     SDL_Rect getRect();
     int isVisible();
+    void getsHitByBossUltimate (bool state);
+    bool isGotHitByBossUltimate();
 };
 
 #endif // CAR_HPP

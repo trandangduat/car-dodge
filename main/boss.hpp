@@ -28,6 +28,7 @@ public:
     void ult();
     void render();
     int getState();
+    SDL_Rect getUltRect();
 };
 
 #endif // BOSS_HPP
