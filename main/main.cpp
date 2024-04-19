@@ -77,7 +77,7 @@ int main(int agrc, char* argv[]) {
 
     speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
     bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
-    boss->updateTexture(bossSprite, 48, 41);
+    boss->updateTexture(bossSprite, bossNearUltingSprite, 48, 41);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {

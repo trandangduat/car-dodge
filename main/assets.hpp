@@ -20,6 +20,7 @@ extern SDL_Texture* bulletIcon;
 extern SDL_Texture* gasSmoke;
 extern SDL_Texture* bossLaser;
 extern SDL_Texture* bossSprite;
+extern SDL_Texture* bossNearUltingSprite;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 void loadMedia (GameWindow* win);

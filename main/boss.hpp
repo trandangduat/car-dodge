@@ -12,6 +12,7 @@ class Boss {
 private:
     GameWindow* gwin = nullptr;
     SDL_Texture* mTex = nullptr;
+    SDL_Texture* mNearUltTex = nullptr;
     SDL_Rect mRect;
     SDL_Rect mClip;
     SDL_Rect mUltimateRect;
@@ -26,7 +27,7 @@ private:
 public:
     Boss() {};
     Boss (GameWindow* gw);
-    void updateTexture (SDL_Texture* tex, int sprite_width, int sprite_height);
+    void updateTexture (SDL_Texture* tex, SDL_Texture* nearUltTex, int sprite_width, int sprite_height);
     void move (int x, int y);
     void animate();
     void ult();

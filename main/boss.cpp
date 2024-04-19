@@ -13,8 +13,9 @@ Boss::Boss (GameWindow* gw) {
     this->mAngle = 0;
 }
 
-void Boss::updateTexture (SDL_Texture* tex, int sprite_width, int sprite_height) {
+void Boss::updateTexture (SDL_Texture* tex, SDL_Texture* nearUltTex, int sprite_width, int sprite_height) {
     this->mTex = tex;
+    this->mNearUltTex = nearUltTex;
     this->mClip = {0, 0, sprite_width, sprite_width};
 }
 
@@ -52,7 +53,13 @@ void Boss::move (int x, int y) {
 void Boss::animate() {
     if (this->mAnimationTimer->elapsedTime() >= 100) {
         int textureW, textureH;
-        SDL_QueryTexture(this->mTex, nullptr, nullptr, &textureW, &textureH);
+        SDL_QueryTexture(
+            this->mState == BOSS_MOVING ? this->mTex : this->mNearUltTex,
+            nullptr,
+            nullptr,
+            &textureW,
+            &textureH
+        );
         int spriteStages = textureW / this->mClip.w;
         this->mAnimStage = (this->mAnimStage + 1) % spriteStages;
         this->mClip.x = this->mAnimStage * mClip.w;
@@ -81,7 +88,15 @@ void Boss::render() {
 //        SDL_SetRenderDrawColor(this->gwin->gRenderer, 0, 0, 0, 255);
 //        SDL_RenderFillRect(this->gwin->gRenderer, &this->mUltimateRect);
 //    }
-    SDL_RenderCopyEx(this->gwin->gRenderer, this->mTex, &this->mClip, &this->mRect, this->mAngle, nullptr, this->mFlip);
+    SDL_RenderCopyEx(
+        this->gwin->gRenderer,
+        this->mState == BOSS_MOVING ? this->mTex : this->mNearUltTex,
+        &this->mClip,
+        &this->mRect,
+        this->mAngle,
+        nullptr,
+        this->mFlip
+    );
 }
 
 int Boss::getState() {
