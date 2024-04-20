@@ -34,6 +34,9 @@ std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
 std::deque<Bullet>    firedBullets;
 std::vector<Button>   storeOption;
 int storeItemsId[NUMBER_OF_ABILITY_TIER];
+std::deque<std::pair<int, int>> abilitiesToActive;
+
+bool handleEvent (SDL_Event e);
 
 void generateColumnRanges();
 void updateBgVelocity();
@@ -97,130 +100,89 @@ int main(int agrc, char* argv[]) {
 
     bool quit = false;
     SDL_Event e;
-    std::deque<std::pair<int, int>> abilitiesToActive;
     while (!quit) {
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) quit = true;
-            else if (e.type == SDL_KEYDOWN) {
-                switch (e.key.keysym.sym) {
-                    case SDLK_SPACE:
-                        if (!state.isPausing()) {
-                            std::clog << "pause!\n";
-                            state.pause();
-                        }
-                        else {
-                            std::clog << "unpause!\n";
-                            state.unpause();
-                        }
-                        break;
+        while (SDL_PollEvent(&e)) if (!handleEvent(e)) quit = true;
+
+        switch (state.currentState()) {
+            case GSTATE_STARTMENU:
+                break;
+
+            case GSTATE_PLAYING:
+                player.moveWithMouse();
+                while (!abilitiesToActive.empty()) {
+                    int tier = abilitiesToActive.front().first;
+                    int id   = abilitiesToActive.front().second;
+                    activeAbility(&state, tier, id);
+                    abilitiesToActive.pop_front();
                 }
-            }
-            else if (e.type == SDL_MOUSEMOTION) {
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                for (Button& B : storeOption) {
-                    if (!state.isPausing()) continue;
-                    B.isPointInsideButton(x, y);
-                }
-            }
-            else if (e.type == SDL_MOUSEBUTTONDOWN) {
-                int mouseX, mouseY;
-                SDL_GetMouseState(&mouseX, &mouseY);
-                switch (e.button.button) {
-                    case SDL_BUTTON_LEFT: {
-                        if (!state.isPausing()) {
-                            if (state.currentBullets() > 0) {
-                                generateBullet();
-                                state.updateBullets(state.currentBullets() - 1);
-                            }
-                        }
-                        else {
-                            int tier = 0;
-                            for (Button& B : storeOption) {
-                                if (!B.isDisabled()
-                                    && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
-                                    && B.isPointInsideButton(mouseX, mouseY)
-                                ) {
-                                    B.click();
-                                    abilitiesToActive.push_back({tier, storeItemsId[tier]});
-                                }
-                                tier++;
-                            }
-                        }
+                for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+                    for (Ability& A : abils[tier]) {
+                        if (A.isActive) A.timer->unpause();
                     }
                 }
-            }
-        }
+                break;
 
-        if (!state.isPausing() && !state.isGameOver()) {
-            player.moveWithMouse();
-            while (!abilitiesToActive.empty()) {
-                int tier = abilitiesToActive.front().first;
-                int id   = abilitiesToActive.front().second;
-                activeAbility(&state, tier, id);
-                abilitiesToActive.pop_front();
-            }
-            for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
-                for (Ability& A : abils[tier]) {
-                    if (A.isActive) A.timer->unpause();
+            case GSTATE_PAUSING:
+                for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+                    for (Ability& A : abils[tier])
+                        if (A.isActive) A.timer->pause();
                 }
-            }
-        }
-        else if (state.isPausing()) {
-            for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
-                for (Ability& A : abils[tier]) {
-                    if (A.isActive) A.timer->pause();
-                }
-            }
+                break;
+
+            case GSTATE_GAMEOVER:
+                break;
         }
 
         //Render
         win.clearRender();
-        {
-            background.render();
-            renderCoins();
-            renderObstacles();
-            if (state.speedBoostIsEnabled()) {
-                speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
+            switch (state.currentState()) {
+                case GSTATE_STARTMENU:
+                    background.render();
+                    win.blit(gameTitle, 0, 0);
+                    break;
+
+                default: {
+                    background.render();
+                    renderCoins();
+                    renderObstacles();
+                    if (state.speedBoostIsEnabled()) {
+                        speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
+                    }
+                    player.render(carTexture);
+                    renderBullets();
+                    renderAIBoss();
+                    // LEFT HUD
+                    hud.drawHearts(heartSymbolTexture, 30, 30, state.currentLives(), 2.0f, HUD_FLOAT_LEFT);
+                    // RIGHT HUD
+                    hud.drawText(
+                        state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
+                        std::to_string(state.currentScore()),
+                        27, 30, 8, 8, 3.5f,
+                        HUD_FLOAT_RIGHT
+                    );
+                    hud.drawText(
+                        goldenFontTexture,
+                        std::to_string(state.currentCoins()) + " #",
+                        20, 65, 8, 8, 2.5f,
+                        HUD_FLOAT_RIGHT
+                    );
+                    win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
+                    hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
+                    renderActiveAbilities(&win, &hud);
+                    if (state.currentState() == GSTATE_PAUSING) {
+                        hud.renderPauseScreen();
+                        hud.renderStore(storeItemsId, storeOption, &storeTimer);
+                    }
+
+                    if (state.currentState() == GSTATE_GAMEOVER) {
+                        hud.renderGameOverScreen();
+                    }
+                }
             }
-            player.render(carTexture);
-            renderBullets();
-            renderAIBoss();
-
-            // LEFT
-            hud.drawHearts(heartSymbolTexture, 30, 30, state.remainLives(), 2.0f, HUD_FLOAT_LEFT);
-
-            // RIGHT
-            hud.drawText(
-                state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
-                std::to_string(state.currentScore()),
-                27, 30, 8, 8, 3.5f,
-                HUD_FLOAT_RIGHT
-            );
-            hud.drawText(
-                goldenFontTexture,
-                std::to_string(state.currentCoins()) + " #",
-                20, 65, 8, 8, 2.5f,
-                HUD_FLOAT_RIGHT
-            );
-            win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
-            hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
-
-            renderActiveAbilities(&win, &hud);
-
-            if (state.isGameOver()) {
-                hud.renderGameOverScreen();
-            }
-
-            if (state.isPausing()) {
-                hud.renderPauseScreen();
-                hud.renderStore(storeItemsId, storeOption, &storeTimer);
-            }
-        }
         win.presentRender();
 
         //Update
-        if (!state.isPausing() && !state.isGameOver()) {
+        if (state.currentState() == GSTATE_PLAYING) {
             background.update(frameTimer.elapsedTime() / 1000.f);
             updateBgVelocity();
             updateObstacles();
@@ -256,6 +218,89 @@ int main(int agrc, char* argv[]) {
     }
 
     return 0;
+}
+
+bool handleEvent (SDL_Event e) {
+    if (e.type == SDL_QUIT) return false;
+    switch (state.currentState()) {
+        case GSTATE_STARTMENU: {
+            break;
+        }
+        case GSTATE_PLAYING: {
+            switch (e.type) {
+                case SDL_KEYDOWN: {
+                    switch (e.key.keysym.sym) {
+                        case SDLK_SPACE:
+                            state.updateState(GSTATE_PAUSING);
+                            std::clog << "Pause!\n";
+                            break;
+                    }
+                    break;
+                }
+                case SDL_MOUSEBUTTONDOWN: {
+                    int mouseX, mouseY;
+                    SDL_GetMouseState(&mouseX, &mouseY);
+                    switch (e.button.button) {
+                        case SDL_BUTTON_LEFT: {
+                            if (state.currentBullets() > 0) {
+                                generateBullet();
+                                state.updateBullets(state.currentBullets() - 1);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case GSTATE_PAUSING: {
+            switch (e.type) {
+                case SDL_KEYDOWN: {
+                    switch (e.key.keysym.sym) {
+                        case SDLK_SPACE:
+                            state.updateState(GSTATE_PLAYING);
+                            std::clog << "Unpause!\n";
+                            break;
+                    }
+                    break;
+                }
+                case SDL_MOUSEMOTION: {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    for (Button& B : storeOption) {
+                        B.isPointInsideButton(x, y);
+                    }
+                    break;
+                }
+                case SDL_MOUSEBUTTONDOWN: {
+                    int mouseX, mouseY;
+                    SDL_GetMouseState(&mouseX, &mouseY);
+                    switch (e.button.button) {
+                        case SDL_BUTTON_LEFT: {
+                            int tier = 0;
+                            for (Button& B : storeOption) {
+                                if (!B.isDisabled()
+                                    && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
+                                    && B.isPointInsideButton(mouseX, mouseY)
+                                ) {
+                                    B.click();
+                                    abilitiesToActive.push_back({tier, storeItemsId[tier]});
+                                }
+                                tier++;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case GSTATE_GAMEOVER: {
+            break;
+        }
+    }
+    return true;
 }
 
 void generateColumnRanges() {
@@ -319,7 +364,7 @@ void checkCollisionsWithPlayer() {
             if (!X.isCrashed() && checkCollision(player.getRect(), X.getRect())) {
                 X.crash();
                 X.setVelY(background.getVelY());
-                state.updateLives(state.remainLives() - 1);
+                state.updateLives(state.currentLives() - 1);
 
                 std::clog << "crashed!\n";
             }
@@ -519,7 +564,7 @@ void checkCollisionWithBossUltimate() {
         }
     }
     if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
-        state.updateLives(state.remainLives() - 1);
+        state.updateLives(state.currentLives() - 1);
         player.getsHitByBossUltimate(true);
         std::clog << "hit by boss ultimate\n";
     }
@@ -550,7 +595,7 @@ void useAbilities() {
 
                         case 2: // Extra Life
                             if (A.isActive)
-                                state.updateLives(state.remainLives() + 1);
+                                state.updateLives(state.currentLives() + 1);
                             A.isActive = 0;
                             break;
                     }

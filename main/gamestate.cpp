@@ -6,52 +6,43 @@ GameState::GameState() {
 }
 
 void GameState::reset() {
+    this->gstate = GSTATE_PLAYING;
     this->score = 0;
     this->lives = NUMBER_OF_LIVES;
     this->coins = 0;
     this->stage = 1;
-    this->paused = 0;
-    this->gameOver = 0;
     this->bullets = 0;
     this->magnetEnabled = 0;
     this->speedBoostEnabled = 0;
 }
 
-void GameState::pause() {
-    this->paused = 1;
-}
-
-void GameState::unpause() {
-    this->paused = 0;
-}
-
-void GameState::endGame() {
-    this->gameOver = 1;
+void GameState::updateState (int _state) {
+    this->gstate = _state;
 }
 
 void GameState::updateScore (int _score) {
-    if (gameOver) return;
+    if (this->gstate == GSTATE_GAMEOVER) return;
     this->score = _score;
 }
 
 void GameState::updateLives (int _lives) {
-    if (gameOver) return;
+    if (this->gstate == GSTATE_GAMEOVER) return;
     this->lives = _lives;
     if (this->lives > NUMBER_OF_LIVES) {
         this->lives = NUMBER_OF_LIVES;
     }
     if (this->lives == 0) {
-        this->endGame();
+        this->updateState(GSTATE_GAMEOVER);
     }
 }
 
 void GameState::updateStage (int _stage) {
-    if (gameOver) return;
+    if (this->gstate == GSTATE_GAMEOVER) return;
     this->stage = _stage;
 }
 
 void GameState::updateCoins (int _coins) {
-    if (gameOver) return;
+    if (this->gstate == GSTATE_GAMEOVER) return;
     this->coins = _coins;
 }
 
@@ -67,13 +58,12 @@ void GameState::updateSpeedBoost (bool state) {
     this->speedBoostEnabled = state;
 }
 
-bool GameState::isPausing() { return this->paused; }
-bool GameState::isGameOver() { return this->gameOver; }
 bool GameState::magnetIsEnabled() { return this->magnetEnabled; }
 bool GameState::speedBoostIsEnabled() { return this->speedBoostEnabled; }
 
+int GameState::currentState() { return this->gstate; }
 int GameState::currentScore() { return this->score; }
-int GameState::remainLives() { return this->lives; }
+int GameState::currentLives() { return this->lives; }
 int GameState::currentCoins() { return this->coins; }
 int GameState::currentStage() { return this->stage; }
 int GameState::currentBullets() { return this->bullets; }

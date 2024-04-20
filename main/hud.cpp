@@ -122,7 +122,7 @@ void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, floa
             break;
     }
     for (int i = 1; i <= NUMBER_OF_LIVES; i++) {
-        srect.x = (i <= gstate->remainLives() ? 0 : 1) * srect.w;
+        srect.x = (i <= gstate->currentLives() ? 0 : 1) * srect.w;
         this->gwin->blit(tex, srect, drect);
         drect.x += drect.w + 5;
     }
@@ -158,19 +158,19 @@ void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* s
     int y = 100;
     for (int i = 0; i < 3; i++) {
         box = {x, y, SCREEN_WIDTH - x * 2, 120};
-        SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
+        SDL_SetRenderDrawColor(this->gwin->gRenderer, 217, 98, 98, 100);
         SDL_RenderDrawLine(this->gwin->gRenderer, box.x, box.y + box.h, box.x + box.w, box.y + box.h);
         if (storeOption[i].onHover()) {
-            SDL_SetRenderDrawColor(this->gwin->gRenderer, 222, 159, 71, 255);
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 245, 155, 115, 255);
             SDL_RenderFillRect(this->gwin->gRenderer, &box);
         }
         else if (storeOption[i].onClicked()) {
-            SDL_SetRenderDrawColor(this->gwin->gRenderer, 177, 127, 57, 255);
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 217, 98, 98, 255);
             SDL_RenderFillRect(this->gwin->gRenderer, &box);
             storeOption[i].disable();
         }
         else if (storeOption[i].isDisabled()) {
-            SDL_SetRenderDrawColor(this->gwin->gRenderer, 137, 87, 60, 255);
+            SDL_SetRenderDrawColor(this->gwin->gRenderer, 217, 98, 98, 255);
             SDL_RenderFillRect(this->gwin->gRenderer, &box);
         }
         // Ability Name
@@ -179,18 +179,18 @@ void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* s
             abils[i][id_tier[i]].name,
             32,
             x + 25, y + 15,
-            {81, 18, 9, 255}
+            {166, 45, 45}
         );
 
         // Ability desc
         this->drawTTFText(
             this->gwin->AvenuePixel,
             abils[i][id_tier[i]].desc,
-            26,
-            x + 30, y + 45,
+            28,
+            x + 25, y + 50,
             {0, 0, 0, 255},
             HUD_FLOAT_LEFT,
-            SCREEN_WIDTH - 2 * (x + 30)
+            SCREEN_WIDTH - 2 * (x + 25)
         );
 
         // Ability price

@@ -1,10 +1,14 @@
 #ifndef GAMESTATE_HPP
 #define GAMESTATE_HPP
 
+#define GSTATE_STARTMENU 1
+#define GSTATE_PLAYING   2
+#define GSTATE_PAUSING   3
+#define GSTATE_GAMEOVER  4
+
 class GameState {
 private:
-    bool gameOver;
-    bool paused;
+    int gstate;
     int score, lives, coins, stage, bullets;
     bool magnetEnabled;
     bool speedBoostEnabled;
@@ -12,9 +16,7 @@ private:
 public:
     GameState();
     void reset();
-    void pause();
-    void unpause();
-    void endGame();
+    void updateState (int _state);
     void updateScore (int _score);
     void updateLives (int _lives);
     void updateCoins (int _coins);
@@ -22,12 +24,11 @@ public:
     void updateMagnet (bool state);
     void updateBullets (int _bullets);
     void updateSpeedBoost (bool state);
-    bool isPausing();
-    bool isGameOver();
     bool magnetIsEnabled();
     bool speedBoostIsEnabled();
+    int currentState();
     int currentScore();
-    int remainLives();
+    int currentLives();
     int currentStage();
     int currentCoins();
     int currentBullets();
