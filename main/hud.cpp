@@ -139,8 +139,10 @@ void HUD::drawFadeOverlay (int fadePercentage) {
 void HUD::renderGameOverScreen() {
     this->drawFadeOverlay(70);
     this->drawText(metalFontTexture, "GAME OVER", 0, 80, 64, 64, 0.6f, HUD_FLOAT_CENTER);
-    this->drawText(whiteFontTexture, "SCORE", 0, 160, 8, 8, 2.0f, HUD_FLOAT_CENTER);
-    this->drawText(whiteFontTexture, std::to_string(gstate->currentScore()), 0, 185, 8, 8, 4.0f, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, "SCORE", 30, 0, 160, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentScore()), 40, 0, 185, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, "HIGHSCORE", 30, 0, 250, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentHighscore()), 40, 0, 275, {255, 255, 255}, HUD_FLOAT_CENTER);
 }
 
 void HUD::renderPauseScreen() {
