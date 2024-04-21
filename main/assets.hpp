@@ -22,6 +22,8 @@ extern SDL_Texture* bossLaser;
 extern SDL_Texture* bossSprite;
 extern SDL_Texture* bossNearUltingSprite;
 extern SDL_Texture* gameTitle;
+extern SDL_Texture* playButtonSprite;
+extern SDL_Texture* homeButtonSprite;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 void loadMedia (GameWindow* win);

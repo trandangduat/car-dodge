@@ -2,11 +2,11 @@
 #include "params.hpp"
 
 GameState::GameState() {
+    this->gstate = GSTATE_STARTMENU;
     reset();
 }
 
 void GameState::reset() {
-    this->gstate = GSTATE_PLAYING;
     this->score = 0;
     this->lives = NUMBER_OF_LIVES;
     this->coins = 0;

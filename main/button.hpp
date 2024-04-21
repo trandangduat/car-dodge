@@ -3,25 +3,23 @@
 
 #include "gamewindow.hpp"
 
-enum {
-    BUTTON_NORMAL,
-    BUTTON_HOVER,
-    BUTTON_CLICKED,
-    BUTTON_DISABLED,
-};
+#define BUTTON_NORMAL 0
+#define BUTTON_HOVER 1
+#define BUTTON_CLICKED 2
+#define BUTTON_DISABLED 3
 
 class Button {
 private:
     SDL_Rect mRect;
+    SDL_Rect mClip;
     GameWindow* gwin;
-    SDL_Texture* mNormal = nullptr;
-    SDL_Texture* mHover = nullptr;
-    SDL_Texture* mClicked = nullptr;
+    SDL_Texture* mTex = nullptr;
     int mState;
 public:
     Button() {};
-    Button (GameWindow* win, SDL_Rect rect, SDL_Texture* normalTex, SDL_Texture* hoverTex, SDL_Texture* clickedTex);
-    bool isPointInsideButton (int x, int y);
+    Button (GameWindow* win, SDL_Rect rect);
+    void updateTexture (SDL_Texture* tex, int source_button_width, int source_button_height);
+    bool isOnHoverByPoint (int x, int y);
     bool isDisabled();
     bool onHover();
     bool onClicked();

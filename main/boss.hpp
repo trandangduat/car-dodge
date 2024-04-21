@@ -27,6 +27,7 @@ private:
 public:
     Boss() {};
     Boss (GameWindow* gw);
+    void reset();
     void updateTexture (SDL_Texture* tex, SDL_Texture* nearUltTex, int sprite_width, int sprite_height);
     void move (int x, int y);
     void animate();

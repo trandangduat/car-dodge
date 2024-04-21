@@ -1,15 +1,17 @@
 #include "button.hpp"
 
-Button::Button (GameWindow* win, SDL_Rect rect, SDL_Texture* normalTex, SDL_Texture* hoverTex, SDL_Texture* clickedTex) {
+Button::Button (GameWindow* win, SDL_Rect rect) {
     this->gwin = win;
     this->mRect = rect;
-    this->mNormal = normalTex;
-    this->mHover = hoverTex;
-    this->mClicked = clickedTex;
     this->mState = BUTTON_NORMAL;
 }
 
-bool Button::isPointInsideButton (int x, int y) {
+void Button::updateTexture (SDL_Texture* tex, int source_button_width, int source_button_height) {
+    this->mClip = {0, 0, source_button_width, source_button_height};
+    this->mTex = tex;
+}
+
+bool Button::isOnHoverByPoint (int x, int y) {
     bool check = (mRect.x <= x && x <= mRect.x + mRect.w) and
                 (mRect.y <= y && y <= mRect.y + mRect.h);
 
@@ -45,16 +47,15 @@ void Button::click() {
 }
 
 void Button::render() {
-    SDL_Texture* tex = nullptr;
-    switch (this->mState) {
-        case BUTTON_NORMAL:
-            tex = this->mNormal;
-        case BUTTON_HOVER:
-            tex = this->mHover;
-        case BUTTON_CLICKED:
-            tex = this->mClicked;
+    if (this->mTex == nullptr) return;
+    int texture_w, texture_h;
+    SDL_QueryTexture(this->mTex, nullptr, nullptr, &texture_w, &texture_h);
+
+    this->mClip.y = this->mClip.h * this->mState;
+    if (this->mClip.y > texture_h) {
+        this->mClip.y = texture_h - this->mClip.h;
     }
-    this->gwin->blit(tex, this->mRect);
+    this->gwin->blit(this->mTex, this->mClip, this->mRect);
 }
 
 void Button::disable() {

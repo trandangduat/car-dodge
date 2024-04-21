@@ -23,11 +23,14 @@ Timer frameTimer, // timer to get time per frame
       storeTimer; // timer to reset store's items
 
 HUD hud               (&win, &state);
-Background background (&win, &backgroundTextures, INIT_VELOCITY);
-Car player            (&win, SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, 0);
+Background background (&win, &backgroundTextures);
+Car player            (&win);
 VFX speedBoostEffect,
     bossUltimateFx;
+
 Boss* boss = new Boss(&win);
+Button* playButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
+Button* homeButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -36,6 +39,7 @@ std::vector<Button>   storeOption;
 int storeItemsId[NUMBER_OF_ABILITY_TIER];
 std::deque<std::pair<int, int>> abilitiesToActive;
 
+void resetGame();
 bool handleEvent (SDL_Event e);
 
 void generateColumnRanges();
@@ -81,6 +85,8 @@ int main(int agrc, char* argv[]) {
     speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
     bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
     boss->updateTexture(bossSprite, bossNearUltingSprite, 48, 41);
+    playButton->updateTexture(playButtonSprite, 150, 50);
+    homeButton->updateTexture(homeButtonSprite, 150, 50);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
@@ -90,13 +96,10 @@ int main(int agrc, char* argv[]) {
     int y = 100;
     for (int i = 0; i < 3; i++) {
         SDL_Rect box = {x, y, SCREEN_WIDTH - x * 2, 120};
-        Button newButton (&win, box, nullptr, nullptr, nullptr);
+        Button newButton (&win, box);
         storeOption.push_back(newButton);
         y += box.h;
     }
-
-    state.updateCoins(9999); // cheats
-    state.updateBullets(999);
 
     bool quit = false;
     SDL_Event e;
@@ -139,6 +142,7 @@ int main(int agrc, char* argv[]) {
                 case GSTATE_STARTMENU:
                     background.render();
                     win.blit(gameTitle, 0, 0);
+                    playButton->render();
                     break;
 
                 default: {
@@ -176,43 +180,56 @@ int main(int agrc, char* argv[]) {
 
                     if (state.currentState() == GSTATE_GAMEOVER) {
                         hud.renderGameOverScreen();
+                        homeButton->render();
                     }
                 }
             }
         win.presentRender();
 
         //Update
-        if (state.currentState() == GSTATE_PLAYING) {
-            background.update(frameTimer.elapsedTime() / 1000.f);
-            updateBgVelocity();
-            updateObstacles();
-            updateCoins();
-            updateBullets();
-            updateAIBoss();
-            if (state.speedBoostIsEnabled()) {
-                speedBoostEffect.animate();
-                speedBoostEffect.mRect.w = player.getRect().w;
-                speedBoostEffect.mRect.h = player.getRect().h;
-                speedBoostEffect.setPos(
-                    player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
-                    player.getPosY() + player.getRect().h - 10
-                );
+        switch (state.currentState()) {
+            case GSTATE_STARTMENU:
+                background.update(frameTimer.elapsedTime() / 1000.f);
+                break;
+
+            case GSTATE_PLAYING: {
+                background.update(frameTimer.elapsedTime() / 1000.f);
+                updateBgVelocity();
+                updateObstacles();
+                updateCoins();
+                updateBullets();
+                updateAIBoss();
+                if (state.speedBoostIsEnabled()) {
+                    speedBoostEffect.animate();
+                    speedBoostEffect.mRect.w = player.getRect().w;
+                    speedBoostEffect.mRect.h = player.getRect().h;
+                    speedBoostEffect.setPos(
+                        player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
+                        player.getPosY() + player.getRect().h - 10
+                    );
+                }
+                updateActiveAbilities();
+                useAbilities();
+                state.updateScore(state.currentScore() + int(background.getVelY() / 60));
+                break;
             }
 
-            state.updateScore(state.currentScore() + background.getVelY() / 60);
+            case GSTATE_PAUSING:
+                break;
+            case GSTATE_GAMEOVER:
+                break;
         }
 
-        if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
-            std::clog << "store reset!\n";
-            for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
-                storeItemsId[i] = rand() % (int) abils[i].size();
-                storeOption[i].reset();
+        if (state.currentState() == GSTATE_PLAYING || state.currentState() == GSTATE_PAUSING) {
+            if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
+                std::clog << "store reset!\n";
+                for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
+                    storeItemsId[i] = rand() % (int) abils[i].size();
+                    storeOption[i].reset();
+                }
+                storeTimer.start();
             }
-            storeTimer.start();
         }
-
-        updateActiveAbilities();
-        useAbilities();
 
         frameTimer.start();
     }
@@ -220,10 +237,55 @@ int main(int agrc, char* argv[]) {
     return 0;
 }
 
+void resetGame() {
+    state.reset();
+    // CHEATS
+    state.updateCoins(9999);
+    state.updateBullets(999);
+    /////////
+    background.reset();
+    player.reset();
+    for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        while (!obstacles[i].empty()) {
+            obstacles[i].pop_back();
+        }
+        while (!coins[i].empty()) {
+            coins[i].pop_back();
+        }
+    }
+    abilitiesToActive.clear();
+    for (int tier = 0; tier < NUMBER_OF_ABILITY_TIER; tier++) {
+        for (Ability& A : abils[tier]) {
+            A.timer->reset();
+            A.isActive = 0;
+        }
+    }
+    firedBullets.clear();
+    boss->reset();
+    veloTimer.start();
+    storeTimer.start();
+}
+
 bool handleEvent (SDL_Event e) {
     if (e.type == SDL_QUIT) return false;
     switch (state.currentState()) {
         case GSTATE_STARTMENU: {
+            switch (e.type) {
+                case SDL_MOUSEMOTION: {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    playButton->isOnHoverByPoint(x, y);
+                    break;
+                }
+                case SDL_MOUSEBUTTONDOWN: {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    if (playButton->isOnHoverByPoint(x, y)) {
+                        resetGame();
+                        state.updateState(GSTATE_PLAYING);
+                    }
+                }
+            }
             break;
         }
         case GSTATE_PLAYING: {
@@ -238,8 +300,6 @@ bool handleEvent (SDL_Event e) {
                     break;
                 }
                 case SDL_MOUSEBUTTONDOWN: {
-                    int mouseX, mouseY;
-                    SDL_GetMouseState(&mouseX, &mouseY);
                     switch (e.button.button) {
                         case SDL_BUTTON_LEFT: {
                             if (state.currentBullets() > 0) {
@@ -268,7 +328,7 @@ bool handleEvent (SDL_Event e) {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
                     for (Button& B : storeOption) {
-                        B.isPointInsideButton(x, y);
+                        B.isOnHoverByPoint(x, y);
                     }
                     break;
                 }
@@ -281,7 +341,7 @@ bool handleEvent (SDL_Event e) {
                             for (Button& B : storeOption) {
                                 if (!B.isDisabled()
                                     && state.currentCoins() >= abils[tier][storeItemsId[tier]].coins
-                                    && B.isPointInsideButton(mouseX, mouseY)
+                                    && B.isOnHoverByPoint(mouseX, mouseY)
                                 ) {
                                     B.click();
                                     abilitiesToActive.push_back({tier, storeItemsId[tier]});
@@ -297,6 +357,22 @@ bool handleEvent (SDL_Event e) {
             break;
         }
         case GSTATE_GAMEOVER: {
+            switch (e.type) {
+                case SDL_MOUSEMOTION: {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    homeButton->isOnHoverByPoint(x, y);
+                    break;
+                }
+                case SDL_MOUSEBUTTONDOWN: {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    if (homeButton->isOnHoverByPoint(x, y)) {
+                        state.updateState(GSTATE_STARTMENU);
+                        resetGame();
+                    }
+                }
+            }
             break;
         }
     }

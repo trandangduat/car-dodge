@@ -1,9 +1,13 @@
 #include "car.hpp"
 
-Car::Car (GameWindow* gw, float x, float y, float velocity) {
+Car::Car (GameWindow* gw) {
     this->gwin = gw;
-    this->mRect = {(int) x, (int) y, CAR_WIDTH, CAR_HEIGHT};
-    this->mVelY = velocity;
+    this->reset();
+}
+
+void Car::reset() {
+    this->mRect = {SCREEN_WIDTH/2-CAR_WIDTH/2, SCREEN_HEIGHT-2*CAR_HEIGHT, CAR_WIDTH, CAR_HEIGHT};
+    this->mVelY = 0;
     this->mTiltedAngle = 0;
     this->mVisible = true;
     this->mIsHitByBoss = false;

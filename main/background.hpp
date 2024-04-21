@@ -14,7 +14,8 @@ private:
 
 public:
     Background() {};
-    Background (GameWindow* gw, std::vector<SDL_Texture*>* bgTex, float velocity);
+    Background (GameWindow* gw, std::vector<SDL_Texture*>* bgTex);
+    void reset();
     void render();
     void update (float dTime = 0.016);
     void setVelY (float velocity);

@@ -14,7 +14,8 @@ private:
 
 public:
     Car() {};
-    Car (GameWindow* gw, float x, float y, float velocity);
+    Car (GameWindow* gw);
+    void reset();
     void moveWithMouse();
     void moveTo (float x, float y);
     void render (SDL_Texture* tex);

@@ -1,9 +1,13 @@
 #include "background.hpp"
 
-Background::Background (GameWindow* gw, std::vector<SDL_Texture*>* bgTex, float velocity) {
+Background::Background (GameWindow* gw, std::vector<SDL_Texture*>* bgTex) {
     this->gwin = gw;
     this->bgTextures = bgTex;
-    this->mVelY = velocity;
+    this->reset();
+}
+
+void Background::reset() {
+    this->mVelY = INIT_VELOCITY;
     this->mOffsetY = 0;
     this->mUpBgRect = {0, -SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT};
     this->mDownBgRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};

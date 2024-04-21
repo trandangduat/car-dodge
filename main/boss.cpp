@@ -5,6 +5,10 @@ Boss::Boss (GameWindow* gw) {
     this->mRect = {0, 0, BOSS_WIDTH, BOSS_HEIGHT};
     this->mTimer = new Timer;
     this->mAnimationTimer = new Timer;
+    this->reset();
+}
+
+void Boss::reset() {
     this->mTimer->start();
     this->mAnimationTimer->start();
     this->mState = BOSS_MOVING;
