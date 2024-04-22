@@ -24,6 +24,7 @@ public:
     void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
     void renderGameOverScreen();
     void renderPauseScreen();
+    void renderTransitionScreen (int countdown);
     void renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer);
     void drawFadeOverlay (int fadePercentage);
 };

@@ -36,6 +36,7 @@ void updateHighScoreToDataFile (std::string path, long long score) {
 
 GameState::GameState() {
     this->gstate = GSTATE_STARTMENU;
+    this->transitionTimer = new Timer;
     reset();
 }
 

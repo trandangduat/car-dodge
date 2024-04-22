@@ -180,10 +180,12 @@ int main(int agrc, char* argv[]) {
                         hud.renderPauseScreen();
                         hud.renderStore(storeItemsId, storeOption, &storeTimer);
                     }
-
                     if (state.currentState() == GSTATE_GAMEOVER) {
                         hud.renderGameOverScreen();
                         homeButton->render();
+                    }
+                    if (state.currentState() == GSTATE_TRANSITION) {
+                        hud.renderTransitionScreen(TRANSITION_COUNTDOWN * 1000 - state.transitionTimer->elapsedTime());
                     }
                 }
             }
@@ -215,6 +217,14 @@ int main(int agrc, char* argv[]) {
                 updateActiveAbilities();
                 useAbilities();
                 state.updateScore(state.currentScore() + int(background.getVelY() / 60));
+                break;
+            }
+
+            case GSTATE_TRANSITION: {
+                if (state.transitionTimer->elapsedTime() > TRANSITION_COUNTDOWN * 1000) {
+                    state.updateState(GSTATE_PLAYING);
+                    state.transitionTimer->reset();
+                }
                 break;
             }
 
@@ -289,7 +299,8 @@ bool handleEvent (SDL_Event e) {
                     SDL_GetMouseState(&x, &y);
                     if (playButton->isOnHoverByPoint(x, y)) {
                         resetGame();
-                        state.updateState(GSTATE_PLAYING);
+                        state.updateState(GSTATE_TRANSITION);
+                        state.transitionTimer->start();
                     }
                 }
             }

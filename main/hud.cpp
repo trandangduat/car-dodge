@@ -144,8 +144,21 @@ void HUD::renderGameOverScreen() {
 }
 
 void HUD::renderPauseScreen() {
-    this->drawFadeOverlay(75);
-    this->drawTTFText(this->gwin->KarenFat, "paused", 40, 0, 35, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawFadeOverlay(55);
+    this->drawTTFText(this->gwin->KarenFat, "paused", 35, 0, 35, {255, 255, 255}, HUD_FLOAT_CENTER);
+}
+
+void HUD::renderTransitionScreen (int countdown) { // in milisecs
+    this->drawFadeOverlay(55);
+    int font_size = (countdown % 1000) / 10;
+    this->drawTTFText(
+        this->gwin->KarenFat,
+        std::to_string(int(countdown/1000) + 1),
+        font_size,
+        0, SCREEN_HEIGHT / 2 - font_size / 2,
+        {255, 255, 255},
+        HUD_FLOAT_CENTER
+    );
 }
 
 void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer) {
