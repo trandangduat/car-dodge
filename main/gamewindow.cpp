@@ -12,7 +12,7 @@ void GameWindow::free() {
 }
 
 bool GameWindow::init() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0 || SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         std::clog << "SDL_Init failed\n";
         return false;
     }
@@ -23,6 +23,10 @@ bool GameWindow::init() {
     }
     if (TTF_Init() == -1) {
         std::clog << "TTF_Init failed\n";
+        return false;
+    }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::clog << "Mix_OpenAudio failed\n";
         return false;
     }
     this->gWindow = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);

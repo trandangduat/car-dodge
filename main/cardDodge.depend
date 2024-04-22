@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1713774633 source:d:\cppgames\car-dodge\main\main.cpp
+1713795462 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"assets.hpp"
@@ -487,7 +487,7 @@
 1709108685 source:d:\cppgames\car-dodge\main\blitter.cpp
 	"blitter.hpp"
 
-1713775805 d:\cppgames\car-dodge\main\gamewindow.hpp
+1713795466 d:\cppgames\car-dodge\main\gamewindow.hpp
 	"params.hpp"
 	<iostream>
 	<deque>
@@ -499,8 +499,9 @@
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_ttf.h>
+	<SDL_mixer.h>
 
-1713775842 source:d:\cppgames\car-dodge\main\gamewindow.cpp
+1713795535 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
 1713771662 d:\cppgames\car-dodge\main\params.hpp
@@ -598,4 +599,13 @@
 
 1713693029 source:d:\cppgames\car-dodge\main\boss.cpp
 	"boss.hpp"
+
+1705857752 d:\cppgames\sdl_mixer\x86_64-w64-mingw32\include\sdl2\sdl_mixer.h
+	"SDL_stdinc.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
 

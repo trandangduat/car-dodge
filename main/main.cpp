@@ -403,6 +403,7 @@ void closeGame() {
     TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
+	Mix_Quit();
 }
 
 void generateColumnRanges() {
