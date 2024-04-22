@@ -67,3 +67,30 @@ void clipObstacles() {
     obstaclesClipRect.push_back({69, 335, 46, 87});
     obstaclesClipRect.push_back({127, 335, 46, 87});
 }
+
+void freeMedia() {
+    SDL_DestroyTexture(carTexture);
+    SDL_DestroyTexture(obstaclesTexture);
+    SDL_DestroyTexture(obstaclesCrashedTexture);
+    SDL_DestroyTexture(obstaclesCrashedWhiteTexture);
+    SDL_DestroyTexture(coinSprite);
+    SDL_DestroyTexture(goldenFontTexture);
+    SDL_DestroyTexture(blueFontTexture);
+    SDL_DestroyTexture(whiteFontTexture);
+    SDL_DestroyTexture(heartSymbolTexture);
+    SDL_DestroyTexture(frameTexture);
+    SDL_DestroyTexture(bulletTexture);
+    SDL_DestroyTexture(bulletIcon);
+    SDL_DestroyTexture(gasSmoke);
+    SDL_DestroyTexture(bossLaser);
+    SDL_DestroyTexture(bossSprite);
+    SDL_DestroyTexture(bossNearUltingSprite);
+    SDL_DestroyTexture(gameTitleSprite);
+    SDL_DestroyTexture(playButtonSprite);
+    SDL_DestroyTexture(homeButtonSprite);
+
+    for (SDL_Texture* texture : backgroundTextures) {
+        SDL_DestroyTexture(texture);
+    }
+    backgroundTextures.clear();
+}

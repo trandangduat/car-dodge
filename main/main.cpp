@@ -42,6 +42,7 @@ std::deque<std::pair<int, int>> abilitiesToActive;
 
 void resetGame();
 bool handleEvent (SDL_Event e);
+void closeGame();
 
 void generateColumnRanges();
 void updateBgVelocity();
@@ -395,6 +396,13 @@ bool handleEvent (SDL_Event e) {
         }
     }
     return true;
+}
+
+void closeGame() {
+    freeMedia();
+    TTF_Quit();
+	IMG_Quit();
+	SDL_Quit();
 }
 
 void generateColumnRanges() {

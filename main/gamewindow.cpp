@@ -1,5 +1,16 @@
 #include "gamewindow.hpp"
 
+GameWindow::~GameWindow() {
+    free();
+}
+
+void GameWindow::free() {
+    TTF_CloseFont(this->KarenFat);
+    TTF_CloseFont(this->AvenuePixel);
+    SDL_DestroyRenderer(this->gRenderer);
+    SDL_DestroyWindow(this->gWindow);
+}
+
 bool GameWindow::init() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::clog << "SDL_Init failed\n";

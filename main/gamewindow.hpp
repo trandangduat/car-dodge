@@ -16,10 +16,11 @@
 
 class GameWindow {
 private:
-
+    void free();
 
 public:
     GameWindow() {};
+    ~GameWindow();
     SDL_Window* gWindow = nullptr;
     SDL_Renderer* gRenderer = nullptr;
     TTF_Font* KarenFat = nullptr;
