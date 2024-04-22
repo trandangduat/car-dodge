@@ -236,7 +236,7 @@ int main(int agrc, char* argv[]) {
                 break;
             case GSTATE_GAMEOVER:
                 if (Mix_PlayingMusic() != 0) {
-                    Mix_HaltMusic();
+                    Mix_FadeOutMusic(1000);
                 }
                 break;
         }
@@ -305,6 +305,7 @@ bool handleEvent (SDL_Event e) {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
                     if (playButton->isOnHoverByPoint(x, y)) {
+                        Mix_PlayChannel(-1, clickSfx, 0);
                         resetGame();
                         state.updateState(GSTATE_TRANSITION);
                         state.transitionTimer->start();
@@ -328,6 +329,7 @@ bool handleEvent (SDL_Event e) {
                     switch (e.button.button) {
                         case SDL_BUTTON_LEFT: {
                             if (state.currentBullets() > 0) {
+                                Mix_PlayChannel(-1, shootSfx, 0);
                                 generateBullet();
                                 state.updateBullets(state.currentBullets() - 1);
                             }
@@ -369,6 +371,7 @@ bool handleEvent (SDL_Event e) {
                                     && B.isOnHoverByPoint(mouseX, mouseY)
                                 ) {
                                     B.click();
+                                    Mix_PlayChannel(-1, cashoutSfx, 0);
                                     abilitiesToActive.push_back({tier, storeItemsId[tier]});
                                 }
                                 tier++;
@@ -393,6 +396,7 @@ bool handleEvent (SDL_Event e) {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
                     if (homeButton->isOnHoverByPoint(x, y)) {
+                        Mix_PlayChannel(-1, clickSfx, 0);
                         state.updateState(GSTATE_STARTMENU);
                         resetGame();
                     }
@@ -471,6 +475,7 @@ void checkCollisionsWithPlayer() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
             if (!X.isCrashed() && checkCollision(player.getRect(), X.getRect())) {
+                Mix_PlayChannel(-1, explodeSfx, 0);
                 X.crash();
                 X.setVelY(background.getVelY());
                 state.updateLives(state.currentLives() - 1);
@@ -488,6 +493,7 @@ void checkCollisionsWithBullets() {
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             for (Obstacle& X : obstacles[i]) {
                 if (!X.isCrashed() && checkCollision(B.getRect(), X.getRect())) {
+                    Mix_PlayChannel(-1, explodeSfx, 0);
                     X.crash();
                     X.setVelY(background.getVelY());
                     bulletHitsObstacle = true;
@@ -559,6 +565,7 @@ void checkCollisionsWithCoins() {
         for (Coin& C : coins[i]) {
             if (!C.isClaimed() && checkCollision(player.getRect(), C.getRect())) {
                 C.claimed();
+                Mix_PlayChannel(-1, coinCollectSfx, 0);
                 state.updateCoins(state.currentCoins() + COIN_MULTIPLIER);
             }
         }
@@ -667,12 +674,14 @@ void checkCollisionWithBossUltimate() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
             if (!X.isCrashed() && checkCollision(boss->getUltRect(), X.getRect())) {
+                Mix_PlayChannel(-1, explodeSfx, 0);
                 X.crash();
                 X.setVelY(background.getVelY());
             }
         }
     }
     if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
+        Mix_PlayChannel(-1, explodeSfx, 0);
         state.updateLives(state.currentLives() - 1);
         player.getsHitByBossUltimate(true);
         std::clog << "hit by boss ultimate\n";

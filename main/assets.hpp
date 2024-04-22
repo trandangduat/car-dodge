@@ -26,6 +26,12 @@ extern SDL_Texture* homeButtonSprite;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 extern Mix_Music* bgMusic;
+extern Mix_Chunk* hoverSfx;
+extern Mix_Chunk* clickSfx;
+extern Mix_Chunk* cashoutSfx;
+extern Mix_Chunk* coinCollectSfx;
+extern Mix_Chunk* shootSfx;
+extern Mix_Chunk* explodeSfx;
 
 void loadMedia (GameWindow* win);
 void freeMedia();

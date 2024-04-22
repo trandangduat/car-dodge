@@ -1,4 +1,5 @@
 #include "button.hpp"
+#include "assets.hpp"
 
 Button::Button (GameWindow* win, SDL_Rect rect) {
     this->gwin = win;
@@ -17,6 +18,7 @@ bool Button::isOnHoverByPoint (int x, int y) {
 
     if (check && this->mState == BUTTON_NORMAL) {
         this->mState = BUTTON_HOVER;
+        Mix_PlayChannel(-1, hoverSfx, 0);
     }
     else if (!check && this->mState == BUTTON_HOVER) {
         this->mState = BUTTON_NORMAL;

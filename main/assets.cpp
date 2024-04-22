@@ -23,6 +23,12 @@ SDL_Texture* homeButtonSprite = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 Mix_Music* bgMusic = nullptr;
+Mix_Chunk* hoverSfx = nullptr;
+Mix_Chunk* clickSfx = nullptr;
+Mix_Chunk* cashoutSfx = nullptr;
+Mix_Chunk* coinCollectSfx = nullptr;
+Mix_Chunk* shootSfx = nullptr;
+Mix_Chunk* explodeSfx = nullptr;
 
 #define BG_PATH "assets/images/road_"
 
@@ -62,7 +68,13 @@ void loadMedia (GameWindow* win) {
     homeButtonSprite                = win->loadTexture("assets/images/game_over/home_button.png");
     clipObstacles();
 
-    bgMusic = Mix_LoadMUS("assets/sfx/bgmusic.mp3");
+    bgMusic                         = Mix_LoadMUS("assets/sfx/bgmusic.mp3");
+    hoverSfx                        = Mix_LoadWAV("assets/sfx/button_hover.wav");
+    clickSfx                        = Mix_LoadWAV("assets/sfx/button_click.wav");
+    cashoutSfx                      = Mix_LoadWAV("assets/sfx/cashout.wav");
+    coinCollectSfx                  = Mix_LoadWAV("assets/sfx/coin_collect.wav");
+    shootSfx                        = Mix_LoadWAV("assets/sfx/shoot.wav");
+    explodeSfx                      = Mix_LoadWAV("assets/sfx/explode.wav");
 }
 
 void clipObstacles() {
@@ -98,4 +110,12 @@ void freeMedia() {
         SDL_DestroyTexture(texture);
     }
     backgroundTextures.clear();
+
+    Mix_FreeMusic(bgMusic);
+    Mix_FreeChunk(hoverSfx);
+    Mix_FreeChunk(clickSfx);
+    Mix_FreeChunk(cashoutSfx);
+    Mix_FreeChunk(coinCollectSfx);
+    Mix_FreeChunk(shootSfx);
+    Mix_FreeChunk(explodeSfx);
 }
