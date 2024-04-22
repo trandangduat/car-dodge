@@ -21,6 +21,9 @@ SDL_Texture* gameTitleSprite = nullptr;
 SDL_Texture* playButtonSprite = nullptr;
 SDL_Texture* homeButtonSprite = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
+
+Mix_Music* bgMusic = nullptr;
+
 #define BG_PATH "assets/images/road_"
 
 void clipObstacles();
@@ -58,6 +61,8 @@ void loadMedia (GameWindow* win) {
     playButtonSprite                = win->loadTexture("assets/images/start_screen/play_button.png");
     homeButtonSprite                = win->loadTexture("assets/images/game_over/home_button.png");
     clipObstacles();
+
+    bgMusic = Mix_LoadMUS("assets/sfx/bgmusic.mp3");
 }
 
 void clipObstacles() {

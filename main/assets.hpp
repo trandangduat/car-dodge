@@ -25,6 +25,8 @@ extern SDL_Texture* playButtonSprite;
 extern SDL_Texture* homeButtonSprite;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
+extern Mix_Music* bgMusic;
+
 void loadMedia (GameWindow* win);
 void freeMedia();
 #endif // ASSETS_HPP

@@ -200,6 +200,9 @@ int main(int agrc, char* argv[]) {
                 break;
 
             case GSTATE_PLAYING: {
+                if (Mix_PlayingMusic() == 0) {
+                    Mix_PlayMusic(bgMusic, -1);
+                }
                 background.update(frameTimer.elapsedTime() / 1000.f);
                 updateBgVelocity();
                 updateObstacles();
@@ -232,6 +235,9 @@ int main(int agrc, char* argv[]) {
             case GSTATE_PAUSING:
                 break;
             case GSTATE_GAMEOVER:
+                if (Mix_PlayingMusic() != 0) {
+                    Mix_HaltMusic();
+                }
                 break;
         }
 

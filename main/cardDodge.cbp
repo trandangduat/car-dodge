@@ -33,12 +33,14 @@
 			<Add directory="D:/CPPGames/include/SDL2" />
 			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/include/SDL2" />
 			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/include/SDL2" />
+			<Add directory="D:/CPPGames/SDL_mixer/x86_64-w64-mingw32/include/SDL2" />
 		</Compiler>
 		<Linker>
-			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf" />
+			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
 			<Add directory="D:/CPPGames/lib" />
 			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/lib" />
 			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/lib" />
+			<Add directory="D:/CPPGames/SDL_mixer/x86_64-w64-mingw32/lib" />
 		</Linker>
 		<Unit filename="Button.cpp" />
 		<Unit filename="abilities.cpp" />
