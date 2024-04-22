@@ -64,8 +64,6 @@ void HUD::drawText (SDL_Texture* tex, std::string text, float x, float y, int le
     }
 }
 
-int cnt = 20;
-
 void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth, int letterHeight, float SCALE) {
     int texW, texH;
     SDL_QueryTexture(tex, nullptr, nullptr, &texW, &texH);
@@ -137,17 +135,17 @@ void HUD::drawFadeOverlay (int fadePercentage) {
 }
 
 void HUD::renderGameOverScreen() {
-    this->drawFadeOverlay(70);
-    this->drawText(metalFontTexture, "GAME OVER", 0, 80, 64, 64, 0.6f, HUD_FLOAT_CENTER);
-    this->drawTTFText(this->gwin->KarenFat, "SCORE", 30, 0, 160, {255, 255, 255}, HUD_FLOAT_CENTER);
-    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentScore()), 40, 0, 185, {255, 255, 255}, HUD_FLOAT_CENTER);
-    this->drawTTFText(this->gwin->KarenFat, "HIGHSCORE", 30, 0, 250, {255, 255, 255}, HUD_FLOAT_CENTER);
-    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentHighscore()), 40, 0, 275, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawFadeOverlay(75);
+    this->drawTTFText(this->gwin->KarenFat, "game over", 60, 0, 110, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, "SCORE", 30, 0, 190, {166, 45, 45}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentScore()), 40, 0, 215, {255, 255, 255}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, "HIGHSCORE", 30, 0, 280, {166, 45, 45}, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentHighscore()), 40, 0, 305, {255, 255, 255}, HUD_FLOAT_CENTER);
 }
 
 void HUD::renderPauseScreen() {
     this->drawFadeOverlay(75);
-    this->drawText(whiteFontTexture, "PAUSED", 0, 35, 8, 8, 3.0f, HUD_FLOAT_CENTER);
+    this->drawTTFText(this->gwin->KarenFat, "paused", 40, 0, 35, {255, 255, 255}, HUD_FLOAT_CENTER);
 }
 
 void HUD::renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer) {

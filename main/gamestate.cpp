@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-const std::string HIGHSCORE_DATA_FILE = "game_data/highscore.txt";
+#define HIGHSCORE_DATA_FILE "game_data/highscore.txt"
 
 long long getHighScoreFromDataFile (std::string path) {
     long long score = 0;

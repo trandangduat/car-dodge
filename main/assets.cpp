@@ -2,7 +2,6 @@
 
 std::vector<SDL_Texture*> backgroundTextures(2, nullptr);
 SDL_Texture* carTexture = nullptr;
-SDL_Texture* carInvisibleTexture = nullptr;
 SDL_Texture* obstaclesTexture = nullptr;
 SDL_Texture* obstaclesCrashedTexture = nullptr;
 SDL_Texture* obstaclesCrashedWhiteTexture = nullptr;
@@ -10,7 +9,6 @@ SDL_Texture* coinSprite = nullptr;
 SDL_Texture* goldenFontTexture = nullptr;
 SDL_Texture* blueFontTexture = nullptr;
 SDL_Texture* whiteFontTexture = nullptr;
-SDL_Texture* metalFontTexture = nullptr;
 SDL_Texture* heartSymbolTexture = nullptr;
 SDL_Texture* frameTexture = nullptr;
 SDL_Texture* bulletTexture = nullptr;
@@ -19,19 +17,28 @@ SDL_Texture* gasSmoke = nullptr;
 SDL_Texture* bossLaser = nullptr;
 SDL_Texture* bossSprite = nullptr;
 SDL_Texture* bossNearUltingSprite = nullptr;
-SDL_Texture* gameTitle = nullptr;
+SDL_Texture* gameTitleSprite = nullptr;
 SDL_Texture* playButtonSprite = nullptr;
 SDL_Texture* homeButtonSprite = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
+#define BG_PATH "assets/images/road_"
 
 void clipObstacles();
 
 void loadMedia (GameWindow* win) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-    backgroundTextures[0]           = win->loadTexture("assets/images/road_7.png");
-    backgroundTextures[1]           = win->loadTexture("assets/images/road_8.png");
+    std::string bgPath1, bgPath2;
+    int type = rand() % 3;
+    bgPath1 = BG_PATH;
+    bgPath1 += char(type * 2 + 1 + '0');
+    bgPath1 += ".png";
+    bgPath2 = BG_PATH;
+    bgPath2 += char(type * 2 + 2 + '0');
+    bgPath2 += ".png";
+
+    backgroundTextures[0]           = win->loadTexture(bgPath1);
+    backgroundTextures[1]           = win->loadTexture(bgPath2);
     carTexture                      = win->loadTexture("assets/images/car.png");
-    carInvisibleTexture             = win->loadTexture("assets/images/car_invisible.png");
     obstaclesTexture                = win->loadTexture("assets/images/cars.png");
     obstaclesCrashedTexture         = win->loadTexture("assets/images/cars_crashed.png");
     obstaclesCrashedWhiteTexture    = win->loadTexture("assets/images/cars_crashed_white.png");
@@ -39,7 +46,6 @@ void loadMedia (GameWindow* win) {
     goldenFontTexture               = win->loadTexture("assets/fonts/golden.png");
     blueFontTexture                 = win->loadTexture("assets/fonts/blue.png");
     whiteFontTexture                = win->loadTexture("assets/fonts/white.png");
-    metalFontTexture                = win->loadTexture("assets/fonts/metal.png");
     heartSymbolTexture              = win->loadTexture("assets/images/HUD/heart.png");
     frameTexture                    = win->loadTexture("assets/images/HUD/frame.png");
     bulletTexture                   = win->loadTexture("assets/images/items/bullet.png");
@@ -48,7 +54,7 @@ void loadMedia (GameWindow* win) {
     bossSprite                      = win->loadTexture("assets/images/boss_sprite.png");
     bossNearUltingSprite            = win->loadTexture("assets/images/boss_near_ulting_sprite.png");
     bossLaser                       = win->loadTexture("assets/images/effects/laser_beam_sprite.png");
-    gameTitle                       = win->loadTexture("assets/images/start_screen/logo.png");
+    gameTitleSprite                 = win->loadTexture("assets/images/start_screen/logo.png");
     playButtonSprite                = win->loadTexture("assets/images/start_screen/play_button.png");
     homeButtonSprite                = win->loadTexture("assets/images/game_over/home_button.png");
     clipObstacles();

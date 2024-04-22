@@ -26,11 +26,12 @@ HUD hud               (&win, &state);
 Background background (&win, &backgroundTextures);
 Car player            (&win);
 VFX speedBoostEffect,
-    bossUltimateFx;
+    bossUltimateFx,
+    logoTitle;
 
 Boss* boss = new Boss(&win);
 Button* playButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
-Button* homeButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
+Button* homeButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 420, 150, 50});
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -84,6 +85,8 @@ int main(int agrc, char* argv[]) {
 
     speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
     bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
+    logoTitle           = VFX(&win, 0, 100, 420, 130, gameTitleSprite, 420, 130, 100);
+    logoTitle.mRect.x = SCREEN_WIDTH / 2 - logoTitle.mRect.w / 2;
     boss->updateTexture(bossSprite, bossNearUltingSprite, 48, 41);
     playButton->updateTexture(playButtonSprite, 150, 50);
     homeButton->updateTexture(homeButtonSprite, 150, 50);
@@ -141,7 +144,7 @@ int main(int agrc, char* argv[]) {
             switch (state.currentState()) {
                 case GSTATE_STARTMENU:
                     background.render();
-                    win.blit(gameTitle, 0, 0);
+                    logoTitle.render(0, SDL_FLIP_NONE);
                     playButton->render();
                     break;
 
@@ -190,6 +193,7 @@ int main(int agrc, char* argv[]) {
         switch (state.currentState()) {
             case GSTATE_STARTMENU:
                 background.update(frameTimer.elapsedTime() / 1000.f);
+                logoTitle.animate();
                 break;
 
             case GSTATE_PLAYING: {
@@ -259,6 +263,9 @@ void resetGame() {
             A.timer->reset();
             A.isActive = 0;
         }
+    }
+    for (Button& B : storeOption) {
+        B.reset();
     }
     firedBullets.clear();
     boss->reset();
