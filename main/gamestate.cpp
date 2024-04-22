@@ -55,6 +55,7 @@ void GameState::updateState (int _state) {
 }
 
 void GameState::updateScore (long long _score) {
+    this->score = _score;
     if (this->gstate == GSTATE_GAMEOVER) {
         // Only update highscore when game is over
         if (this->highScore < _score) {
@@ -63,7 +64,6 @@ void GameState::updateScore (long long _score) {
         }
         return;
     }
-    this->score = _score;
 }
 
 void GameState::updateLives (int _lives) {
