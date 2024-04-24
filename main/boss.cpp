@@ -52,6 +52,14 @@ void Boss::move (int x, int y) {
     this->mRect.y += speed * dy;
     this->mFlip = (dx < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
     this->mAngle = atan2(abs(dy), abs(dx)) * 180 / M_PI;
+    // update ultimate range
+    this->mUltimateRect = {
+        this->mRect.x + this->mRect.w / 2,
+        this->mRect.y + this->mRect.h - 10,
+        this->mRect.w / 3,
+        this->mRect.h * 6
+    };
+    this->mUltimateRect.x -= this->mUltimateRect.w / 2;
 }
 
 void Boss::animate() {
@@ -72,13 +80,6 @@ void Boss::animate() {
 }
 
 void Boss::ult() {
-    this->mUltimateRect = {
-        this->mRect.x + this->mRect.w / 2,
-        this->mRect.y + this->mRect.h - 10,
-        this->mRect.w / 3,
-        this->mRect.h * 5
-    };
-    this->mUltimateRect.x -= this->mUltimateRect.w / 2;
     this->mAngle = (this->mFlip == SDL_FLIP_NONE ? 60 : -60);
     if (this->mState == BOSS_ULTING && this->mTimer->elapsedTime() >= 1500) {
         this->mState = BOSS_MOVING;

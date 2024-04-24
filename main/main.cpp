@@ -212,7 +212,7 @@ int main(int agrc, char* argv[]) {
                 if (state.speedBoostIsEnabled()) {
                     speedBoostEffect.animate();
                     speedBoostEffect.mRect.w = player.getRect().w;
-                    speedBoostEffect.mRect.h = player.getRect().h;
+                    speedBoostEffect.mRect.h = player.getRect().h * 0.6;
                     speedBoostEffect.setPos(
                         player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
                         player.getPosY() + player.getRect().h - 10
@@ -438,6 +438,7 @@ SDL_Point getNearestObstacle (float x, float y) {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& O : obstacles[i]) {
             if (O.isCrashed()) continue;
+            if (O.getPosY() > player.getPosY()) continue;
 
             float distanceSq = (x - O.getPosX()) * (x - O.getPosX()) + (y - O.getPosY()) * (y - O.getPosY());
             if (distanceSq < shortestDistanceSq) {
@@ -475,12 +476,11 @@ void checkCollisionsWithPlayer() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
             if (!X.isCrashed() && checkCollision(player.getRect(), X.getRect())) {
+                Mix_PlayChannel(-1, gruntSfx, 0);
                 Mix_PlayChannel(-1, explodeSfx, 0);
                 X.crash();
                 X.setVelY(background.getVelY());
                 state.updateLives(state.currentLives() - 1);
-
-                std::clog << "crashed!\n";
             }
         }
     }
@@ -497,7 +497,6 @@ void checkCollisionsWithBullets() {
                     X.crash();
                     X.setVelY(background.getVelY());
                     bulletHitsObstacle = true;
-                    std::clog << "bullet hits obstacle!";
                     break;
                 }
             }
@@ -542,6 +541,8 @@ void generateObstacles() {
                 obstaclesClipRect[rand() % (int) obstaclesClipRect.size()]
             );
             obstacles[i].push_back(newObstacle);
+            if (rand() % 10 == 0)
+                Mix_PlayChannel(-1, honkSfx, 0);
         }
     }
 }
@@ -663,6 +664,7 @@ void updateAIBoss() {
         player.getsHitByBossUltimate(false);
     }
     if (boss->getState() == BOSS_ULTING) {
+        Mix_PlayChannel(-1, bossRoarSfx, 0);
         bossUltimateFx.animate();
         bossUltimateFx.mRect = boss->getUltRect();
         boss->ult();
@@ -681,10 +683,9 @@ void checkCollisionWithBossUltimate() {
         }
     }
     if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
-        Mix_PlayChannel(-1, explodeSfx, 0);
+        Mix_PlayChannel(-1, gruntSfx, 0);
         state.updateLives(state.currentLives() - 1);
         player.getsHitByBossUltimate(true);
-        std::clog << "hit by boss ultimate\n";
     }
 }
 

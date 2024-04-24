@@ -29,6 +29,10 @@ Mix_Chunk* cashoutSfx = nullptr;
 Mix_Chunk* coinCollectSfx = nullptr;
 Mix_Chunk* shootSfx = nullptr;
 Mix_Chunk* explodeSfx = nullptr;
+Mix_Chunk* bossRoarSfx = nullptr;
+Mix_Chunk* bossWarningSfx = nullptr;
+Mix_Chunk* gruntSfx = nullptr;
+Mix_Chunk* honkSfx = nullptr;
 
 #define BG_PATH "assets/images/road_"
 
@@ -75,6 +79,10 @@ void loadMedia (GameWindow* win) {
     coinCollectSfx                  = Mix_LoadWAV("assets/sfx/coin_collect.wav");
     shootSfx                        = Mix_LoadWAV("assets/sfx/shoot.wav");
     explodeSfx                      = Mix_LoadWAV("assets/sfx/explode.wav");
+    bossRoarSfx                     = Mix_LoadWAV("assets/sfx/boss_roar.wav");
+    bossWarningSfx                  = Mix_LoadWAV("assets/sfx/boss_warning.wav");
+    gruntSfx                        = Mix_LoadWAV("assets/sfx/grunt.wav");
+    honkSfx                         = Mix_LoadWAV("assets/sfx/honk.wav");
 }
 
 void clipObstacles() {
@@ -118,4 +126,8 @@ void freeMedia() {
     Mix_FreeChunk(coinCollectSfx);
     Mix_FreeChunk(shootSfx);
     Mix_FreeChunk(explodeSfx);
+    Mix_FreeChunk(bossRoarSfx);
+    Mix_FreeChunk(bossWarningSfx);
+    Mix_FreeChunk(gruntSfx);
+    Mix_FreeChunk(honkSfx);
 }

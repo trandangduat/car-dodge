@@ -32,6 +32,10 @@ extern Mix_Chunk* cashoutSfx;
 extern Mix_Chunk* coinCollectSfx;
 extern Mix_Chunk* shootSfx;
 extern Mix_Chunk* explodeSfx;
+extern Mix_Chunk* bossRoarSfx;
+extern Mix_Chunk* bossWarningSfx;
+extern Mix_Chunk* gruntSfx;
+extern Mix_Chunk* honkSfx;
 
 void loadMedia (GameWindow* win);
 void freeMedia();
