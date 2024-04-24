@@ -1,10 +1,9 @@
 # depslib dependency file v1.0
-1713921801 source:d:\cppgames\car-dodge\main\main.cpp
+1713946280 source:d:\cppgames\car-dodge\main\main.cpp
 	"logic.hpp"
 	"timer.hpp"
 	"assets.hpp"
 	"background.hpp"
-	"car.hpp"
 	"obstacle.hpp"
 	"coin.hpp"
 	"hud.hpp"
@@ -14,6 +13,7 @@
 	"bullet.hpp"
 	"vfx.hpp"
 	"boss.hpp"
+	"car.hpp"
 
 1706832967 d:\cppgames\include\sdl2\sdl.h
 	"SDL_main.h"
@@ -501,7 +501,7 @@
 	<SDL_ttf.h>
 	<SDL_mixer.h>
 
-1713796446 source:d:\cppgames\car-dodge\main\gamewindow.cpp
+1713945653 source:d:\cppgames\car-dodge\main\gamewindow.cpp
 	"gamewindow.hpp"
 
 1713883561 d:\cppgames\car-dodge\main\params.hpp
@@ -551,14 +551,14 @@
 1713799464 source:d:\cppgames\car-dodge\main\coin.cpp
 	"coin.hpp"
 
-1713883934 d:\cppgames\car-dodge\main\assets.hpp
+1713946288 d:\cppgames\car-dodge\main\assets.hpp
 	"gamewindow.hpp"
 
 1709914982 d:\cppgames\car-dodge\main\gameover.hpp
 
 1709914974 source:d:\cppgames\car-dodge\main\gameover.cpp
 
-1713883986 source:d:\cppgames\car-dodge\main\assets.cpp
+1713945390 source:d:\cppgames\car-dodge\main\assets.cpp
 	"assets.hpp"
 
 1713530422 source:d:\cppgames\car-dodge\main\abilities.cpp
@@ -598,8 +598,9 @@
 	"gamewindow.hpp"
 	"timer.hpp"
 
-1713921560 source:d:\cppgames\car-dodge\main\boss.cpp
+1713946967 source:d:\cppgames\car-dodge\main\boss.cpp
 	"boss.hpp"
+	"assets.hpp"
 
 1705857752 d:\cppgames\sdl_mixer\x86_64-w64-mingw32\include\sdl2\sdl_mixer.h
 	"SDL_stdinc.h"
@@ -609,4 +610,14 @@
 	"SDL_version.h"
 	"begin_code.h"
 	"close_code.h"
+
+1713945103 source:d:\cppgames\car-dodge\main\audio.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<SDL.h>
+	"audio.hpp"
+
+1713945108 d:\cppgames\car-dodge\main\audio.hpp
+	<SDL.h>
 

@@ -2,7 +2,6 @@
 #include "timer.hpp"
 #include "assets.hpp"
 #include "background.hpp"
-#include "car.hpp"
 #include "obstacle.hpp"
 #include "coin.hpp"
 #include "hud.hpp"
@@ -12,6 +11,7 @@
 #include "bullet.hpp"
 #include "vfx.hpp"
 #include "boss.hpp"
+#include "car.hpp"
 
 SDL_Rect column[NUMBER_OF_COLUMNS];
 int colVelocity[NUMBER_OF_COLUMNS];
@@ -85,7 +85,7 @@ int main(int agrc, char* argv[]) {
     loadAbilitiesFromFiles();
 
     speedBoostEffect    = VFX(&win, 0, 0, 0, 0, gasSmoke, 32, 32, 50);
-    bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 10, 48, 50);
+    bossUltimateFx      = VFX(&win, 0, 0, 0, 0, bossLaser, 20, 96, 65);
     logoTitle           = VFX(&win, 0, 100, 420, 130, gameTitleSprite, 420, 130, 100);
     logoTitle.mRect.x = SCREEN_WIDTH / 2 - logoTitle.mRect.w / 2;
     boss->updateTexture(bossSprite, bossNearUltingSprite, 48, 41);
@@ -664,7 +664,6 @@ void updateAIBoss() {
         player.getsHitByBossUltimate(false);
     }
     if (boss->getState() == BOSS_ULTING) {
-        Mix_PlayChannel(-1, bossRoarSfx, 0);
         bossUltimateFx.animate();
         bossUltimateFx.mRect = boss->getUltRect();
         boss->ult();

@@ -1,4 +1,5 @@
 #include "boss.hpp"
+#include "assets.hpp"
 
 Boss::Boss (GameWindow* gw) {
     this->gwin = gw;
@@ -27,10 +28,12 @@ void Boss::move (int x, int y) {
     if (this->mState == BOSS_MOVING && this->mTimer->elapsedTime() >= 5000) {
         this->mState = BOSS_DELAY;
         this->mTimer->start();
+        Mix_PlayChannel(-1, bossWarningSfx, 0);
     }
     if (this->mState == BOSS_DELAY && this->mTimer->elapsedTime() >= 2000) {
         this->mState = BOSS_ULTING;
         this->mTimer->start();
+        Mix_PlayChannel(-1, bossRoarSfx, 0);
     }
     if (this->mState == BOSS_ULTING) {
         return;
