@@ -23,6 +23,7 @@ extern SDL_Texture* bossNearUltingSprite;
 extern SDL_Texture* gameTitleSprite;
 extern SDL_Texture* playButtonSprite;
 extern SDL_Texture* homeButtonSprite;
+extern SDL_Texture* arrowHUD;
 extern std::vector<SDL_Rect> obstaclesClipRect;
 
 extern Mix_Music* bgMusic;

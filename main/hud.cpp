@@ -110,7 +110,7 @@ void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int
 void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX) {
     SDL_Rect srect = {0, 0, 16, 16};
     SDL_Rect drect = {x, y, (int) (scale * srect.w), (int) (scale * srect.h)};
-    int totalLength = drect.w * NUMBER_OF_LIVES;
+    int totalLength = drect.w * gstate->maxLives();
     switch (alignX) {
         case HUD_FLOAT_RIGHT:
             drect.x = SCREEN_WIDTH - x - totalLength;
@@ -119,7 +119,7 @@ void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, floa
             drect.x = SCREEN_WIDTH / 2 - totalLength / 2;
             break;
     }
-    for (int i = 1; i <= NUMBER_OF_LIVES; i++) {
+    for (int i = 1; i <= gstate->maxLives(); i++) {
         srect.x = (i <= gstate->currentLives() ? 0 : 1) * srect.w;
         this->gwin->blit(tex, srect, drect);
         drect.x += drect.w + 5;

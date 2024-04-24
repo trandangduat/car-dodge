@@ -32,6 +32,8 @@ VFX speedBoostEffect,
 Boss* boss = new Boss(&win);
 Button* playButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
 Button* homeButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 420, 150, 50});
+Button* LeftArrowButton = new Button(&win, {SCREEN_WIDTH / 2 - 90 - 18, 386, 18, 18});
+Button* RightArrowButton = new Button(&win, {SCREEN_WIDTH / 2 + 90, 386, 18, 18});
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -91,6 +93,8 @@ int main(int agrc, char* argv[]) {
     boss->updateTexture(bossSprite, bossNearUltingSprite, 48, 41);
     playButton->updateTexture(playButtonSprite, 150, 50);
     homeButton->updateTexture(homeButtonSprite, 150, 50);
+    LeftArrowButton->updateTexture(arrowHUD, 25, 25);
+    RightArrowButton->updateTexture(arrowHUD, 25, 25);
 
     // init store
     for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
@@ -143,12 +147,23 @@ int main(int agrc, char* argv[]) {
         //Render
         win.clearRender();
             switch (state.currentState()) {
-                case GSTATE_STARTMENU:
+                case GSTATE_STARTMENU: {
                     background.render();
                     logoTitle.render(0, SDL_FLIP_NONE);
                     playButton->render();
+                    // Difficulty Switch
+                    std::string difType;
+                    switch (state.currentDifficulty()) {
+                        case DIFFICULITY_EASY: difType = "EASY"; break;
+                        case DIFFICULITY_MEDIUM: difType = "MEDIUM"; break;
+                        case DIFFICULITY_HARD: difType = "HARD"; break;
+                        case DIFFICULITY_ASIAN: difType = "ASIAN"; break;
+                    }
+                    hud.drawTTFText(win.KarenFat, difType, 30, 0, 380, {255, 255, 255}, HUD_FLOAT_CENTER);
+                    LeftArrowButton->render(SDL_FLIP_HORIZONTAL);
+                    RightArrowButton->render();
                     break;
-
+                }
                 default: {
                     background.render();
                     renderCoins();
@@ -158,7 +173,9 @@ int main(int agrc, char* argv[]) {
                     }
                     player.render(carTexture);
                     renderBullets();
-                    renderAIBoss();
+                    if (state.hasBoss()) {
+                        renderAIBoss();
+                    }
                     // LEFT HUD
                     hud.drawHearts(heartSymbolTexture, 30, 30, state.currentLives(), 2.0f, HUD_FLOAT_LEFT);
                     // RIGHT HUD
@@ -208,7 +225,9 @@ int main(int agrc, char* argv[]) {
                 updateObstacles();
                 updateCoins();
                 updateBullets();
-                updateAIBoss();
+                if (state.hasBoss()) {
+                    updateAIBoss();
+                }
                 if (state.speedBoostIsEnabled()) {
                     speedBoostEffect.animate();
                     speedBoostEffect.mRect.w = player.getRect().w;
@@ -260,11 +279,8 @@ int main(int agrc, char* argv[]) {
 
 void resetGame() {
     state.reset();
-    // CHEATS
-    state.updateCoins(9999);
-    state.updateBullets(999);
     /////////
-    background.reset();
+    background.reset(state.currentStage());
     player.reset();
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         while (!obstacles[i].empty()) {
@@ -309,6 +325,12 @@ bool handleEvent (SDL_Event e) {
                         resetGame();
                         state.updateState(GSTATE_TRANSITION);
                         state.transitionTimer->start();
+                    }
+                    if (LeftArrowButton->isOnHoverByPoint(x, y)) {
+                        state.updateDifficulty((state.currentDifficulty() - 1 + NUMBER_OF_DIFFICULTIES) % NUMBER_OF_DIFFICULTIES);
+                    }
+                    if (RightArrowButton->isOnHoverByPoint(x, y)) {
+                        state.updateDifficulty((state.currentDifficulty() + 1) % NUMBER_OF_DIFFICULTIES);
                     }
                 }
             }

@@ -3,11 +3,11 @@
 Background::Background (GameWindow* gw, std::vector<SDL_Texture*>* bgTex) {
     this->gwin = gw;
     this->bgTextures = bgTex;
-    this->reset();
+    this->reset(1);
 }
 
-void Background::reset() {
-    this->mVelY = INIT_VELOCITY;
+void Background::reset (int stage) {
+    this->mVelY = INIT_VELOCITY + 30 * stage;
     this->mOffsetY = 0;
     this->mUpBgRect = {0, -SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT};
     this->mDownBgRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};

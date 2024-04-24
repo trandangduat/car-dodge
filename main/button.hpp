@@ -25,7 +25,7 @@ public:
     bool onClicked();
     void reset();
     void click();
-    void render();
+    void render (SDL_RendererFlip flip = SDL_FLIP_NONE);
     void disable();
 };
 

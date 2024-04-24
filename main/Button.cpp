@@ -48,16 +48,18 @@ void Button::click() {
     this->mState = BUTTON_CLICKED;
 }
 
-void Button::render() {
+void Button::render (SDL_RendererFlip flip) {
     if (this->mTex == nullptr) return;
     int texture_w, texture_h;
     SDL_QueryTexture(this->mTex, nullptr, nullptr, &texture_w, &texture_h);
+    int number_of_sprite = int(texture_h / this->mClip.h);
 
-    this->mClip.y = this->mClip.h * this->mState;
+    this->mClip.y = this->mClip.h * std::min(number_of_sprite - 1, this->mState);
     if (this->mClip.y > texture_h) {
         this->mClip.y = texture_h - this->mClip.h;
     }
-    this->gwin->blit(this->mTex, this->mClip, this->mRect);
+//    this->gwin->blit(this->mTex, this->mClip, this->mRect);
+    SDL_RenderCopyEx(this->gwin->gRenderer, this->mTex, &this->mClip, &this->mRect, 0, nullptr, flip);
 }
 
 void Button::disable() {

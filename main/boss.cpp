@@ -1,6 +1,8 @@
 #include "boss.hpp"
 #include "assets.hpp"
 
+int BOSS_COOLDOWN = 5; // by seconds
+
 Boss::Boss (GameWindow* gw) {
     this->gwin = gw;
     this->mRect = {0, 0, BOSS_WIDTH, BOSS_HEIGHT};
@@ -25,7 +27,7 @@ void Boss::updateTexture (SDL_Texture* tex, SDL_Texture* nearUltTex, int sprite_
 }
 
 void Boss::move (int x, int y) {
-    if (this->mState == BOSS_MOVING && this->mTimer->elapsedTime() >= 5000) {
+    if (this->mState == BOSS_MOVING && this->mTimer->elapsedTime() >= BOSS_COOLDOWN * 1000) {
         this->mState = BOSS_DELAY;
         this->mTimer->start();
         Mix_PlayChannel(-1, bossWarningSfx, 0);

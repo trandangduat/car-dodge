@@ -26,5 +26,6 @@ const int BOSS_WIDTH = 100;
 const int BOSS_HEIGHT = 80;
 
 extern int COIN_MULTIPLIER;
+extern int BOSS_COOLDOWN;
 
 #endif // PARAMS_HPP
