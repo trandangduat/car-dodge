@@ -2,6 +2,7 @@
 #define GAMESTATE_HPP
 
 #include "timer.hpp"
+#include<vector>
 
 #define GSTATE_STARTMENU 0
 #define GSTATE_PLAYING   1
@@ -21,7 +22,7 @@ private:
     int gstate;
     int score, lives, coins, stage, bullets;
     int max_lives;
-    int highScore;
+    std::vector<long long> highScores;
     int difficulty;
     bool bossSpawned;
     bool magnetEnabled;

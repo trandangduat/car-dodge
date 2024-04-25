@@ -6,23 +6,26 @@
 
 #define HIGHSCORE_DATA_FILE "game_data/highscore.txt"
 
-long long getHighScoreFromDataFile (std::string path) {
-    long long score = 0;
+std::vector<long long> getHighScoreFromDataFile (std::string path) {
+    std::vector<long long> scores(NUMBER_OF_DIFFICULTIES, 0LL);
     std::ifstream file(path);
     if (!file.is_open()) {
         std::clog << "Failed to open: " << path << '\n';
-        return -1;
+        return {0};
     }
+    int i = 0;
     std::string s;
-    file >> s;
-    for (const char& c : s) {
-        score = score * 10 + int(c - '0');
+    while (file >> s) {
+        for (const char& c : s) {
+            scores[i] = scores[i] * 10 + int(c - '0');
+        }
+        i++;
     }
     file.close();
-    return score;
+    return scores;
 }
 
-void updateHighScoreToDataFile (std::string path, long long score) {
+void updateHighScoreToDataFile (std::string path, const std::vector<long long> &highScores) {
     std::ofstream file(path);
     if (!file.is_open()) {
         std::clog << "Failed to open: " << path << '\n';
@@ -30,7 +33,9 @@ void updateHighScoreToDataFile (std::string path, long long score) {
     }
     // Clear the file by setting the position indicator to the beginning
     file.seekp(0, std::ios::beg);
-    file << score;
+    for (int i = 0; i < NUMBER_OF_DIFFICULTIES; i++) {
+        file << highScores[i] << '\n';
+    }
     file.close();
 }
 
@@ -51,7 +56,7 @@ void GameState::reset() {
     this->magnetEnabled = 0;
     this->speedBoostEnabled = 0;
     BOSS_COOLDOWN = 5;
-    this->highScore = getHighScoreFromDataFile(HIGHSCORE_DATA_FILE);
+    this->highScores = getHighScoreFromDataFile(HIGHSCORE_DATA_FILE);
     updateDifficulty(this->difficulty);
 }
 
@@ -96,9 +101,9 @@ void GameState::updateScore (long long _score) {
     this->score = _score;
     if (this->gstate == GSTATE_GAMEOVER) {
         // Only update highscore when game is over
-        if (this->highScore < _score) {
-            this->highScore = _score;
-            updateHighScoreToDataFile(HIGHSCORE_DATA_FILE, _score);
+        if (this->highScores[this->difficulty] < _score) {
+            this->highScores[this->difficulty] = _score;
+            updateHighScoreToDataFile(HIGHSCORE_DATA_FILE, this->highScores);
         }
         return;
     }
@@ -149,5 +154,5 @@ int GameState::currentStage() { return this->stage; }
 int GameState::currentBullets() { return this->bullets; }
 int GameState::currentDifficulty() { return this->difficulty; }
 bool GameState::hasBoss() { return this->bossSpawned; }
-long long GameState::currentHighscore() { return this->highScore; }
+long long GameState::currentHighscore() { return this->highScores[this->difficulty]; }
 

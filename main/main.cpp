@@ -32,8 +32,8 @@ VFX speedBoostEffect,
 Boss* boss = new Boss(&win);
 Button* playButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 300, 150, 50});
 Button* homeButton = new Button(&win, {SCREEN_WIDTH / 2 - 150 / 2, 420, 150, 50});
-Button* LeftArrowButton = new Button(&win, {SCREEN_WIDTH / 2 - 90 - 18, 386, 18, 18});
-Button* RightArrowButton = new Button(&win, {SCREEN_WIDTH / 2 + 90, 386, 18, 18});
+Button* LeftArrowButton  = new Button(&win, {SCREEN_WIDTH / 2 - 90 - 30, 390, 30, 30});
+Button* RightArrowButton = new Button(&win, {SCREEN_WIDTH / 2 + 90     , 390, 30, 30});
 
 std::deque<Obstacle>  obstacles[NUMBER_OF_COLUMNS];
 std::deque<Coin>      coins[NUMBER_OF_COLUMNS];
@@ -159,9 +159,11 @@ int main(int agrc, char* argv[]) {
                         case DIFFICULITY_HARD: difType = "HARD"; break;
                         case DIFFICULITY_ASIAN: difType = "ASIAN"; break;
                     }
+                    hud.drawFadeRectangle({0, 375, SCREEN_WIDTH, 60}, 75);
                     hud.drawTTFText(win.KarenFat, difType, 30, 0, 380, {255, 255, 255}, HUD_FLOAT_CENTER);
                     LeftArrowButton->render(SDL_FLIP_HORIZONTAL);
                     RightArrowButton->render();
+                    hud.drawTTFText(win.AvenuePixel, std::to_string(state.currentHighscore()), 30, 0, 400, {255, 255, 255}, HUD_FLOAT_CENTER);
                     break;
                 }
                 default: {
@@ -328,9 +330,11 @@ bool handleEvent (SDL_Event e) {
                     }
                     if (LeftArrowButton->isOnHoverByPoint(x, y)) {
                         state.updateDifficulty((state.currentDifficulty() - 1 + NUMBER_OF_DIFFICULTIES) % NUMBER_OF_DIFFICULTIES);
+                        LeftArrowButton->reset();
                     }
                     if (RightArrowButton->isOnHoverByPoint(x, y)) {
                         state.updateDifficulty((state.currentDifficulty() + 1) % NUMBER_OF_DIFFICULTIES);
+                        RightArrowButton->reset();
                     }
                 }
             }

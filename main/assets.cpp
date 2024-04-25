@@ -21,6 +21,7 @@ SDL_Texture* gameTitleSprite = nullptr;
 SDL_Texture* playButtonSprite = nullptr;
 SDL_Texture* homeButtonSprite = nullptr;
 SDL_Texture* arrowHUD = nullptr;
+SDL_Texture* highscoreStamp = nullptr;
 std::vector<SDL_Rect> obstaclesClipRect;
 
 Mix_Music* bgMusic = nullptr;
@@ -72,6 +73,8 @@ void loadMedia (GameWindow* win) {
     playButtonSprite                = win->loadTexture("assets/images/start_screen/play_button.png");
     homeButtonSprite                = win->loadTexture("assets/images/game_over/home_button.png");
     arrowHUD                        = win->loadTexture("assets/images/HUD/arrow.png");
+    highscoreStamp                  = win->loadTexture("assets/images/game_over/highscore_stamp.png");
+
     clipObstacles();
 
     bgMusic                         = Mix_LoadMUS("assets/sfx/bgmusic.mp3");
@@ -116,6 +119,7 @@ void freeMedia() {
     SDL_DestroyTexture(playButtonSprite);
     SDL_DestroyTexture(homeButtonSprite);
     SDL_DestroyTexture(arrowHUD);
+    SDL_DestroyTexture(highscoreStamp);
 
     for (SDL_Texture* texture : backgroundTextures) {
         SDL_DestroyTexture(texture);

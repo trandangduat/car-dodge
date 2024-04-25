@@ -126,6 +126,12 @@ void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, floa
     }
 }
 
+void HUD::drawFadeRectangle (SDL_Rect rect, int fadePercentage) {
+    SDL_SetRenderDrawColor(gwin->gRenderer, 0, 0, 0, fadePercentage * 255 / 100);
+    SDL_SetRenderDrawBlendMode(gwin->gRenderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderFillRect(gwin->gRenderer, &rect);
+}
+
 void HUD::drawFadeOverlay (int fadePercentage) {
     /* Draw a 'fadePercentage' opacity black rectangle covering the screen */
     SDL_SetRenderDrawColor(gwin->gRenderer, 0, 0, 0, fadePercentage * 255 / 100);
@@ -141,6 +147,10 @@ void HUD::renderGameOverScreen() {
     this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentScore()), 40, 0, 215, {255, 255, 255}, HUD_FLOAT_CENTER);
     this->drawTTFText(this->gwin->KarenFat, "HIGHSCORE", 30, 0, 280, {166, 45, 45}, HUD_FLOAT_CENTER);
     this->drawTTFText(this->gwin->KarenFat, std::to_string(gstate->currentHighscore()), 40, 0, 305, {255, 255, 255}, HUD_FLOAT_CENTER);
+    if (gstate->currentScore() == gstate->currentHighscore()) {
+        SDL_Rect drect = {SCREEN_WIDTH / 2 + 80, 180, 80, 80};
+        SDL_RenderCopyEx(this->gwin->gRenderer, highscoreStamp, nullptr, &drect, 45, nullptr, SDL_FLIP_NONE);
+    }
 }
 
 void HUD::renderPauseScreen() {

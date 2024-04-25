@@ -27,6 +27,7 @@ public:
     void renderTransitionScreen (int countdown);
     void renderStore (int id_tier[], std::vector<Button> &storeOption, Timer* storeTimer);
     void drawFadeOverlay (int fadePercentage);
+    void drawFadeRectangle (SDL_Rect rect, int fadePercentage);
 };
 
 #endif // HUD_HPP
