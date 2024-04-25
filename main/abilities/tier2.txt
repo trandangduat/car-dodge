@@ -1,4 +1,4 @@
-Coin Magnet$Attracts coins towards your car$50
-Double Coins$Doubles the amount of coins you collect$50
-x5 Bullets$Gives you 5 bullets that explode upon hitting obstacles$75
-Shrink$Shrink your car$85
+Coin Magnet$Attracts coins towards your car$30
+Double Coins$Doubles the amount of coins you collect$30
+x5 Bullets$Gives you 5 bullets that explode upon hitting obstacles$60
+Shrink$Shrink your car$60
