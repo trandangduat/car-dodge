@@ -5,6 +5,8 @@
 HUD::HUD (GameWindow* gw, GameState* gs) {
     this->gwin = gw;
     this->gstate = gs;
+    this->mBlinkTimer = new Timer;
+    this->blinkSwitch = -1;
 }
 
 void HUD::drawTTFText (TTF_Font* font, std::string text, int fontSize, int x, int y, SDL_Color textColor, int alignX, int wrapLength) {
@@ -107,20 +109,31 @@ void HUD::drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int
     }
 }
 
-void HUD::drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX) {
+void HUD::startBlinkingHearts() {
+    this->mBlinkTimer->start();
+    this->blinkSwitch = 0;
+    this->lastBlinkTime = 0;
+}
+
+void HUD::drawHearts (SDL_Texture* tex, float x, float y, float scale) {
     SDL_Rect srect = {0, 0, 16, 16};
     SDL_Rect drect = {x, y, (int) (scale * srect.w), (int) (scale * srect.h)};
-    int totalLength = drect.w * gstate->maxLives();
-    switch (alignX) {
-        case HUD_FLOAT_RIGHT:
-            drect.x = SCREEN_WIDTH - x - totalLength;
-            break;
-        case HUD_FLOAT_CENTER:
-            drect.x = SCREEN_WIDTH / 2 - totalLength / 2;
-            break;
+    if (this->mBlinkTimer->elapsedTime() >= 750) {
+        this->mBlinkTimer->reset();
+        this->blinkSwitch = -1;
+    }
+    if (this->blinkSwitch != -1 && this->mBlinkTimer->elapsedTime() - this->lastBlinkTime >= 150) {
+        this->blinkSwitch = 1 - this->blinkSwitch;
+        this->lastBlinkTime = this->mBlinkTimer->elapsedTime();
     }
     for (int i = 1; i <= gstate->maxLives(); i++) {
         srect.x = (i <= gstate->currentLives() ? 0 : 1) * srect.w;
+        if (i <= gstate->currentLives()) {
+            srect.x = (this->blinkSwitch != 1 ? 0 : srect.w * 2);
+        }
+        else {
+            srect.x = srect.w;
+        }
         this->gwin->blit(tex, srect, drect);
         drect.x += drect.w + 5;
     }

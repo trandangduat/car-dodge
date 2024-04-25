@@ -12,6 +12,7 @@ private:
     bool mIsCrashed;
     Timer* blinkTimer = nullptr;
     int blinkSwitch;
+    int lastBlinkTime;
     SDL_Texture* mNormalTex = nullptr;
     SDL_Texture* mCrashedTex = nullptr;
     SDL_Texture* mCrashedWhiteTex = nullptr;

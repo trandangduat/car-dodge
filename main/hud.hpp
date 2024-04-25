@@ -14,6 +14,9 @@ class HUD {
 private:
     GameWindow* gwin = nullptr;
     GameState* gstate = nullptr;
+    Timer* mBlinkTimer = nullptr;
+    int blinkSwitch;
+    int lastBlinkTime;
 
 public:
     HUD() {};
@@ -21,7 +24,8 @@ public:
     void drawTTFText (TTF_Font* font, std::string text, int fontSize, int x, int y, SDL_Color textColor, int alignX = HUD_FLOAT_LEFT, int wrapLength = SCREEN_WIDTH);
     void drawText (SDL_Texture* tex, std::string text, float x, float y, int letterWidth = 8, int letterHeight = 8, float SCALE = 1, int alignX = HUD_FLOAT_LEFT);
     void drawParagraph (std::string text, SDL_Rect drect, SDL_Texture* tex, int letterWidth = 8, int letterHeight = 8, float SCALE = 1);
-    void drawHearts (SDL_Texture* tex, float x, float y, int remainHearts, float scale, int alignX);
+    void startBlinkingHearts();
+    void drawHearts (SDL_Texture* tex, float x, float y, float scale);
     void renderGameOverScreen();
     void renderPauseScreen();
     void renderTransitionScreen (int countdown);

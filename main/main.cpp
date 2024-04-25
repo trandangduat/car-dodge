@@ -179,7 +179,7 @@ int main(int agrc, char* argv[]) {
                         renderAIBoss();
                     }
                     // LEFT HUD
-                    hud.drawHearts(heartSymbolTexture, 30, 30, state.currentLives(), 2.0f, HUD_FLOAT_LEFT);
+                    hud.drawHearts(heartSymbolTexture, 30, 30, 2.3f);
                     // RIGHT HUD
                     hud.drawText(
                         state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
@@ -507,6 +507,7 @@ void checkCollisionsWithPlayer() {
                 X.crash();
                 X.setVelY(background.getVelY());
                 state.updateLives(state.currentLives() - 1);
+                hud.startBlinkingHearts();
             }
         }
     }
@@ -710,6 +711,7 @@ void checkCollisionWithBossUltimate() {
     if (player.isVisible() && !player.isGotHitByBossUltimate() && checkCollision(boss->getUltRect(), player.getRect())) {
         Mix_PlayChannel(-1, gruntSfx, 0);
         state.updateLives(state.currentLives() - 1);
+        hud.startBlinkingHearts();
         player.getsHitByBossUltimate(true);
     }
 }

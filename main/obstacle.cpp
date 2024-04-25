@@ -11,14 +11,16 @@ Obstacle::Obstacle (GameWindow* gw, SDL_Texture* normalTex, SDL_Texture* crashed
     this->mClip = clip;
     this->blinkTimer = new Timer;
     this->blinkSwitch = 0;
+    this->lastBlinkTime = 0;
 }
 
 void Obstacle::render() {
     if (this->blinkTimer->elapsedTime() >= 200) return;
     SDL_Texture* renderTex = mNormalTex;
     if (this->isCrashed()) {
-        if (this->blinkTimer->elapsedTime() % 50 == 0) {
+        if (this->blinkTimer->elapsedTime() - this->lastBlinkTime >= 50) {
             this->blinkSwitch = 1 - this->blinkSwitch;
+            this->lastBlinkTime = this->blinkTimer->elapsedTime();
         }
         renderTex = (!this->blinkSwitch ? mCrashedWhiteTex : mCrashedTex);
     }
