@@ -658,7 +658,7 @@ void updateBullets() {
             B.setState(BULLET_EXPLODED);
             continue;
         }
-        SDL_Point nearestObstacle = getNearestObstacle(B.getRect().x, B.getRect().y);
+        SDL_Point nearestObstacle = getNearestObstacle(player.getRect().x, player.getRect().y);
         B.move(nearestObstacle, frameTimer.elapsedTime() / 1000.f);
     }
     while (!firedBullets.empty() && firedBullets.back().getState() == BULLET_EXPLODED) {
