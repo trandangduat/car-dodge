@@ -1,7 +1,7 @@
 #ifndef PARAMS_HPP
 #define PARAMS_HPP
 
-#define GAME_TITLE "CarDodge"
+#define GAME_TITLE "Dodgem"
 
 const double oo = 2e9;
 const double MOVEMENT_DELAY = 0.20; // the higher the value the faster

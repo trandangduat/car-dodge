@@ -221,7 +221,6 @@ bool handleEvent (SDL_Event e) {
                     switch (e.key.keysym.sym) {
                         case SDLK_SPACE:
                             state.updateState(GSTATE_PAUSING);
-                            std::clog << "Pause!\n";
                             break;
                     }
                     break;
@@ -247,7 +246,6 @@ bool handleEvent (SDL_Event e) {
                     switch (e.key.keysym.sym) {
                         case SDLK_SPACE:
                             state.updateState(GSTATE_PLAYING);
-                            std::clog << "Unpause!\n";
                             break;
                     }
                     break;
@@ -440,7 +438,6 @@ void update() {
 
     if (state.currentState() == GSTATE_PLAYING || state.currentState() == GSTATE_PAUSING) {
         if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
-            std::clog << "store reset!\n";
             for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
                 storeItemsId[i] = rand() % (int) abils[i].size();
                 storeOption[i].reset();

@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="carDodge" />
+		<Option title="Dodgem" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/cardDodge" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug/dodgem" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -16,9 +16,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/cardDodge" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/dodgem" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
@@ -30,18 +30,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="D:/CPPGames/include/SDL2" />
-			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/include/SDL2" />
-			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/include/SDL2" />
-			<Add directory="D:/CPPGames/SDL_mixer/x86_64-w64-mingw32/include/SDL2" />
 		</Compiler>
-		<Linker>
-			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
-			<Add directory="D:/CPPGames/lib" />
-			<Add directory="D:/CPPGames/SDL_Image/x86_64-w64-mingw32/lib" />
-			<Add directory="D:/CPPGames/SDL_ttf/x86_64-w64-mingw32/lib" />
-			<Add directory="D:/CPPGames/SDL_mixer/x86_64-w64-mingw32/lib" />
-		</Linker>
 		<Unit filename="Button.cpp" />
 		<Unit filename="abilities.cpp" />
 		<Unit filename="abilities.hpp" />
