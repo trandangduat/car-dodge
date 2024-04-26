@@ -46,13 +46,16 @@ void resetGame();
 bool handleEvent (SDL_Event e);
 void closeGame();
 
+void render();
+void update();
+
 void generateColumnRanges();
 void updateBgVelocity();
 SDL_Point getNearestObstacle (float x, float y);
 
 void renderObstacles();
 void updateObstacles();
-void checkCollisionsWithPlayer();
+void checkCollisionsWithObstacles();
 void checkCollisionsWithBullets();
 void manageObstaclesMovement();
 void generateObstacles();
@@ -144,136 +147,8 @@ int main(int agrc, char* argv[]) {
                 break;
         }
 
-        //Render
-        win.clearRender();
-            switch (state.currentState()) {
-                case GSTATE_STARTMENU: {
-                    background.render();
-                    logoTitle.render(0, SDL_FLIP_NONE);
-                    playButton->render();
-                    // Difficulty Switch
-                    std::string difType;
-                    switch (state.currentDifficulty()) {
-                        case DIFFICULITY_EASY: difType = "EASY"; break;
-                        case DIFFICULITY_MEDIUM: difType = "MEDIUM"; break;
-                        case DIFFICULITY_HARD: difType = "HARD"; break;
-                        case DIFFICULITY_ASIAN: difType = "ASIAN"; break;
-                    }
-                    hud.drawFadeRectangle({0, 375, SCREEN_WIDTH, 60}, 75);
-                    hud.drawTTFText(win.KarenFat, difType, 30, 0, 380, {255, 255, 255}, HUD_FLOAT_CENTER);
-                    LeftArrowButton->render(SDL_FLIP_HORIZONTAL);
-                    RightArrowButton->render();
-                    hud.drawTTFText(win.AvenuePixel, std::to_string(state.currentHighscore()), 30, 0, 400, {255, 255, 255}, HUD_FLOAT_CENTER);
-                    break;
-                }
-                default: {
-                    background.render();
-                    renderCoins();
-                    renderObstacles();
-                    if (state.speedBoostIsEnabled()) {
-                        speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
-                    }
-                    player.render(carTexture);
-                    renderBullets();
-                    if (state.hasBoss()) {
-                        renderAIBoss();
-                    }
-                    // LEFT HUD
-                    hud.drawHearts(heartSymbolTexture, 30, 30, 2.3f);
-                    // RIGHT HUD
-                    hud.drawText(
-                        state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
-                        std::to_string(state.currentScore()),
-                        27, 30, 8, 8, 3.5f,
-                        HUD_FLOAT_RIGHT
-                    );
-                    hud.drawText(
-                        goldenFontTexture,
-                        std::to_string(state.currentCoins()) + " #",
-                        20, 65, 8, 8, 2.5f,
-                        HUD_FLOAT_RIGHT
-                    );
-                    win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
-                    hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
-                    renderActiveAbilities(&win, &hud);
-                    if (state.currentState() == GSTATE_PAUSING) {
-                        hud.renderPauseScreen();
-                        hud.renderStore(storeItemsId, storeOption, &storeTimer);
-                    }
-                    if (state.currentState() == GSTATE_GAMEOVER) {
-                        hud.renderGameOverScreen();
-                        homeButton->render();
-                    }
-                    if (state.currentState() == GSTATE_TRANSITION) {
-                        hud.renderTransitionScreen(TRANSITION_COUNTDOWN * 1000 - state.transitionTimer->elapsedTime());
-                    }
-                }
-            }
-        win.presentRender();
-
-        //Update
-        switch (state.currentState()) {
-            case GSTATE_STARTMENU:
-                background.update(frameTimer.elapsedTime() / 1000.f);
-                logoTitle.animate();
-                break;
-
-            case GSTATE_PLAYING: {
-                if (Mix_PlayingMusic() == 0) {
-                    Mix_PlayMusic(bgMusic, -1);
-                }
-                background.update(frameTimer.elapsedTime() / 1000.f);
-                updateBgVelocity();
-                updateObstacles();
-                updateCoins();
-                updateBullets();
-                if (state.hasBoss()) {
-                    updateAIBoss();
-                }
-                if (state.speedBoostIsEnabled()) {
-                    speedBoostEffect.animate();
-                    speedBoostEffect.mRect.w = player.getRect().w;
-                    speedBoostEffect.mRect.h = player.getRect().h * 0.6;
-                    speedBoostEffect.setPos(
-                        player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
-                        player.getPosY() + player.getRect().h - 10
-                    );
-                }
-                updateActiveAbilities();
-                useAbilities();
-                state.updateScore(state.currentScore() + int(background.getVelY() / 60));
-                break;
-            }
-
-            case GSTATE_TRANSITION: {
-                if (state.transitionTimer->elapsedTime() > TRANSITION_COUNTDOWN * 1000) {
-                    state.updateState(GSTATE_PLAYING);
-                    state.transitionTimer->reset();
-                }
-                break;
-            }
-
-            case GSTATE_PAUSING:
-                break;
-            case GSTATE_GAMEOVER:
-                if (Mix_PlayingMusic() != 0) {
-                    Mix_FadeOutMusic(1000);
-                }
-                break;
-        }
-
-        if (state.currentState() == GSTATE_PLAYING || state.currentState() == GSTATE_PAUSING) {
-            if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
-                std::clog << "store reset!\n";
-                for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
-                    storeItemsId[i] = rand() % (int) abils[i].size();
-                    storeOption[i].reset();
-                }
-                storeTimer.start();
-            }
-        }
-
-        frameTimer.start();
+        render();
+        update();
     }
 
     return 0;
@@ -442,6 +317,141 @@ void closeGame() {
 	Mix_Quit();
 }
 
+void render() {
+    //Render
+    win.clearRender();
+    switch (state.currentState()) {
+        case GSTATE_STARTMENU: {
+            background.render();
+            logoTitle.render(0, SDL_FLIP_NONE);
+            playButton->render();
+            // Difficulty Switch
+            std::string difType;
+            switch (state.currentDifficulty()) {
+                case DIFFICULITY_EASY: difType = "EASY"; break;
+                case DIFFICULITY_MEDIUM: difType = "MEDIUM"; break;
+                case DIFFICULITY_HARD: difType = "HARD"; break;
+                case DIFFICULITY_ASIAN: difType = "ASIAN"; break;
+            }
+            hud.drawFadeRectangle({0, 375, SCREEN_WIDTH, 60}, 75);
+            hud.drawTTFText(win.KarenFat, difType, 30, 0, 380, {255, 255, 255}, HUD_FLOAT_CENTER);
+            LeftArrowButton->render(SDL_FLIP_HORIZONTAL);
+            RightArrowButton->render();
+            hud.drawTTFText(win.AvenuePixel, std::to_string(state.currentHighscore()), 30, 0, 400, {255, 255, 255}, HUD_FLOAT_CENTER);
+            break;
+        }
+        default: {
+            background.render();
+            renderCoins();
+            renderObstacles();
+            if (state.speedBoostIsEnabled()) {
+                speedBoostEffect.render(0, SDL_FLIP_VERTICAL);
+            }
+            player.render(carTexture);
+            renderBullets();
+            if (state.hasBoss()) {
+                renderAIBoss();
+            }
+            // LEFT HUD
+            hud.drawHearts(heartSymbolTexture, 30, 30, 2.3f);
+            // RIGHT HUD
+            hud.drawText(
+                state.speedBoostIsEnabled() ? blueFontTexture : whiteFontTexture,
+                std::to_string(state.currentScore()),
+                27, 30, 8, 8, 3.5f,
+                HUD_FLOAT_RIGHT
+            );
+            hud.drawText(
+                goldenFontTexture,
+                std::to_string(state.currentCoins()) + " #",
+                20, 65, 8, 8, 2.5f,
+                HUD_FLOAT_RIGHT
+            );
+            win.blit(bulletIcon, {SCREEN_WIDTH - 30, SCREEN_HEIGHT - 55, 12, 35});
+            hud.drawText(whiteFontTexture, std::to_string(state.currentBullets()), 35, SCREEN_HEIGHT - 45, 8, 8, 2.5f, HUD_FLOAT_RIGHT);
+            renderActiveAbilities(&win, &hud);
+            if (state.currentState() == GSTATE_PAUSING) {
+                hud.renderPauseScreen();
+                hud.renderStore(storeItemsId, storeOption, &storeTimer);
+            }
+            if (state.currentState() == GSTATE_GAMEOVER) {
+                hud.renderGameOverScreen();
+                homeButton->render();
+            }
+            if (state.currentState() == GSTATE_TRANSITION) {
+                hud.renderTransitionScreen(TRANSITION_COUNTDOWN * 1000 - state.transitionTimer->elapsedTime());
+            }
+        }
+    }
+    win.presentRender();
+}
+
+void update() {
+    //Update
+    switch (state.currentState()) {
+        case GSTATE_STARTMENU:
+            background.update(frameTimer.elapsedTime() / 1000.f);
+            logoTitle.animate();
+            break;
+
+        case GSTATE_PLAYING: {
+            if (Mix_PlayingMusic() == 0) {
+                Mix_PlayMusic(bgMusic, -1);
+            }
+            background.update(frameTimer.elapsedTime() / 1000.f);
+            updateBgVelocity();
+            updateObstacles();
+            updateCoins();
+            updateBullets();
+            if (state.hasBoss()) {
+                updateAIBoss();
+            }
+            if (state.speedBoostIsEnabled()) {
+                speedBoostEffect.animate();
+                speedBoostEffect.mRect.w = player.getRect().w;
+                speedBoostEffect.mRect.h = player.getRect().h * 0.6;
+                speedBoostEffect.setPos(
+                    player.getPosX() + player.getRect().w / 2 - speedBoostEffect.mRect.w / 2,
+                    player.getPosY() + player.getRect().h - 10
+                );
+            }
+            updateActiveAbilities();
+            useAbilities();
+            state.updateScore(state.currentScore() + int(background.getVelY() / 60));
+            break;
+        }
+
+        case GSTATE_TRANSITION: {
+            if (state.transitionTimer->elapsedTime() > TRANSITION_COUNTDOWN * 1000) {
+                state.updateState(GSTATE_PLAYING);
+                state.transitionTimer->reset();
+            }
+            break;
+        }
+
+        case GSTATE_PAUSING:
+            break;
+        case GSTATE_GAMEOVER:
+            if (Mix_PlayingMusic() != 0) {
+                Mix_FadeOutMusic(1000);
+            }
+            break;
+    }
+
+    if (state.currentState() == GSTATE_PLAYING || state.currentState() == GSTATE_PAUSING) {
+        if (storeTimer.elapsedTime() >= STORE_DURATION * 1000) {
+            std::clog << "store reset!\n";
+            for (int i = 0; i < NUMBER_OF_ABILITY_TIER; i++) {
+                storeItemsId[i] = rand() % (int) abils[i].size();
+                storeOption[i].reset();
+            }
+            storeTimer.start();
+        }
+    }
+
+    frameTimer.start();
+}
+
 void generateColumnRanges() {
     int gap = (SCREEN_WIDTH - OBSTACLE_WIDTH * NUMBER_OF_COLUMNS - 2 * ROADSIDE_WIDTH) / (NUMBER_OF_COLUMNS + 1);
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
@@ -491,14 +501,14 @@ void updateObstacles() {
         collisions with the obstacles
     */
     if (player.isVisible()) {
-        checkCollisionsWithPlayer();
+        checkCollisionsWithObstacles();
     }
     checkCollisionsWithBullets();
     manageObstaclesMovement();
     generateObstacles();
 }
 
-void checkCollisionsWithPlayer() {
+void checkCollisionsWithObstacles() {
     for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
         for (Obstacle& X : obstacles[i]) {
             if (!X.isCrashed() && checkCollision(player.getRect(), X.getRect())) {
