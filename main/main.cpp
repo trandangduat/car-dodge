@@ -271,6 +271,7 @@ bool handleEvent (SDL_Event e) {
                                 ) {
                                     B.click();
                                     Mix_PlayChannel(-1, cashoutSfx, 0);
+                                    state.updateCoins(state.currentCoins() - abils[tier][storeItemsId[tier]].coins);
                                     abilitiesToActive.push_back({tier, storeItemsId[tier]});
                                 }
                                 tier++;

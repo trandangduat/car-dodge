@@ -61,7 +61,6 @@ void activeAbility (GameState* gState, int tier, int id) {
         abils[tier][id].isActive = 1;
     }
     abils[tier][id].timer->start();
-    gState->updateCoins(gState->currentCoins() - abils[tier][id].coins);
 }
 
 void renderActiveAbilities (GameWindow* gWin, HUD* gHud) {
